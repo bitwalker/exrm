@@ -26,7 +26,7 @@ This project's goal is to make releases with Elixir projects a breeze. It is com
 4. Run your app! (my example is based on a simple ping server, see the appendix for more info)
 
 ```
-> rel/example_app/bin/example_app
+> rel/test/bin/test
 Erlang/OTP 17 [RELEASE CANDIDATE 1] [erts-6.0] [source-fdcdaca] [64-bit] [smp:4:4] [async-threads:10] [hipe] [kernel-poll:false]
 
 Interactive Elixir (0.12.5) - press Ctrl+C to exit (type h() ENTER for help)
