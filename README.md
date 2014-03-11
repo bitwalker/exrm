@@ -6,7 +6,7 @@ Thanks to @tylerflint for the Makefile, rel.config, and runner script!
 
 This project's goal is to make releases with Elixir projects a breeze. It is composed of a mix task, and all build files required to successfully take your Elixir project and perform a release build. All you have to do to get started is the following:
 
-### Add `exrm` as a dependency to your project
+#### Add `exrm` as a dependency to your project
 
 ```elixir
   defp deps do
@@ -14,16 +14,16 @@ This project's goal is to make releases with Elixir projects a breeze. It is com
   end
 ```
 
-### Fetch and Compile
+#### Fetch and Compile
 
 - `mix deps.get`
 - `mix deps.compile`
 
-### Perform a release
+#### Perform a release
 
 - `mix release`
 
-### Run your app! (my example is based on a simple ping server, see the appendix for more info)
+#### Run your app! (my example is based on a simple ping server, see the appendix for more info)
 
 ```
 > rel/test/bin/test
