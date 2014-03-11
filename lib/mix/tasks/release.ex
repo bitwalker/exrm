@@ -5,7 +5,6 @@ defmodule Mix.Tasks.Release do
   ## Examples
 
     mix release
-    mix release clean
 
   """
   @shortdoc "Build a release for the current mix application."
@@ -18,7 +17,7 @@ defmodule Mix.Tasks.Release do
   @_NAME     "{{{PROJECT_NAME}}}"
   @_VERSION  "{{{PROJECT_VERSION}}}"
 
-  def run(args) do
+  def run(_) do
     # Ensure this isn't an umbrella project
     if Mix.Project.umbrella? do
       raise Mix.Error, message: "Umbrella projects are not currently supported!"
@@ -27,20 +26,21 @@ defmodule Mix.Tasks.Release do
     config = [ relfiles_path:   Path.join([__DIR__, "..", "..", "..", "priv"]) |> Path.expand,
                project_name:    Mix.project |> Keyword.get(:app) |> atom_to_binary,
                project_version: Mix.project |> Keyword.get(:version) ]
-    cond do
-      # Clean up all release-related files
-      "clean" in args ->
-        do_cleanup
-      # Generate a release
-      true ->
-        config
-        |> ensure_makefile
-        |> ensure_relx_config
-        |> ensure_runner
-        |> execute_release
+    config
+    |> ensure_makefile
+    |> ensure_relx_config
+    |> ensure_runner
+    |> execute_release
 
-        success "Your release is ready!"
-      end
+    success "Your release is ready!"
+  end
+
+  def info(message) do
+    IO.puts message
+  end
+
+  def success(message) do
+    IO.puts "#{IO.ANSI.green}#{message}#{IO.ANSI.reset}"
   end
 
   defp ensure_makefile([relfiles_path: relfiles_path, project_name: name, project_version: _] = config) do
@@ -114,31 +114,6 @@ defmodule Mix.Tasks.Release do
     info "Compiling release..."
     Mix.Shell.IO.cmd  "make rel"
     config
-  end
-
-  defp do_cleanup do
-    cwd = File.cwd!
-    makefile = cwd |> Path.join(@_MAKEFILE)
-    relfiles = cwd |> Path.join("rel")
-    elixir   = cwd |> Path.join("_elixir")
-    rebar    = cwd |> Path.join("rebar")
-    relx     = cwd |> Path.join("relx")
-
-    info "Removing release files..."
-    if File.exists?(makefile), do: File.rm!(makefile)
-    if File.exists?(relfiles), do: File.rm_rf!(relfiles)
-    if File.exists?(elixir),   do: File.rm_rf!(elixir)
-    if File.exists?(rebar),    do: File.rm!(rebar)
-    if File.exists?(relx),     do: File.rm!(relx)
-    success "All release files were removed successfully!"
-  end
-
-  defp info(message) do
-    IO.puts message
-  end
-
-  defp success(message) do
-    IO.puts "#{IO.ANSI.green}#{message}#{IO.ANSI.reset}"
   end
 
 end
