@@ -103,6 +103,8 @@ defmodule Mix.Tasks.Release do
           |> String.replace(@_NAME, name)
           |> String.replace(@_VERSION, version)
         File.write!(dest, contents)
+        # Make executable
+        Mix.Shell.IO.cmd "chmod +x #{dest}"
         # Return the project config after we're done
         config
     end
