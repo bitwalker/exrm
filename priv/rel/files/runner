@@ -1,0 +1,48 @@
+#!/bin/sh
+
+set -e
+
+SCRIPT_DIR=`dirname $0`
+RELEASE_ROOT_DIR=`cd $SCRIPT_DIR/.. && pwd`
+REL_NAME={{{PROJECT_NAME}}}
+REL_VSN=0.0.1
+ERTS_VSN=6.0
+REL_DIR=$RELEASE_ROOT_DIR/releases/$REL_VSN
+ERL_OPTS=
+
+find_erts_dir() {
+    local erts_dir=$RELEASE_ROOT_DIR/erts-$ERTS_VSN
+    if [ -d "$erts_dir" ]; then
+        ERTS_DIR=$erts_dir;
+        ROOTDIR=$RELEASE_ROOT_DIR
+    else
+        local erl=`which erl`
+        local erl_root=`$erl -noshell -eval "io:format(\"~s\", [code:root_dir()])." -s init stop`
+        ERTS_DIR=$erl_root/erts-$ERTS_VSN
+        ROOTDIR=$erl_root
+    fi
+
+}
+
+find_sys_config() {
+    local possible_sys=$REL_DIR/sys.config
+    if [ -f "$possible_sys" ]; then
+        SYS_CONFIG="-config $possible_sys"
+    fi
+}
+
+find_erts_dir
+find_sys_config
+export ROOTDIR=$RELEASE_ROOT_DIR
+export BINDIR=$ERTS_DIR/bin
+export EMU=beam
+export PROGNAME=erl
+export LD_LIBRARY_PATH=$ERTS_DIR/lib
+
+cd $ROOTDIR
+
+# uncomment for a default erlang release with Eshell
+# $BINDIR/erlexec $ERL_OPTS $SYS_CONFIG -boot $REL_DIR/$REL_NAME $@
+
+# uncomment for an elixir release with iex
+$BINDIR/erlexec $ERL_OPTS $SYS_CONFIG -boot $REL_DIR/$REL_NAME -user Elixir.IEx.CLI -extra --no-halt +iex $@
