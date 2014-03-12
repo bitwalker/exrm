@@ -4,7 +4,9 @@ defmodule Mix.Tasks.Release.Clean do
 
   ## Examples
 
-    mix release.clean
+    mix release.clean       #=> Cleans release
+    mix release.clean --rel #=> Cleans release + generated tools
+    mix release.clean --all #=> Cleans absolutely everything
 
   """
   @shortdoc "Clean up any release-related files."
@@ -18,25 +20,51 @@ defmodule Mix.Tasks.Release.Clean do
   @_NAME     "{{{PROJECT_NAME}}}"
   @_VERSION  "{{{PROJECT_VERSION}}}"
 
-  def run(_) do
-    do_cleanup
+  def run(args) do
+    info "Removing release files..."
+    cond do
+      "--rel" in args ->
+        do_cleanup :rel
+      "--all" in args ->
+        do_cleanup :all
+      true ->
+        do_cleanup :build
+    end
+    success "All release files were removed successfully!"
   end
 
-  defp do_cleanup do
+  # Clean release build
+  defp do_cleanup(:build) do
+    cwd      = File.cwd!
+    project  = Mix.project |> Keyword.get(:app) |> atom_to_binary
+    release  = cwd |> Path.join(["rel", project])
+    if File.exists?(release), do: File.rm_rf!(release)
+  end
+  # Clean release build + generated tools
+  defp do_cleanup(:rel) do
+    # Execute build cleanup
+    do_cleanup :build
+
+    # Remove generated tools
     cwd = File.cwd!
     makefile = cwd |> Path.join(@_MAKEFILE)
     relfiles = cwd |> Path.join("rel")
-    elixir   = cwd |> Path.join("_elixir")
     rebar    = cwd |> Path.join("rebar")
     relx     = cwd |> Path.join("relx")
-
-    info "Removing release files..."
-    if File.exists?(makefile), do: File.rm!(makefile)
     if File.exists?(relfiles), do: File.rm_rf!(relfiles)
-    if File.exists?(elixir),   do: File.rm_rf!(elixir)
     if File.exists?(rebar),    do: File.rm!(rebar)
     if File.exists?(relx),     do: File.rm!(relx)
-    success "All release files were removed successfully!"
+    if File.exists?(makefile), do: File.rm!(makefile)
+  end
+  defp do_cleanup(:all) do
+    # Execute other clean tasks
+    do_cleanup :build
+    do_cleanup :rel
+
+    # Remove local Elixir
+    cwd = File.cwd!
+    elixir   = cwd |> Path.join("_elixir")
+    if File.exists?(elixir),   do: File.rm_rf!(elixir)
   end
 
 end
