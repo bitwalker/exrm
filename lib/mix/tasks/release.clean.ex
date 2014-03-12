@@ -37,7 +37,7 @@ defmodule Mix.Tasks.Release.Clean do
   defp do_cleanup(:build) do
     cwd      = File.cwd!
     project  = Mix.project |> Keyword.get(:app) |> atom_to_binary
-    release  = cwd |> Path.join(["rel", project])
+    release  = cwd |> Path.join("rel") |> Path.join(project)
     if File.exists?(release), do: File.rm_rf!(release)
   end
   # Clean release build + generated tools
