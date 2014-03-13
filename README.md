@@ -61,6 +61,22 @@ build.
 
 If you run into problems, this is still early in the project's development, so please create an issue, and I'll address ASAP.
 
+## Common Issues
+
+I'm starting this list to begin collating the various caveats around
+building releases. As soon as I feel like I have a firm grasp of all the
+edge cases, I'll formalize this in a better format perhaps as a
+"Preparing for Release" document.
+
+- Ensure all dependencies for your application are defined in the
+  `:applications` block of your `mix.exs` file. This is how the build
+  process knows that those dependencies need to be bundled in to the
+  release.
+- If you are running into issues with your dependencies missing their
+  dependencies, it's likely that the author did not put the dependencies in
+  the `:application` block of *their* `mix.exs`. You may have to fork, or
+  issue a pull request in order to resolve this issue.
+
 ## Appendix
 
 The example server I setup was as simple as this:
