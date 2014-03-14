@@ -9,9 +9,9 @@ defmodule Mix.Tasks.Release do
   """
   @shortdoc "Build a release for the current mix application."
 
-  use Mix.Task
+  use    Mix.Task
+  import ExRM.Release.Utils
 
-  @_MAKEFILE "Makefile"
   @_RELXCONF "relx.config"
   @_RUNNER   "runner"
   @_NAME     "{{{PROJECT_NAME}}}"
@@ -23,48 +23,39 @@ defmodule Mix.Tasks.Release do
       raise Mix.Error, message: "Umbrella projects are not currently supported!"
     end
     # Collect release configuration
-    config = [ relfiles_path:   Path.join([__DIR__, "..", "..", "..", "priv"]) |> Path.expand,
-               project_name:    Mix.project |> Keyword.get(:app) |> atom_to_binary,
-               project_version: Mix.project |> Keyword.get(:version) ]
+    config = [ priv_path:  Path.join([__DIR__, "..", "..", "..", "priv"]) |> Path.expand,
+               name:       Mix.project |> Keyword.get(:app) |> atom_to_binary,
+               version:    Mix.project |> Keyword.get(:version),
+               verbosity:  :quiet]
     config
-    |> ensure_makefile
-    |> ensure_relx_config
-    |> ensure_runner
-    |> execute_release
+    |> prepare_elixir
+    |> prepare_relx
+    |> generate_relx_config
+    |> generate_runner
+    |> do_release
 
-    success "Your release is ready!"
+    info "Your release is ready!"
   end
 
-  def info(message) do
-    IO.puts message
+  defp prepare_elixir(config) do
+    # Ensure Elixir has been cloned, and the right branch is checked out
+    fetch_elixir :default
+    # Ensure Elixir is built
+    build_elixir
+    # Continue...
+    config
   end
 
-  def success(message) do
-    IO.puts "#{IO.ANSI.green}#{message}#{IO.ANSI.reset}"
+  defp prepare_relx(config) do
+    # Ensure relx has been downloaded
+    fetch_relx
+    # Continue...
+    config
   end
 
-  defp ensure_makefile([relfiles_path: relfiles_path, project_name: name, project_version: _] = config) do
-    info "Generating Makefile..."
-    source = Path.join(relfiles_path, @_MAKEFILE)
-    # Destination is the root
-    dest   = Path.join(File.cwd!, @_MAKEFILE)
-    case File.exists?(dest) do
-      # If the makefile has already been generated, skip generation
-      true ->
-        # Return the project config after we're done
-        config
-      # Otherwise, read in Makefile, replace the placeholders, and write it to the project root
-      _ ->
-        contents = File.read!(source) |> String.replace(@_NAME, name)
-        File.write!(dest, contents)
-        # Return the project options after we're done
-        config
-    end
-  end
-
-  defp ensure_relx_config([relfiles_path: relfiles_path, project_name: name, project_version: version] = config) do
-    info "Generating relx.config"
-    source = Path.join([relfiles_path, "rel", @_RELXCONF])
+  defp generate_relx_config([priv_path: priv, name: name, version: version, verbosity: _] = config) do
+    debug "Generating relx.config"
+    source = Path.join([priv, "rel", @_RELXCONF])
     base   = Path.join(File.cwd!, "rel")
     dest   = Path.join(base, @_RELXCONF)
     # Ensure destination base path exists
@@ -85,9 +76,9 @@ defmodule Mix.Tasks.Release do
     end
   end
 
-  defp ensure_runner([relfiles_path: relfiles_path, project_name: name, project_version: version] = config) do
-    info "Generating runner..."
-    source = Path.join([relfiles_path, "rel", "files", @_RUNNER])
+  defp generate_runner([priv_path: priv, name: name, version: version, verbosity: _] = config) do
+    debug "Generating runner..."
+    source = Path.join([priv, "rel", "files", @_RUNNER])
     base   = Path.join([File.cwd!, "rel", "files"])
     dest   = Path.join(base, @_RUNNER)
     # Ensure destination base path exists
@@ -104,15 +95,15 @@ defmodule Mix.Tasks.Release do
           |> String.replace(@_VERSION, version)
         File.write!(dest, contents)
         # Make executable
-        Mix.Shell.IO.cmd "chmod +x #{dest}"
+        dest |> chmod("+x")
         # Return the project config after we're done
         config
     end
   end
 
-  defp execute_release(config) do
-    info "Compiling release..."
-    Mix.Shell.IO.cmd  "make rel"
+  defp do_release([priv_path: _, name: name, version: version, verbosity: verbosity] = config) do
+    debug "Constructing release..."
+    relx name, version, verbosity
     config
   end
 

@@ -12,16 +12,13 @@ defmodule Mix.Tasks.Release.Clean do
   @shortdoc "Clean up any release-related files."
 
   use     Mix.Task
-  import  Mix.Tasks.Release, only: [info: 1, success: 1]
+  import  ExRM.Release.Utils
 
-  @_MAKEFILE "Makefile"
   @_RELXCONF "relx.config"
   @_RUNNER   "runner"
-  @_NAME     "{{{PROJECT_NAME}}}"
-  @_VERSION  "{{{PROJECT_VERSION}}}"
 
   def run(args) do
-    info "Removing release files..."
+    debug "Removing release files..."
     cond do
       "--rel" in args ->
         do_cleanup :rel
@@ -30,7 +27,7 @@ defmodule Mix.Tasks.Release.Clean do
       true ->
         do_cleanup :build
     end
-    success "All release files were removed successfully!"
+    info "All release files were removed successfully!"
   end
 
   # Clean release build
@@ -46,15 +43,9 @@ defmodule Mix.Tasks.Release.Clean do
     do_cleanup :build
 
     # Remove generated tools
-    cwd = File.cwd!
-    makefile = cwd |> Path.join(@_MAKEFILE)
-    relfiles = cwd |> Path.join("rel")
-    rebar    = cwd |> Path.join("rebar")
-    relx     = cwd |> Path.join("relx")
+    clean_relx
+    relfiles = File.cwd! |> Path.join("rel")
     if File.exists?(relfiles), do: File.rm_rf!(relfiles)
-    if File.exists?(rebar),    do: File.rm!(rebar)
-    if File.exists?(relx),     do: File.rm!(relx)
-    if File.exists?(makefile), do: File.rm!(makefile)
   end
   defp do_cleanup(:all) do
     # Execute other clean tasks
@@ -62,9 +53,7 @@ defmodule Mix.Tasks.Release.Clean do
     do_cleanup :rel
 
     # Remove local Elixir
-    cwd = File.cwd!
-    elixir   = cwd |> Path.join("_elixir")
-    if File.exists?(elixir),   do: File.rm_rf!(elixir)
+    clean_elixir
   end
 
 end
