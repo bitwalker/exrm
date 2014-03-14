@@ -1,6 +1,6 @@
 # Elixir Release Manager
 
-Thanks to @tylerflint for the Makefile, rel.config, and runner script!
+Thanks to @tylerflint for the original Makefile, rel.config, and runner script!
 
 ## Getting Started
 
@@ -58,8 +58,8 @@ build.
 ## TODO
 
 - Make Elixir version configurable (currently locked to stable)
-- Store Makefile in the `rel/files` directory, so that conflicts aren't possible
-- Allow `release.clean` to be more granular (i.e. don't wipe `_elixir` on clean by default)
+- Support custom sys.config, vm.args, and overrides in relx.config
+- Support multiple releases (i.e. appups)
 
 If you run into problems, this is still early in the project's development, so please create an issue, and I'll address ASAP.
 
