@@ -6,6 +6,8 @@ Thanks to @tylerflint for the Makefile, rel.config, and runner script!
 
 This project's goal is to make releases with Elixir projects a breeze. It is composed of a mix task, and all build files required to successfully take your Elixir project and perform a release build. All you have to do to get started is the following:
 
+NOTE: This is currently set up for Erlang R17 and Elixir 0.12.4+, support for other versions of Erlang is on it's way!
+
 #### Add `exrm` as a dependency to your project
 
 ```elixir
