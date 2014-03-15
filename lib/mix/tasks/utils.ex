@@ -22,11 +22,11 @@ defmodule ExRM.Release.Utils do
   @doc """
   Call make in the current working directory.
   """
-  def make(command, args \\ ""), do: cmd("make #{command} #{args}", &ignore/1)
+  def make(command \\ "", args \\ ""), do: cmd("make #{command} #{args}", &ignore/1)
   @doc """
   Call the _elixir mix binary with the given arguments
   """
-  def mix(command, env \\ :dev), do: cmd("MIX_ENV=#{env} #{@mix_bin_path} #{command}")
+  def mix(command, env \\ :dev), do: cmd("MIX_ENV=#{env} #{@mix_bin_path} #{command}", &ignore/1)
   @doc """
   Download a file from a url to the provided destination.
   """
@@ -38,12 +38,12 @@ defmodule ExRM.Release.Utils do
   @doc """
   Clone a git repository to the provided destination, or current directory
   """
-  def clone(repo_url, destination), do: cmd("git clone #{repo_url} #{destination}")
+  def clone(repo_url, destination), do: cmd("git clone #{repo_url} #{destination}", &ignore/1)
   def clone(repo_url, destination, branch) do
     case branch do
       :default -> clone repo_url, destination
       ""       -> clone repo_url, destination
-      _        -> cmd "git clone --branch #{branch} #{repo_url} #{destination}"
+      _        -> cmd "git clone --branch #{branch} #{repo_url} #{destination}", &ignore/1
     end
   end
   @doc """
@@ -76,13 +76,15 @@ defmodule ExRM.Release.Utils do
   end
 
   @doc "Print an informational message without color"
-  def debug(message), do: IO.puts message
+  def debug(message), do: IO.puts "==> #{message}"
   @doc "Print an informational message in green"
-  def info(message),  do: IO.puts "#{IO.ANSI.green}#{message}#{IO.ANSI.reset}"
+  def info(message),  do: IO.puts "==> #{IO.ANSI.green}#{message}#{IO.ANSI.reset}"
   @doc "Print a warning message in yellow"
-  def warn(message),  do: IO.puts "#{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}"
+  def warn(message),  do: IO.puts "==> #{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}"
+  @doc "Print a notice in yellow"
+  def notice(message), do: IO.puts "#{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}"
   @doc "Print an error message in red"
-  def error(message), do: IO.puts "#{IO.ANSI.red}#{message}#{IO.ANSI.reset}"
+  def error(message), do: IO.puts "==> #{IO.ANSI.red}#{message}#{IO.ANSI.reset}"
 
   #########
   # Elixir
@@ -104,7 +106,6 @@ defmodule ExRM.Release.Utils do
           :ok
         # Branch is different, perform a checkout, blowing away any local changes
         _ ->
-          debug "Elixir repo ok, checking out #{branch} branch..."
           case branch do
             :default -> System.cmd "git checkout --force #{@elixir_default_branch}"
             _        -> System.cmd "git checkout --force #{branch}"
@@ -113,7 +114,15 @@ defmodule ExRM.Release.Utils do
       # popd
       cwd |> File.cd!
     else
-      debug "Fetching release version of Elixir..."
+      # This step should only happen the first time the release task is run, so let's remind
+      # the user that this is going to take a minute to get through the next few steps.
+      notice """
+      This can take a few minutes depending on your internet connection 
+      and how powerful of a machine you have. Since this is a fresh release
+      from scratch, we need to clone the Elixir repo and perform a build.
+      So I'd recommend grabbing a coffee :)
+      """
+      debug "Fetching Elixir..."
       # Clone the Elixir repo
       case branch do
         :default -> clone @elixir_repo_url, @elixir_build_path, @elixir_default_branch
@@ -152,7 +161,6 @@ defmodule ExRM.Release.Utils do
   Remove the Elixir source/build directory
   """
   def clean_elixir do
-    debug "Cleaning Elixir artifacts..."
     if @elixir_build_path |> File.exists? do
       @elixir_build_path |> File.rm_rf!
     end

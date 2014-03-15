@@ -125,7 +125,7 @@ defmodule Mix.Tasks.Release do
         config
       # Otherwise, read in the runner, replace placeholders, and write to the destination in the project root
       _ ->
-        debug "Generating runner..."
+        debug "Generating boot script..."
         contents = File.read!(source)
           |> String.replace(@_NAME, name)
           |> String.replace(@_VERSION, version)
@@ -140,7 +140,7 @@ defmodule Mix.Tasks.Release do
   end
 
   defp do_release(config) do
-    debug "Constructing release..."
+    debug "Generating release..."
     name      = config |> Keyword.get(:name)
     version   = config |> Keyword.get(:version)
     verbosity = config |> Keyword.get(:verbosity)
