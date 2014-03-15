@@ -143,7 +143,7 @@ defmodule ExRM.Release.Utils do
     # pushd, make, popd
     cwd = File.cwd!
     @elixir_build_path |> File.cd! 
-    cmd "make"
+    make
     cwd |> File.cd!
     
     # Delete test subdirectories to prevent false "App metadata file found but malformed" warnings
