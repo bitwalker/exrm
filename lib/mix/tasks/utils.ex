@@ -24,6 +24,10 @@ defmodule ExRM.Release.Utils do
   """
   def make(command, args \\ ""), do: cmd("make #{command} #{args}", &ignore/1)
   @doc """
+  Call the _elixir mix binary with the given arguments
+  """
+  def mix(command, env \\ :dev), do: cmd("MIX_ENV=#{env} #{@mix_bin_path} #{command}")
+  @doc """
   Download a file from a url to the provided destination.
   """
   def wget(url, destination), do: cmd("wget -O #{destination} #{url}", &ignore/1)

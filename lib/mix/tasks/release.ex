@@ -48,6 +48,7 @@ defmodule Mix.Tasks.Release do
     |> Keyword.merge(args |> parse_args)
     |> prepare_elixir
     |> prepare_relx
+    |> build_project
     |> generate_relx_config
     |> generate_runner
     |> do_release
@@ -67,6 +68,15 @@ defmodule Mix.Tasks.Release do
   defp prepare_relx(config) do
     # Ensure relx has been downloaded
     fetch_relx
+    # Continue...
+    config
+  end
+
+  defp build_project(config) do
+    # Fetch deps, and compile, using the prepared Elixir binaries
+    mix "deps.get",     :prod
+    mix "deps.compile", :prod
+    mix "compile",      :prod
     # Continue...
     config
   end
