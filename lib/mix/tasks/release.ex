@@ -41,6 +41,8 @@ defmodule Mix.Tasks.Release do
     config = [ priv_path:  Path.join([__DIR__, "..", "..", "..", "priv"]) |> Path.expand,
                name:       Mix.project |> Keyword.get(:app) |> atom_to_binary,
                version:    Mix.project |> Keyword.get(:version),
+               erts:       "6.0",
+               erl:        "",
                verbosity:  :quiet]
     config
     |> Keyword.merge(args |> parse_args)
