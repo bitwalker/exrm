@@ -37,6 +37,8 @@ iex(1)> :gen_server.call(:test, :ping)
 iex(2)>
 ```
 
+See the section "Deployment" for information on how to deploy, run, and remotely connect to your release!
+
 ## Features
 
 - `mix release`
@@ -57,7 +59,6 @@ build.
 
 ## TODO
 
-- Support custom sys.config, vm.args, and overrides in relx.config
 - Support multiple releases (i.e. appups)
 
 If you run into problems, this is still early in the project's development, so please create an issue, and I'll address ASAP.
@@ -72,11 +73,43 @@ edge cases, I'll formalize this in a better format perhaps as a
 - Ensure all dependencies for your application are defined in the
   `:applications` block of your `mix.exs` file. This is how the build
   process knows that those dependencies need to be bundled in to the
-  release.
+  release. **This includes dependencies of your dependencies, if they were
+  not properly configured**. For instance, if you depend on `mongoex`, and
+  `mongoex` depends on `erlang-mongodb`, but `mongoex` doesn't have `erlang-mongodb`
+  in it's applications section, your app will fail in it's release form,
+  because `erlang-mongodb` won't be loaded.
 - If you are running into issues with your dependencies missing their
   dependencies, it's likely that the author did not put the dependencies in
   the `:application` block of *their* `mix.exs`. You may have to fork, or
-  issue a pull request in order to resolve this issue.
+  issue a pull request in order to resolve this issue. Alternatively, if
+  you know what the dependency is, you can put it in your own `mix.exs`, and
+  the release process will ensure that it is loaded with everything else.
+
+## Deployment
+
+Now that you've generated your first release, it's time to deploy it! Let's walk through a simulated deployment to the `/tmp` directory on your machine, using the example app from the Appendix.
+
+1. `mix release`
+2. `mkdir -p /tmp/test`
+3. `cp rel/test/test-0.0.1.tar.gz /tmp/`
+4. `cd /tmp/test`
+5. `tar -xf /tmp/test-0.0.1.tar.gz`
+
+At this point, we've effectively 'deployed' the `test` application. Let's assume that we're going to run this as a detached shell, rather than the default behavior of starting and immediately booting to the Elixir shell, so:
+
+- `bin/test -detached`
+
+Ok, at this point, our application is running using the default `vm.args` file bundled with the release (make sure you change these values for a real deployment). The important ones to know about are `-name` and `cookie`. These two options will give us what we need to remotely connect to our running node. Let's connect to it now:
+
+- `iex --sname foo --erl "-setcookie test" --remsh test@localhost`
+
+Ok, you should be staring at a standard `iex` prompt, but slightly different: `iex(test@localhost)1>`. The prompt shows us that we are currently connected to `test@localhost`, which is the value of `name` in our `vm.args` file. Feel free to ping the app using `:gen_server.call(:test, :ping)` to make sure it works.
+
+At this point, you can't just abort from the prompt like usual and make the node shut down. This would be an obviously bad thing in a production environment. Instead, you can issue `:init.stop` from the `iex` prompt, and this will shut down the node. You will still be connected to the shell, but once you quit the shell, the node is gone.
+
+## Upgrading Releases
+
+Coming soon...
 
 ## Appendix
 
