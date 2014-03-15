@@ -82,7 +82,6 @@ defmodule Mix.Tasks.Release do
   end
 
   defp generate_relx_config(config) do
-    debug "Generating relx.config"
     priv    = config |> Keyword.get(:priv_path)
     name    = config |> Keyword.get(:name)
     version = config |> Keyword.get(:version)
@@ -98,6 +97,7 @@ defmodule Mix.Tasks.Release do
         config
       # Otherwise, read in relx.config, replace placeholders, and write to the destination in the project root
       _ ->
+        debug "Generating relx.config"
         contents = File.read!(source) 
           |> String.replace(@_NAME, name)
           |> String.replace(@_VERSION, version)
@@ -108,7 +108,6 @@ defmodule Mix.Tasks.Release do
   end
 
   defp generate_runner(config) do
-    debug "Generating runner..."
     priv     = config |> Keyword.get(:priv_path)
     name     = config |> Keyword.get(:name)
     version  = config |> Keyword.get(:version)
@@ -126,6 +125,7 @@ defmodule Mix.Tasks.Release do
         config
       # Otherwise, read in the runner, replace placeholders, and write to the destination in the project root
       _ ->
+        debug "Generating runner..."
         contents = File.read!(source)
           |> String.replace(@_NAME, name)
           |> String.replace(@_VERSION, version)

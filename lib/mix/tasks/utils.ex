@@ -92,9 +92,7 @@ defmodule ExRM.Release.Utils do
   Clones the Elixir source, and checks out a specific branch or tag
   """
   def fetch_elixir(branch \\ :default) do
-    debug "Fetching release version of Elixir..."
     if @elixir_build_path |> File.exists? do
-      debug "Elixir repo ok, checking out #{branch} branch..."
       # pushd
       cwd = File.cwd!
       @elixir_build_path |> File.cd!
@@ -106,6 +104,7 @@ defmodule ExRM.Release.Utils do
           :ok
         # Branch is different, perform a checkout, blowing away any local changes
         _ ->
+          debug "Elixir repo ok, checking out #{branch} branch..."
           case branch do
             :default -> System.cmd "git checkout --force #{@elixir_default_branch}"
             _        -> System.cmd "git checkout --force #{branch}"
@@ -114,6 +113,7 @@ defmodule ExRM.Release.Utils do
       # popd
       cwd |> File.cd!
     else
+      debug "Fetching release version of Elixir..."
       # Clone the Elixir repo
       case branch do
         :default -> clone @elixir_repo_url, @elixir_build_path, @elixir_default_branch
@@ -133,7 +133,7 @@ defmodule ExRM.Release.Utils do
     @elixir_build_path |> File.cd! 
     cmd "make"
     cwd |> File.cd!
-    debug "Deleting invalid application manifests from Elixir source tree..."
+    
     # Delete test subdirectories to prevent false "App metadata file found but malformed" warnings
     elixir_lib_path = Path.join([File.cwd!, @elixir_build_path, "lib"])
     # This will list out all of the subdirs of Elixir's `lib` folder,
@@ -146,8 +146,6 @@ defmodule ExRM.Release.Utils do
     |> Enum.filter(&File.dir?/1)
     |> Enum.filter(&File.exists?/1)
     |> Enum.map(&File.rm_rf!/1)
-
-    info "Elixir is ready for release!"
   end
 
   @doc """
@@ -168,14 +166,10 @@ defmodule ExRM.Release.Utils do
   Downloads the relx executable
   """
   def fetch_relx do
-    debug "Checking for relx..."
-    if @relx_executable |> File.exists? do
-      debug "relx ok, skipping..."
-    else
+    unless @relx_executable |> File.exists? do
       debug "Downloading relx..."
       wget @relx_pkg_url, @relx_executable
       @relx_executable |> chmod("+x")
-      info "Success!"
     end
   end
 
@@ -183,8 +177,8 @@ defmodule ExRM.Release.Utils do
   Remove the relx executable
   """
   def clean_relx do
-    debug "Cleaning relx artifcats..."
     if @relx_executable |> File.exists? do
+      debug "Cleaning relx artifcats..."
       @relx_executable |> File.rm_rf!
     end
   end
