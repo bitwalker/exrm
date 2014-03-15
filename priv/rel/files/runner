@@ -31,8 +31,16 @@ find_sys_config() {
     fi
 }
 
+find_vm_args() {
+    local possible_args=$REL_DIR/vm.args
+    if [ -f "$possible_args" ]; then
+        VM_ARGS="-args_file $possible_args"
+    fi
+}
+
 find_erts_dir
 find_sys_config
+find_vm_args
 export ROOTDIR=$RELEASE_ROOT_DIR
 export BINDIR=$ERTS_DIR/bin
 export EMU=beam
@@ -45,4 +53,4 @@ cd $ROOTDIR
 # $BINDIR/erlexec $ERL_OPTS $SYS_CONFIG -boot $REL_DIR/$REL_NAME $@
 
 # uncomment for an elixir release with iex
-$BINDIR/erlexec $ERL_OPTS $SYS_CONFIG -boot $REL_DIR/$REL_NAME -user Elixir.IEx.CLI -extra --no-halt +iex $@
+$BINDIR/erlexec $ERL_OPTS $VM_ARGS $SYS_CONFIG $@ -boot $REL_DIR/$REL_NAME -user Elixir.IEx.CLI -extra --no-halt +iex
