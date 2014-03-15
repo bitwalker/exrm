@@ -41,7 +41,7 @@ iex(2)>
 
 - `mix release`
 
-This task constructs the complete release for you. The output is sent to `rel/project_name_here`.
+This task constructs the complete release for you. The output is sent to `rel/project_name_here`. To see what flags you can pass to this task, use `mix help release`.
 
 - `mix release.clean [--rel | --all]`
 

@@ -6,9 +6,9 @@ SCRIPT_DIR=`dirname $0`
 RELEASE_ROOT_DIR=`cd $SCRIPT_DIR/.. && pwd`
 REL_NAME={{{PROJECT_NAME}}}
 REL_VSN={{{PROJECT_VERSION}}}
-ERTS_VSN=6.0
+ERTS_VSN={{{ERTS_VERSION}}}
 REL_DIR=$RELEASE_ROOT_DIR/releases/$REL_VSN
-ERL_OPTS=
+ERL_OPTS={{{ERL_OPTS}}}
 
 find_erts_dir() {
     local erts_dir=$RELEASE_ROOT_DIR/erts-$ERTS_VSN
