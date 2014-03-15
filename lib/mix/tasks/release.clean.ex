@@ -41,8 +41,7 @@ defmodule Mix.Tasks.Release.Clean do
       build
       |> File.ls!
       |> Enum.map(fn dir -> build |> Path.join(dir) end)
-      |> Enum.map(&IO.puts/1)
-      #|> Enum.map(&File.rm_rf!/1)
+      |> Enum.map(&File.rm_rf!/1)
     end
   end
   # Clean release build + generated tools
