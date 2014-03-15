@@ -55,7 +55,7 @@ defmodule Mix.Tasks.Release do
 
   defp prepare_elixir(config) do
     # Ensure Elixir has been cloned, and the right branch is checked out
-    fetch_elixir :default
+    config |> Keyword.get(:elixir, :default) |> fetch_elixir
     # Ensure Elixir is built
     build_elixir
     # Continue...

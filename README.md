@@ -57,7 +57,6 @@ build.
 
 ## TODO
 
-- Make Elixir version configurable (currently locked to stable)
 - Support custom sys.config, vm.args, and overrides in relx.config
 - Support multiple releases (i.e. appups)
 
