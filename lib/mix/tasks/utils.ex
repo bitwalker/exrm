@@ -66,7 +66,10 @@ defmodule ExRM.Release.Utils do
       :verbose -> 3
       _        -> 2 # Normal if we get an odd value
     end
+    # Let relx do the heavy lifting
     cmd "./relx -V #{v} --config #{config} --relname #{name} --relvsn #{ver} --output-dir #{output_dir}"
+    # tar.gz the release files for easy deployment
+    package_release output_dir, name, ver
   end
   @doc """
   Get the current project revision's short hash from git
@@ -186,9 +189,19 @@ defmodule ExRM.Release.Utils do
   """
   def clean_relx do
     if @relx_executable |> File.exists? do
-      debug "Cleaning relx artifcats..."
       @relx_executable |> File.rm_rf!
     end
+  end
+
+  defp package_release(release_path, name, version) do
+    # pushd
+    cwd = File.cwd!
+    release_path |> File.cd!
+    # tar up the release files
+    debug "Creating release package..."
+    cmd "tar -czf #{name}-#{version}.tar.gz lib releases erts* bin"
+    # popd
+    cwd |> File.cd!
   end
 
   # Ignore a message when used as the callback for Mix.Shell.cmd
