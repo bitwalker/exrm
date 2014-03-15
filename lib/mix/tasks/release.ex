@@ -144,7 +144,11 @@ defmodule Mix.Tasks.Release do
     name      = config |> Keyword.get(:name)
     version   = config |> Keyword.get(:version)
     verbosity = config |> Keyword.get(:verbosity)
+    # Do release
     relx name, version, verbosity
+    # Clean up template files
+    Mix.Tasks.Release.Clean.do_cleanup(:relfiles)
+    # Continue..
     config
   end
 

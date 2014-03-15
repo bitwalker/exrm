@@ -31,7 +31,7 @@ defmodule Mix.Tasks.Release.Clean do
   end
 
   # Clean release build
-  defp do_cleanup(:build) do
+  def do_cleanup(:build) do
     cwd      = File.cwd!
     project  = Mix.project |> Keyword.get(:app) |> atom_to_binary
     release  = cwd |> Path.join("rel")    |> Path.join(project)
@@ -45,16 +45,22 @@ defmodule Mix.Tasks.Release.Clean do
     end
   end
   # Clean release build + generated tools
-  defp do_cleanup(:rel) do
+  def do_cleanup(:rel) do
     # Execute build cleanup
     do_cleanup :build
 
     # Remove generated tools
     clean_relx
-    relfiles = File.cwd! |> Path.join("rel")
+    rel = File.cwd! |> Path.join("rel")
+    if File.exists?(rel), do: File.rm_rf!(rel)
+  end
+  # Clean up the template files for release generation
+  def do_cleanup(:relfiles) do
+    relfiles = File.cwd! |> Path.join("rel") |> Path.join("files")
     if File.exists?(relfiles), do: File.rm_rf!(relfiles)
   end
-  defp do_cleanup(:all) do
+  # Clean up everything
+  def do_cleanup(:all) do
     # Execute other clean tasks
     do_cleanup :build
     do_cleanup :rel
