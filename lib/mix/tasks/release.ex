@@ -60,16 +60,26 @@ defmodule Mix.Tasks.Release do
     # Ensure Elixir has been cloned, and the right branch is checked out
     config |> Keyword.get(:elixir, :default) |> fetch_elixir
     # Ensure Elixir is built
-    build_elixir
-    # Continue...
-    config
+    case build_elixir do
+      :ok ->
+        # Continue...
+        config
+      {:error, message} ->
+        error message
+        exit(:normal)
+    end
   end
 
   defp prepare_relx(config) do
     # Ensure relx has been downloaded
-    fetch_relx
-    # Continue...
-    config
+    case fetch_relx do
+      :ok ->
+        # Continue...
+        config
+      {:error, message} ->
+        error message
+        exit(:normal)
+    end
   end
 
   defp build_project(config) do
@@ -128,11 +138,16 @@ defmodule Mix.Tasks.Release do
     version   = config |> Keyword.get(:version)
     verbosity = config |> Keyword.get(:verbosity)
     # Do release
-    relx name, version, verbosity
-    # Clean up template files
-    Mix.Tasks.Release.Clean.do_cleanup(:relfiles)
-    # Continue..
-    config
+    case relx name, version, verbosity do
+      :ok ->
+        # Clean up template files
+        Mix.Tasks.Release.Clean.do_cleanup(:relfiles)
+        # Continue..
+        config
+      {:error, message} ->
+        error message
+        exit(:normal)
+    end
   end
 
   defp parse_args(argv) do
