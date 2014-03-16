@@ -45,17 +45,16 @@ See the section "Deployment" for information on how to deploy, run, and remotely
 
 This task constructs the complete release for you. The output is sent to `rel/project_name_here`. To see what flags you can pass to this task, use `mix help release`.
 
-- `mix release.clean [--rel | --all]`
+- `mix release.clean [--implode]`
 
-Without args, this will clean up any relese builds.
+Without args, this will clean up the release corresponding to the
+current project version.
 
-With `--rel`, it will also clean up any generated tools (rebar, relx,
-etc.), useful when you've changed project information like version or
-name, and need the build configuration updated.
-
-With `--all`, it will implode all files created by `exrm`, and will
-leave your project in the same state as it was prior to your first
-build.
+With `--implode`, all releases, configuration, generated tools, etc.,
+will be cleaned up, leaving your project directory the same as if exrm
+had never been run. This is a destructive operation, as you can't get
+your releases back unless they were source-controlled, so exrm will ask
+you for confirmation before proceeding with the cleanup.
 
 ## TODO
 
