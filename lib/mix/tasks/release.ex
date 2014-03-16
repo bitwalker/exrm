@@ -90,21 +90,12 @@ defmodule Mix.Tasks.Release do
     dest    = Path.join(base, @_RELXCONF)
     # Ensure destination base path exists
     File.mkdir_p!(base)
-    case File.exists?(dest) do
-      # If the config has already been generated, skip generation
-      true ->
-        # Return the project config after we're done
-        config
-      # Otherwise, read in relx.config, replace placeholders, and write to the destination in the project root
-      _ ->
-        debug "Generating relx.config"
-        contents = File.read!(source) 
-          |> String.replace(@_NAME, name)
-          |> String.replace(@_VERSION, version)
-        File.write!(dest, contents)
-        # Return the project config after we're done
-        config
-    end
+    contents = File.read!(source) 
+      |> String.replace(@_NAME, name)
+      |> String.replace(@_VERSION, version)
+    File.write!(dest, contents)
+    # Return the project config after we're done
+    config
   end
 
   defp generate_runner(config) do
@@ -118,25 +109,17 @@ defmodule Mix.Tasks.Release do
     dest     = Path.join(base, @_RUNNER)
     # Ensure destination base path exists
     File.mkdir_p!(base)
-    case File.exists?(dest) do
-      # If the runner has already been generated, skip generation
-      true ->
-        # Return the project config after we're done
-        config
-      # Otherwise, read in the runner, replace placeholders, and write to the destination in the project root
-      _ ->
-        debug "Generating boot script..."
-        contents = File.read!(source)
-          |> String.replace(@_NAME, name)
-          |> String.replace(@_VERSION, version)
-          |> String.replace(@_ERTS_VSN, erts)
-          |> String.replace(@_ERL_OPTS, erl_opts)
-        File.write!(dest, contents)
-        # Make executable
-        dest |> chmod("+x")
-        # Return the project config after we're done
-        config
-    end
+    debug "Generating boot script..."
+    contents = File.read!(source)
+      |> String.replace(@_NAME, name)
+      |> String.replace(@_VERSION, version)
+      |> String.replace(@_ERTS_VSN, erts)
+      |> String.replace(@_ERL_OPTS, erl_opts)
+    File.write!(dest, contents)
+    # Make executable
+    dest |> chmod("+x")
+    # Return the project config after we're done
+    config
   end
 
   defp do_release(config) do
