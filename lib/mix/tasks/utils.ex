@@ -48,7 +48,7 @@ defmodule ExRM.Release.Utils do
   @doc """
   Execute `relx`
   """
-  def relx(name, version \\ "", verbosity \\ :quiet) do
+  def relx(name, version \\ "", verbosity \\ :quiet, upgrade? \\ false) do
     # Setup paths
     config     = @relx_config_path
     output_dir = "#{@relx_output_path}/#{name}"
@@ -66,10 +66,14 @@ defmodule ExRM.Release.Utils do
       _        -> 2 # Normal if we get an odd value
     end
     # Let relx do the heavy lifting
-    case do_cmd "./relx -V #{v} --config #{config} --relname #{name} --relvsn #{ver} --output-dir #{output_dir}" do
-      :ok ->
-        # tar.gz the release files for easy deployment
-        package_release output_dir, name, ver
+    command = case upgrade? do
+      false -> "./relx release tar -V #{v} --config #{config} --relname #{name} --relvsn #{ver} --output-dir #{output_dir}"
+      true  ->
+        last_release = get_last_release(name)
+        "./relx release relup tar -V #{v} --config #{config} --relname #{name} --relvsn #{ver} --output-dir #{output_dir} --upfrom \"#{last_release}\""
+    end
+    case do_cmd command do
+      :ok         -> :ok
       {:error, _} ->
         {:error, "Failed to build release. Please fix any errors and try again."}
     end
@@ -208,23 +212,31 @@ defmodule ExRM.Release.Utils do
     end
   end
 
-  defp package_release(release_path, name, version) do
-    # pushd
-    cwd = File.cwd!
-    release_path |> File.cd!
-    # tar up the release files
-    debug "Creating release package..."
-    case do_cmd "tar -czf #{name}-#{version}.tar.gz lib releases erts* bin" do
-      :ok ->
-        # popd
-        cwd |> File.cd!
-        :ok
-      {:error, _} ->
-        # popd
-        cwd |> File.cd!
-        # Let user know we've failed
-        {:error, "Packaging step failed. Please fix any errors and try again."}
+  @doc """
+  Get a list of tuples representing the previous releases:
+
+    ## Examples
+
+    get_releases #=> [{"test", "0.0.1"}, {"test", "0.0.2"}]
+  """
+  def get_releases(project) do
+    release_path = Path.join([File.cwd!, "rel", project, "releases"])
+    case release_path |> File.exists? do
+      false -> []
+      true  ->
+        release_path
+        |> File.ls!
+        |> Enum.reject(fn entry -> entry == "RELEASES" end)
+        |> Enum.map(fn version -> {project, version} end)
     end
+  end
+
+  @doc """
+  Get the l
+  """
+  def get_last_release(project) do
+    [{_,version} | _] = project |> get_releases |> Enum.sort(fn {_, v1}, {_, v2} -> v1 > v2 end)
+    version
   end
 
   # Ignore a message when used as the callback for Mix.Shell.cmd

@@ -94,13 +94,15 @@ Now that you've generated your first release, it's time to deploy it! Let's walk
 4. `cd /tmp/test`
 5. `tar -xf /tmp/test-0.0.1.tar.gz`
 
-At this point, we've effectively 'deployed' the `test` application. Let's assume that we're going to run this as a detached shell, rather than the default behavior of starting and immediately booting to the Elixir shell, so:
+Now to start your app:
 
-- `bin/test -detached`
+`bin/test start`
 
-Ok, at this point, our application is running using the default `vm.args` file bundled with the release (make sure you change these values for a real deployment). The important ones to know about are `-name` and `cookie`. These two options will give us what we need to remotely connect to our running node. Let's connect to it now:
+You can test if your app is alive and running with `bin/test ping`. 
 
-- `iex --sname foo --erl "-setcookie test" --remsh test@localhost`
+If you want to connect a remote shell to your now running app:
+
+`bin/test remote_console`
 
 Ok, you should be staring at a standard `iex` prompt, but slightly different: `iex(test@localhost)1>`. The prompt shows us that we are currently connected to `test@localhost`, which is the value of `name` in our `vm.args` file. Feel free to ping the app using `:gen_server.call(:test, :ping)` to make sure it works.
 
@@ -108,7 +110,24 @@ At this point, you can't just abort from the prompt like usual and make the node
 
 ## Upgrading Releases
 
-Coming soon...
+So you've made some changes to your app, and you want to generate a new relase and perform a no-downtime upgrade. I'm here to tell you that this is going to be a breeze, so I hope you're ready (I'm using my test app as an example here again):
+
+- `mix release`
+- `mkdir -p /tmp/test/releases/0.0.2`
+- `cp rel/test/test-0.0.2.tar.gz /tmp/test/releases/0.0.2/test.tar.gz`
+- `cd /tmp/test`
+- `bin/test upgrade "0.0.2"`
+
+Annnnd we're done. Your app was upgraded in place with no downtime, and is now running your modified code. You can use `bin/test remote_console` to connect and test to be sure your changes worked as expected.
+
+## Downgrading Releases
+
+This is even easier! Using the example from before:
+
+- `cd /tmp/test`
+- `bin/test downgrade "0.0.1"`
+
+All done!
 
 ## Appendix
 

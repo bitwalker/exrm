@@ -25,24 +25,30 @@ defmodule Mix.Tasks.Release do
   use    Mix.Task
   import ExRM.Release.Utils
 
-  @_RELXCONF "relx.config"
-  @_RUNNER   "runner"
-  @_NAME     "{{{PROJECT_NAME}}}"
-  @_VERSION  "{{{PROJECT_VERSION}}}"
-  @_ERTS_VSN "{{{ERTS_VERSION}}}"
-  @_ERL_OPTS "{{{ERL_OPTS}}}"
+  @_RELXCONF    "relx.config"
+  @_RUNNER      "runner"
+  @_SYSCONFIG   "sys.config"
+  @_RELEASE_DEF "release_definition.txt"
+  @_RELEASES    "{{{RELEASES}}}"
+  @_NAME        "{{{PROJECT_NAME}}}"
+  @_VERSION     "{{{PROJECT_VERSION}}}"
+  @_ERTS_VSN    "{{{ERTS_VERSION}}}"
+  @_ERL_OPTS    "{{{ERL_OPTS}}}"
 
   def run(args) do
     # Ensure this isn't an umbrella project
     if Mix.Project.umbrella? do
       raise Mix.Error, message: "Umbrella projects are not currently supported!"
     end
+    # Start with a clean slate
+    Mix.Tasks.Release.Clean.do_cleanup(:build)
     # Collect release configuration
     config = [ priv_path:  Path.join([__DIR__, "..", "..", "..", "priv"]) |> Path.expand,
                name:       Mix.project |> Keyword.get(:app) |> atom_to_binary,
                version:    Mix.project |> Keyword.get(:version),
                erts:       "6.0",
                erl:        "",
+               upgrade?:   false,
                verbosity:  :quiet]
     config
     |> Keyword.merge(args |> parse_args)
@@ -92,40 +98,62 @@ defmodule Mix.Tasks.Release do
   end
 
   defp generate_relx_config(config) do
-    priv    = config |> Keyword.get(:priv_path)
-    name    = config |> Keyword.get(:name)
-    version = config |> Keyword.get(:version)
-    source  = Path.join([priv, "rel", @_RELXCONF])
-    base    = Path.join(File.cwd!, "rel")
-    dest    = Path.join(base, @_RELXCONF)
+    # Get configuration
+    priv     = config |> Keyword.get(:priv_path)
+    name     = config |> Keyword.get(:name)
+    version  = config |> Keyword.get(:version)
+    # Get paths
+    deffile  = Path.join([priv, "rel", "files", @_RELEASE_DEF])
+    source   = Path.join([priv, "rel", @_RELXCONF])
+    base     = Path.join(File.cwd!, "rel")
+    dest     = Path.join(base, @_RELXCONF)
+    # Get relx.config template contents
+    relx_config = source |> File.read!
+    # Get release definition template contents
+    tmpl = deffile |> File.read!
+    # Generate release configuration for historical releases
+    releases = get_releases(name)
+      |> Enum.map(fn {rname, rver} -> tmpl |> replace_release_info(rname, rver) end)
+      |> Enum.join
+    # Set upgrade flag if this is an upgrade release
+    config = case releases do
+      "" -> config
+      _  -> config |> Keyword.merge [upgrade?: true]
+    end
+    # Write release configuration
+    relx_config = relx_config
+      |> String.replace(@_RELEASES, releases)
+    # Replace placeholders for current release
+    relx_config = relx_config |> replace_release_info(name, version)
     # Ensure destination base path exists
     File.mkdir_p!(base)
-    contents = File.read!(source) 
-      |> String.replace(@_NAME, name)
-      |> String.replace(@_VERSION, version)
-    File.write!(dest, contents)
+    # Write relx.config
+    File.write!(dest, relx_config)
     # Return the project config after we're done
     config
   end
 
   defp generate_runner(config) do
-    priv     = config |> Keyword.get(:priv_path)
-    name     = config |> Keyword.get(:name)
-    version  = config |> Keyword.get(:version)
-    erts     = config |> Keyword.get(:erts)
-    erl_opts = config |> Keyword.get(:erl)
-    source   = Path.join([priv, "rel", "files", @_RUNNER])
-    base     = Path.join([File.cwd!, "rel", "files"])
-    dest     = Path.join(base, @_RUNNER)
+    priv      = config |> Keyword.get(:priv_path)
+    name      = config |> Keyword.get(:name)
+    version   = config |> Keyword.get(:version)
+    erts      = config |> Keyword.get(:erts)
+    erl_opts  = config |> Keyword.get(:erl)
+    runner    = Path.join([priv, "rel", "files", @_RUNNER])
+    sysconfig = Path.join([priv, "rel", "files", @_SYSCONFIG])
+    base      = Path.join([File.cwd!, "rel", "files"])
+    dest      = Path.join(base, @_RUNNER)
     # Ensure destination base path exists
     File.mkdir_p!(base)
     debug "Generating boot script..."
-    contents = File.read!(source)
+    contents = File.read!(runner)
       |> String.replace(@_NAME, name)
       |> String.replace(@_VERSION, version)
       |> String.replace(@_ERTS_VSN, erts)
       |> String.replace(@_ERL_OPTS, erl_opts)
     File.write!(dest, contents)
+    # Copy sys.config
+    File.copy!(sysconfig, Path.join(base, @_SYSCONFIG))
     # Make executable
     dest |> chmod("+x")
     # Return the project config after we're done
@@ -137,8 +165,9 @@ defmodule Mix.Tasks.Release do
     name      = config |> Keyword.get(:name)
     version   = config |> Keyword.get(:version)
     verbosity = config |> Keyword.get(:verbosity)
+    upgrade?  = config |> Keyword.get(:upgrade?)
     # Do release
-    case relx name, version, verbosity do
+    case relx name, version, verbosity, upgrade? do
       :ok ->
         # Clean up template files
         Mix.Tasks.Release.Clean.do_cleanup(:relfiles)
@@ -156,5 +185,11 @@ defmodule Mix.Tasks.Release do
   end
   defp parse_arg({:verbosity, verbosity}), do: {:verbosity, binary_to_atom(verbosity)}
   defp parse_arg({_key, _value} = arg),    do: arg
+
+  defp replace_release_info(template, name, version) do
+    template
+    |> String.replace(@_NAME, name)
+    |> String.replace(@_VERSION, version)
+  end
 
 end
