@@ -112,11 +112,11 @@ At this point, you can't just abort from the prompt like usual and make the node
 
 So you've made some changes to your app, and you want to generate a new relase and perform a no-downtime upgrade. I'm here to tell you that this is going to be a breeze, so I hope you're ready (I'm using my test app as an example here again):
 
-- `mix release`
-- `mkdir -p /tmp/test/releases/0.0.2`
-- `cp rel/test/test-0.0.2.tar.gz /tmp/test/releases/0.0.2/test.tar.gz`
-- `cd /tmp/test`
-- `bin/test upgrade "0.0.2"`
+1. `mix release`
+2. `mkdir -p /tmp/test/releases/0.0.2`
+3. `cp rel/test/test-0.0.2.tar.gz /tmp/test/releases/0.0.2/test.tar.gz`
+4. `cd /tmp/test`
+5. `bin/test upgrade "0.0.2"`
 
 Annnnd we're done. Your app was upgraded in place with no downtime, and is now running your modified code. You can use `bin/test remote_console` to connect and test to be sure your changes worked as expected.
 
@@ -124,8 +124,8 @@ Annnnd we're done. Your app was upgraded in place with no downtime, and is now r
 
 This is even easier! Using the example from before:
 
-- `cd /tmp/test`
-- `bin/test downgrade "0.0.1"`
+1. `cd /tmp/test`
+2. `bin/test downgrade "0.0.1"`
 
 All done!
 
@@ -133,8 +133,8 @@ All done!
 
 The example server I setup was as simple as this:
 
-- `mix new test`
-- `cd test && touch lib/test/server.ex`
+1. `mix new test`
+2. `cd test && touch lib/test/server.ex`
 
 Then put the following in `lib/test/server.ex`
 
