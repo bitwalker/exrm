@@ -258,8 +258,8 @@ case "$1" in
         export PROGNAME
 
         # Dump environment info for logging purposes
-        echo "Exec: $CMD" -- ${1+"$@"}
-        echo "Root: $ROOTDIR"
+        #echo "Exec: $CMD" -- ${1+"$@"}
+        #echo "Root: $ROOTDIR"
 
         # Log the startup
         logger -t "$REL_NAME[$$]" "Starting up"
