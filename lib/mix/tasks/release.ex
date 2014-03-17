@@ -34,6 +34,7 @@ defmodule Mix.Tasks.Release do
   @_VERSION     "{{{PROJECT_VERSION}}}"
   @_ERTS_VSN    "{{{ERTS_VERSION}}}"
   @_ERL_OPTS    "{{{ERL_OPTS}}}"
+  @_ELIXIR_PATH "{{{ELIXIR_PATH}}}"
 
   def run(args) do
     # Ensure this isn't an umbrella project
@@ -52,7 +53,6 @@ defmodule Mix.Tasks.Release do
                verbosity:  :quiet]
     config
     |> Keyword.merge(args |> parse_args)
-    |> prepare_elixir
     |> prepare_relx
     |> build_project
     |> generate_relx_config
@@ -60,20 +60,6 @@ defmodule Mix.Tasks.Release do
     |> do_release
 
     info "Your release is ready!"
-  end
-
-  defp prepare_elixir(config) do
-    # Ensure Elixir has been cloned, and the right branch is checked out
-    config |> Keyword.get(:elixir, :default) |> fetch_elixir
-    # Ensure Elixir is built
-    case build_elixir do
-      :ok ->
-        # Continue...
-        config
-      {:error, message} ->
-        error message
-        exit(:normal)
-    end
   end
 
   defp prepare_relx(config) do
@@ -123,6 +109,7 @@ defmodule Mix.Tasks.Release do
     # Write release configuration
     relx_config = relx_config
       |> String.replace(@_RELEASES, releases)
+      |> String.replace(@_ELIXIR_PATH, get_elixir_path() |> Path.join("lib"))
     # Replace placeholders for current release
     relx_config = relx_config |> replace_release_info(name, version)
     # Ensure destination base path exists
