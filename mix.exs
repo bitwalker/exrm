@@ -3,7 +3,7 @@ defmodule ExRm.Mixfile do
 
   def project do
     [ app: :exrm,
-      version: "0.2.7",
+      version: "0.3.0",
       deps: deps ]
   end
 
