@@ -2,6 +2,23 @@
 
 Thanks to @tylerflint for the original Makefile, rel.config, and runner script!
 
+## Usage
+
+- `mix release`
+
+This task constructs the complete release for you. The output is sent to `rel/project_name_here`. To see what flags you can pass to this task, use `mix help release`.
+
+- `mix release.clean [--implode]`
+
+Without args, this will clean up the release corresponding to the
+current project version.
+
+With `--implode`, all releases, configuration, generated tools, etc.,
+will be cleaned up, leaving your project directory the same as if exrm
+had never been run. This is a destructive operation, as you can't get
+your releases back unless they were source-controlled, so exrm will ask
+you for confirmation before proceeding with the cleanup.
+
 ## Getting Started
 
 This project's goal is to make releases with Elixir projects a breeze. It is composed of a mix task, and all build files required to successfully take your Elixir project and perform a release build. All you have to do to get started is the following:
@@ -37,24 +54,7 @@ iex(1)> :gen_server.call(:test, :ping)
 iex(2)>
 ```
 
-See the section "Deployment" for information on how to deploy, run, and remotely connect to your release!
-
-## Usage
-
-- `mix release`
-
-This task constructs the complete release for you. The output is sent to `rel/project_name_here`. To see what flags you can pass to this task, use `mix help release`.
-
-- `mix release.clean [--implode]`
-
-Without args, this will clean up the release corresponding to the
-current project version.
-
-With `--implode`, all releases, configuration, generated tools, etc.,
-will be cleaned up, leaving your project directory the same as if exrm
-had never been run. This is a destructive operation, as you can't get
-your releases back unless they were source-controlled, so exrm will ask
-you for confirmation before proceeding with the cleanup.
+See the next few sections for information on how to deploy, run, upgrade/downgrade, and remotely connect to your release!
 
 ## Deployment
 
