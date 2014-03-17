@@ -169,12 +169,12 @@ defmodule ExRM.Release.Utils do
   defp get_real_path(path) do
     case path |> String.to_char_list! |> :file.read_link_info do
       {:ok, {:file_info, _, :regular, _, _, _, _, _, _, _, _, _, _, _}} ->
-        path |> String.replace("/bin/elixir", "")
+        path
       {:ok, {:file_info, _, :symlink, _, _, _, _, _, _, _, _, _, _, _}} ->
         {:ok, sym} = path |> String.to_char_list! |> :file.read_link
         symlink    = sym |> iolist_to_binary
-        path |> Path.dirname |> Path.join(symlink) |> Path.expand |> String.replace("/bin/elixir", "")
-    end
+        path |> Path.dirname |> Path.join(symlink) |> Path.expand
+    end |> String.replace("/bin/elixir", "")
   end
 
 end
