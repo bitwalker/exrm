@@ -56,12 +56,6 @@ had never been run. This is a destructive operation, as you can't get
 your releases back unless they were source-controlled, so exrm will ask
 you for confirmation before proceeding with the cleanup.
 
-## TODO
-
-- Support multiple releases (i.e. appups)
-
-If you run into problems, this is still early in the project's development, so please create an issue, and I'll address ASAP.
-
 ## Common Issues
 
 I'm starting this list to begin collating the various caveats around
@@ -83,6 +77,8 @@ edge cases, I'll formalize this in a better format perhaps as a
   issue a pull request in order to resolve this issue. Alternatively, if
   you know what the dependency is, you can put it in your own `mix.exs`, and
   the release process will ensure that it is loaded with everything else.
+
+If you run into problems, this is still early in the project's development, so please create an issue, and I'll address ASAP.
 
 ## Deployment
 
