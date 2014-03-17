@@ -6,7 +6,7 @@ Thanks to @tylerflint for the original Makefile, rel.config, and runner script!
 
 This project's goal is to make releases with Elixir projects a breeze. It is composed of a mix task, and all build files required to successfully take your Elixir project and perform a release build. All you have to do to get started is the following:
 
-NOTE: This is currently set up for Erlang R17 and Elixir 0.12.4+, support for other versions of Erlang is on it's way!
+NOTE: exrm currently defaults to using version 6.0 of ERTS, which corresponds to Erlang R17. If you need to use the 5.10.x version of ERTS, make sure you pass the `--erts <version>` parameters to `mix release`!
 
 #### Add `exrm` as a dependency to your project
 
@@ -28,7 +28,7 @@ NOTE: This is currently set up for Erlang R17 and Elixir 0.12.4+, support for ot
 #### Run your app! (my example is based on a simple ping server, see the appendix for more info)
 
 ```
-> rel/test/bin/test
+> rel/test/bin/test console
 Erlang/OTP 17 [RELEASE CANDIDATE 1] [erts-6.0] [source-fdcdaca] [64-bit] [smp:4:4] [async-threads:10] [hipe] [kernel-poll:false]
 
 Interactive Elixir (0.12.5) - press Ctrl+C to exit (type h() ENTER for help)
