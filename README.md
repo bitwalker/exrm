@@ -6,9 +6,9 @@ Thanks to @tylerflint for the original Makefile, rel.config, and runner script!
 
 This project's goal is to make releases with Elixir projects a breeze. It is composed of a mix task, and all build files required to successfully take your Elixir project and perform a release build. All you have to do to get started is the following:
 
-NOTE: exrm currently defaults to using version 6.0 of ERTS, which corresponds to Erlang R17. If you need to use the 5.10.x version of ERTS, make sure you pass the `--erts <version>` parameters to `mix release`!
+NOTE: exrm currently defaults to using version 6.0 of ERTS, which corresponds to Erlang R17. If you need to use the 5.10.x version of ERTS, make sure you pass the `--erts <version>` parameter to `mix release`!
 
-#### Add `exrm` as a dependency to your project
+#### Add exrm as a dependency to your project
 
 ```elixir
   defp deps do
