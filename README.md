@@ -39,7 +39,7 @@ iex(2)>
 
 See the section "Deployment" for information on how to deploy, run, and remotely connect to your release!
 
-## Features
+## Usage
 
 - `mix release`
 
@@ -55,30 +55,6 @@ will be cleaned up, leaving your project directory the same as if exrm
 had never been run. This is a destructive operation, as you can't get
 your releases back unless they were source-controlled, so exrm will ask
 you for confirmation before proceeding with the cleanup.
-
-## Common Issues
-
-I'm starting this list to begin collating the various caveats around
-building releases. As soon as I feel like I have a firm grasp of all the
-edge cases, I'll formalize this in a better format perhaps as a
-"Preparing for Release" document.
-
-- Ensure all dependencies for your application are defined in the
-  `:applications` block of your `mix.exs` file. This is how the build
-  process knows that those dependencies need to be bundled in to the
-  release. **This includes dependencies of your dependencies, if they were
-  not properly configured**. For instance, if you depend on `mongoex`, and
-  `mongoex` depends on `erlang-mongodb`, but `mongoex` doesn't have `erlang-mongodb`
-  in it's applications section, your app will fail in it's release form,
-  because `erlang-mongodb` won't be loaded.
-- If you are running into issues with your dependencies missing their
-  dependencies, it's likely that the author did not put the dependencies in
-  the `:application` block of *their* `mix.exs`. You may have to fork, or
-  issue a pull request in order to resolve this issue. Alternatively, if
-  you know what the dependency is, you can put it in your own `mix.exs`, and
-  the release process will ensure that it is loaded with everything else.
-
-If you run into problems, this is still early in the project's development, so please create an issue, and I'll address ASAP.
 
 ## Deployment
 
@@ -124,6 +100,30 @@ This is even easier! Using the example from before:
 2. `bin/test downgrade "0.0.1"`
 
 All done!
+
+## Common Issues
+
+I'm starting this list to begin collating the various caveats around
+building releases. As soon as I feel like I have a firm grasp of all the
+edge cases, I'll formalize this in a better format perhaps as a
+"Preparing for Release" document.
+
+- Ensure all dependencies for your application are defined in the
+  `:applications` block of your `mix.exs` file. This is how the build
+  process knows that those dependencies need to be bundled in to the
+  release. **This includes dependencies of your dependencies, if they were
+  not properly configured**. For instance, if you depend on `mongoex`, and
+  `mongoex` depends on `erlang-mongodb`, but `mongoex` doesn't have `erlang-mongodb`
+  in it's applications section, your app will fail in it's release form,
+  because `erlang-mongodb` won't be loaded.
+- If you are running into issues with your dependencies missing their
+  dependencies, it's likely that the author did not put the dependencies in
+  the `:application` block of *their* `mix.exs`. You may have to fork, or
+  issue a pull request in order to resolve this issue. Alternatively, if
+  you know what the dependency is, you can put it in your own `mix.exs`, and
+  the release process will ensure that it is loaded with everything else.
+
+If you run into problems, this is still early in the project's development, so please create an issue, and I'll address ASAP.
 
 ## Appendix
 
