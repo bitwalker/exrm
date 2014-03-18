@@ -70,6 +70,8 @@ defmodule Mix.Tasks.Release.Clean do
     clean_relx
     rel = File.cwd! |> Path.join("rel")
     if File.exists?(rel), do: File.rm_rf!(rel)
+    # Remove local Elixir
+    clean_elixir
   end
 
   defp confirm_implode? do
