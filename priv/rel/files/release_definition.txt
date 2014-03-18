@@ -1,5 +1,5 @@
 {release, { {{{PROJECT_NAME}}}, "{{{PROJECT_VERSION}}}" }, [
-  {{{PROJECT_NAME}}},
+  { {{{PROJECT_NAME}}}, "{{{PROJECT_VERSION}}}" },
   elixir,
   iex,  % needed for iex remote console
   sasl % required for upgrades
