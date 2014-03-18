@@ -13,7 +13,7 @@ for a fix for upgrades/downgrades in the next day.
 
 ## Usage
 
-NOTE: Due to a bug in Elixir's compilation process (fixed in v0.13), the v0.12.x versions of Elixir will require you to add `:kernel`, `:stdlib`, and `:elixir` to your projects application dependencies array in order for releases to work for you. In addition, by default `exrm` assumes Erlang R17, so you need to pass `--erts <version>` with the current version of ERTS you are running if not using R17. I would highly recommend moving to Erlang R17 and Elixir v0.13 for the best possible compatibility. However, if you do encounter issues, please let me know and I will work with you to make sure you are able to use exrm with your project.
+NOTE: Due to a bug in Elixir's compilation process (fixed in v0.13), the v0.12.x versions of Elixir will require you to add `:kernel`, `:stdlib`, and `:elixir` to your projects application dependencies array in order for releases to work for you. If you encounter issues, please let me know and I will work with you to make sure you are able to use exrm with your project.
 
 You can build a release with the `release` task:
 
