@@ -2,6 +2,15 @@
 
 Thanks to @tylerflint for the original Makefile, rel.config, and runner script!
 
+## Status
+
+There is a bug currently with upgrades where relx isn't able to find the
+previous release's code. I'm addressing that today (3/17) and hope to
+have it resolved by tomorrow (3/18). Still, generating a release should
+be fully functional, as is all of the functions of running a release
+(attaching, remote shells, starting, stopping, restarting, etc). Look
+for a fix for upgrades/downgrades in the next day.
+
 ## Usage
 
 NOTE: Due to a bug in Elixir's compilation process (fixed in v0.13), the v0.12.x versions of Elixir will require you to add `:kernel`, `:stdlib`, and `:elixir` to your projects application dependencies array in order for releases to work for you. In addition, by default `exrm` assumes Erlang R17, so you need to pass `--erts <version>` with the current version of ERTS you are running if not using R17. I would highly recommend moving to Erlang R17 and Elixir v0.13 for the best possible compatibility. However, if you do encounter issues, please let me know and I will work with you to make sure you are able to use exrm with your project.
