@@ -156,7 +156,7 @@ defmodule ExRM.Release.Utils do
   end
 
   # Ignore a message when used as the callback for Mix.Shell.cmd
-  defp ignore(_), do: nil 
+  defp ignore(_), do: nil
 
   defp do_cmd(command), do: do_cmd(command, &IO.write/1)
   defp do_cmd(command, callback) do
@@ -173,8 +173,8 @@ defmodule ExRM.Release.Utils do
       {:ok, {:file_info, _, :symlink, _, _, _, _, _, _, _, _, _, _, _}} ->
         {:ok, sym} = path |> String.to_char_list! |> :file.read_link
         symlink    = sym |> iolist_to_binary
-        path |> Path.dirname |> Path.join(symlink) |> Path.expand |> String.replace("/bin/elixir", "")
-    end
+        path |> Path.dirname |> Path.join(symlink) |> Path.expand
+    end |> String.replace("/bin/elixir", "")
   end
 
 end
