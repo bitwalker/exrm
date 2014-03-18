@@ -152,7 +152,7 @@ defmodule ExRM.Release.Utils do
   Get the local path of the current elixir executable
   """
   def get_elixir_path() do
-    System.cmd("which elixir") |> String.strip(?\n) |> get_real_path
+    System.find_executable("elixir") |> get_real_path
   end
 
   # Ignore a message when used as the callback for Mix.Shell.cmd
