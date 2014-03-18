@@ -6,10 +6,6 @@ defmodule Mix.Tasks.Release do
 
     # Build a release using defaults
     mix release
-    # Use a specific version of ERTS
-    mix release --erts=6.0
-    # Use a specific version of Elixir (branch or tag name)
-    mix release --elixir=v0.13
     # Pass args to erlexec when running the release
     mix release --erl="-env TZ UTC"
     # Set the verbosity level
@@ -47,7 +43,6 @@ defmodule Mix.Tasks.Release do
     config = [ priv_path:  Path.join([__DIR__, "..", "..", "..", "priv"]) |> Path.expand,
                name:       Mix.project |> Keyword.get(:app) |> atom_to_binary,
                version:    Mix.project |> Keyword.get(:version),
-               erts:       "6.0",
                erl:        "",
                upgrade?:   false,
                verbosity:  :quiet]
@@ -124,7 +119,7 @@ defmodule Mix.Tasks.Release do
     priv      = config |> Keyword.get(:priv_path)
     name      = config |> Keyword.get(:name)
     version   = config |> Keyword.get(:version)
-    erts      = config |> Keyword.get(:erts)
+    erts      = :erlang.system_info(:version) |> iolist_to_binary
     erl_opts  = config |> Keyword.get(:erl)
     runner    = Path.join([priv, "rel", "files", @_RUNNER])
     sysconfig = Path.join([priv, "rel", "files", @_SYSCONFIG])

@@ -174,7 +174,7 @@ defmodule ExRM.Release.Utils do
         {:ok, sym} = path |> String.to_char_list! |> :file.read_link
         case sym |> :filename.pathtype do
           :absolute ->
-            symlink = sym |> iolist_to_binary
+            sym |> iolist_to_binary
           :relative ->
             symlink = sym |> iolist_to_binary
             path |> Path.dirname |> Path.join(symlink) |> Path.expand
