@@ -1,4 +1,4 @@
-defmodule ExRm.Mixfile do
+defmodule ReleaseManager.Mixfile do
   use Mix.Project
 
   def project do

@@ -1,4 +1,4 @@
-defmodule ExRM.Release.Utils do
+defmodule ReleaseManager.Utils do
   @moduledoc """
   This module provides helper functions for the `mix release` and
   `mix release.clean` tasks.

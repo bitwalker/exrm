@@ -13,7 +13,7 @@ defmodule Mix.Tasks.Release.Clean do
   @shortdoc "Clean up any release-related files."
 
   use     Mix.Task
-  import  ExRM.Release.Utils
+  import  ReleaseManager.Utils
 
   @_RELXCONF "relx.config"
   @_RUNNER   "runner"

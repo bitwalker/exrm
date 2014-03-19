@@ -19,7 +19,7 @@ defmodule Mix.Tasks.Release do
   @shortdoc "Build a release for the current mix application."
 
   use    Mix.Task
-  import ExRM.Release.Utils
+  import ReleaseManager.Utils
 
   @_RELXCONF    "relx.config"
   @_RUNNER      "runner"
