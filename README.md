@@ -4,12 +4,9 @@ Thanks to @tylerflint for the original Makefile, rel.config, and runner script!
 
 ## Status
 
-There is a bug currently with upgrades where relx isn't able to find the
-previous release's code. I'm addressing that today (3/17) and hope to
-have it resolved by tomorrow (3/18). Still, generating a release should
-be fully functional, as is all of the functions of running a release
-(attaching, remote shells, starting, stopping, restarting, etc). Look
-for a fix for upgrades/downgrades in the next day.
+Generating a release is fully functional.
+
+I'm currently retooling the process for upgrades/downgrades, so these currently do not work properly (it will fail due to the lack of a `.appup` file). I'm building an appup generator that should work for the typical case (reloading existing modules using `code_change`, loading new modules, and unloading deleted modules). I will be adding an option that will allow you to provide your own `.appup` for a release, in those cases where more careful juggling of upgrades and downgrades is required. Keep your eye out for this to be released very soon.
 
 ## Usage
 
@@ -19,7 +16,9 @@ You can build a release with the `release` task:
 
 - `mix release`
 
-This task constructs the complete release for you. The output is sent to `rel/project_name_here`. To see what flags you can pass to this task, use `mix help release`.
+This task constructs the complete release for you. The output is sent to `rel/<project>`. To see what flags you can pass to this task, use `mix help release`.
+
+One really cool thing you can do is `mix release --dev`. This will symlink your application's code into the release, allowing you to make code changes, recompile with `MIX_ENV=prod mix compile`, and rerun your release with `rel/<project>/bin/<project> console` to see the changes. Being able to rapidly test and tweak your release like this goes a long way to making the release process less tedious!
 
 - `mix release.clean [--implode]`
 
