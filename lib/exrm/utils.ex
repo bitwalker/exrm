@@ -7,7 +7,6 @@ defmodule ReleaseManager.Utils do
 
   # Relx constants
   @relx_pkg_url          "https://github.com/erlware/relx/releases/download/v0.6.0/relx"
-  @relx_executable       "relx"
   @relx_build_path       ".relx-build"
   @relx_config_path      "rel/relx.config"
   @relx_output_path      "rel"
@@ -95,36 +94,6 @@ defmodule ReleaseManager.Utils do
   @doc "Print an error message in red"
   def error(message), do: IO.puts "==> #{IO.ANSI.red}#{message}#{IO.ANSI.reset}"
 
-  #########
-  # Relx
-  #########
-
-  @doc """
-  Downloads the relx executable
-  """
-  def fetch_relx do
-    if @relx_executable |> File.exists? do
-      :ok
-    else
-      debug "Downloading relx..."
-      case wget @relx_pkg_url, @relx_executable do
-        :ok ->
-          @relx_executable |> chmod("+x")
-        {:error, _} ->
-          {:error, "Failed to download relx. Please try again."}
-      end
-    end
-  end
-
-  @doc """
-  Remove the relx executable
-  """
-  def clean_relx do
-    if @relx_executable |> File.exists? do
-      @relx_executable |> File.rm_rf!
-    end
-  end
-
   @doc """
   Get a list of tuples representing the previous releases:
 
@@ -151,7 +120,6 @@ defmodule ReleaseManager.Utils do
     [{_,version} | _] = project |> get_releases |> Enum.sort(fn {_, v1}, {_, v2} -> v1 > v2 end)
     version
   end
-
 
   @doc """
   Get the local path of the current elixir executable

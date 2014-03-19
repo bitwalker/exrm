@@ -67,7 +67,9 @@ defmodule Mix.Tasks.Release.Clean do
     do_cleanup :build
 
     # Remove generated tools
-    clean_relx
+    relx = Path.join(File.cwd!, "relx")
+    if File.exists?(relx), do: relx |> File.rm_rf!
+    # Remove release folder
     rel = File.cwd! |> Path.join("rel")
     if File.exists?(rel), do: File.rm_rf!(rel)
   end

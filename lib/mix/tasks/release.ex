@@ -63,12 +63,20 @@ defmodule Mix.Tasks.Release do
 
   defp prepare_relx(config) do
     # Ensure relx has been downloaded
-    case fetch_relx do
-      :ok ->
+    verbosity = config |> Keyword.get(:verbosity)
+    priv = config |> Keyword.get(:priv_path)
+    relx = Path.join([priv, "bin", "relx"])
+    dest = Path.join(File.cwd!, "relx")
+    case File.copy(relx, dest) do
+      {:ok, _} ->
+        dest |> chmod("+x")
         # Continue...
         config
-      {:error, message} ->
-        error message
+      {:error, reason} ->
+        if verbosity == :verbose do
+          error reason
+        end
+        error "Unable to copy relx to your project's directory!"
         exit(:normal)
     end
   end
