@@ -42,10 +42,15 @@ defmodule ReleaseManager.Utils do
   @doc """
   Execute `relx`
   """
-  def relx(name, version \\ "", verbosity \\ :quiet, upgrade? \\ false) do
+  def relx(name, version, verbosity, upgrade?, dev) do
     # Setup paths
     config     = @relx_config_path
     output_dir = "#{@relx_output_path}/#{name}"
+    # Determine whether to pass --dev-mode or not
+    dev_mode?  = case dev do 
+      true  -> "--dev-mode"
+      false -> ""
+    end
     # Get the release version
     ver = case version do
       "" -> git_describe
@@ -61,10 +66,10 @@ defmodule ReleaseManager.Utils do
     end
     # Let relx do the heavy lifting
     command = case upgrade? do
-      false -> "./relx release tar -V #{v} --config #{config} --relname #{name} --relvsn #{ver} --output-dir #{output_dir}"
+      false -> "./relx release tar -V #{v} --config #{config} --relname #{name} --relvsn #{ver} --output-dir #{output_dir} #{dev_mode?}"
       true  ->
         last_release = get_last_release(name)
-        "./relx release relup tar -V #{v} --config #{config} --relname #{name} --relvsn #{ver} --output-dir #{output_dir} --upfrom \"#{last_release}\""
+        "./relx release relup tar -V #{v} --config #{config} --relname #{name} --relvsn #{ver} --output-dir #{output_dir} --upfrom \"#{last_release}\" #{dev_mode?}"
     end
     case do_cmd command do
       :ok         -> :ok

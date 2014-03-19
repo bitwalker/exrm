@@ -8,6 +8,9 @@ defmodule Mix.Tasks.Release do
     mix release
     # Pass args to erlexec when running the release
     mix release --erl="-env TZ UTC"
+    # Enable dev mode. Make changes, compile using MIX_ENV=prod
+    # and execute your release again to pick up the changes
+    mix release --dev
     # Set the verbosity level
     mix release --verbosity=[silent|quiet|normal|verbose]
 
@@ -43,6 +46,7 @@ defmodule Mix.Tasks.Release do
     config = [ priv_path:  Path.join([__DIR__, "..", "..", "..", "priv"]) |> Path.expand,
                name:       Mix.project |> Keyword.get(:app) |> atom_to_binary,
                version:    Mix.project |> Keyword.get(:version),
+               dev:        false,
                erl:        "",
                upgrade?:   false,
                verbosity:  :quiet]
@@ -148,8 +152,9 @@ defmodule Mix.Tasks.Release do
     version   = config |> Keyword.get(:version)
     verbosity = config |> Keyword.get(:verbosity)
     upgrade?  = config |> Keyword.get(:upgrade?)
+    dev_mode? = config |> Keyword.get(:dev)
     # Do release
-    case relx name, version, verbosity, upgrade? do
+    case relx name, version, verbosity, upgrade?, dev_mode? do
       :ok ->
         # Clean up template files
         Mix.Tasks.Release.Clean.do_cleanup(:relfiles)
