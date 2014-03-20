@@ -1,12 +1,6 @@
 # Elixir Release Manager
 
-Thanks to @tylerflint for the original Makefile, rel.config, and runner script!
-
-## Status
-
-Generating a release is fully functional.
-
-I'm currently retooling the process for upgrades/downgrades, so these currently do not work properly (it will fail due to the lack of a `.appup` file). I'm building an appup generator that should work for the typical case (reloading existing modules using `code_change`, loading new modules, and unloading deleted modules). I will be adding an option that will allow you to provide your own `.appup` for a release, in those cases where more careful juggling of upgrades and downgrades is required. Keep your eye out for this to be released very soon.
+Thanks to @tylerflint for the original Makefile, rel.config, and runner script which inspired this project!
 
 ## Usage
 
