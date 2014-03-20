@@ -12,6 +12,20 @@ defmodule ReleaseManager.Utils do
   @relx_output_path      "rel"
 
   @doc """
+  Perform some actions within the context of a specific mix environment
+  """
+  defmacro with_env(env, body) do
+    quote do
+      old_env = Mix.env
+      # Change env
+      Mix.env(unquote(env))
+      unquote(body)
+      # Change back
+      Mix.env(old_env)
+    end
+  end
+
+  @doc """
   Call make in the current working directory.
   """
   def make(command \\ "", args \\ ""), do: do_cmd("make #{command} #{args}", &ignore/1)

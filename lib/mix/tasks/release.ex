@@ -161,6 +161,18 @@ defmodule Mix.Tasks.Release do
     verbosity = config |> Keyword.get(:verbosity)
     upgrade?  = config |> Keyword.get(:upgrade?)
     dev_mode? = config |> Keyword.get(:dev)
+    # If this is an upgrade release, generate an appup
+    if upgrade? do
+      # Change mix env for appup generation
+      with_env :prod do
+        # Generate appup
+        app     = name |> binary_to_atom
+        v1      = get_last_release(name)
+        v1_path = Path.join([File.cwd!, "rel", name, "lib", "#{name}-#{v1}"])
+        v2_path = Mix.Project.config |> Mix.Project.compile_path |> String.replace("/ebin", "")
+        ReleaseManager.Appups.make(app, v1, version, v1_path, v2_path)
+      end
+    end
     # Do release
     case relx name, version, verbosity, upgrade?, dev_mode? do
       :ok ->
