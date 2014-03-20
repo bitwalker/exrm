@@ -37,12 +37,12 @@ defmodule Mix.Tasks.Release.Clean do
     cwd      = File.cwd!
     project  = Mix.project |> Keyword.get(:app) |> atom_to_binary
     version  = Mix.project |> Keyword.get(:version)
-    build    = cwd |> Path.join("_build") |> Path.join("prod")
-    release  = cwd |> Path.join("rel")    |> Path.join(project) |> Path.join("releases") |> Path.join(version)
-    releases = cwd |> Path.join("rel")    |> Path.join(project) |> Path.join("releases") |> Path.join("RELEASES")
-    package  = cwd |> Path.join("rel")    |> Path.join(project) |> Path.join("#{project}-#{version}.tar.gz")
-    lib      = cwd |> Path.join("rel")    |> Path.join(project) |> Path.join("lib") |> Path.join("#{project}-#{version}")
-    relup    = cwd |> Path.join("rel")    |> Path.join(project) |> Path.join("relup")
+    build    = Path.join([cwd, "_build", "prod"])
+    release  = Path.join([cwd, "rel", project, "releases", version])
+    releases = Path.join([cwd, "rel", project, "releases", "RELEASES"])
+    package  = Path.join([cwd, "rel", project, "#{project}-#{version}.tar.gz"])
+    lib      = Path.join([cwd, "rel", project, "lib", "#{project}-#{version}"])
+    relup    = Path.join([cwd, "rel", project, "relup"])
 
     if File.exists?(release),  do: File.rm_rf!(release)
     if File.exists?(releases), do: File.rm_rf!(releases)
