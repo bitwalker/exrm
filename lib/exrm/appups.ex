@@ -73,14 +73,14 @@ defmodule ReleaseManager.Appups do
         (v2_path <> "/ebin/" <> atom_to_binary(module) <> ".beam")
         |> File.read!
         |> upgrade_directives(v1, v2, module)
-      end)
+      end) |> List.flatten
 
     down_directives = 
       Enum.reverse(modules(v2_props) -- add_mods) |> Enum.map(fn module ->
         (v2_path <> "/ebin/" <> atom_to_binary(module) <> ".beam")
         |> File.read!
         |> downgrade_directives(v1, v2, module)
-      end)
+      end) |> List.flatten
       
     appup =
       { v2 |> to_char_list!,
