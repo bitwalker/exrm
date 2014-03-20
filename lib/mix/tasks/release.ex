@@ -170,7 +170,13 @@ defmodule Mix.Tasks.Release do
         v1      = get_last_release(name)
         v1_path = Path.join([File.cwd!, "rel", name, "lib", "#{name}-#{v1}"])
         v2_path = Mix.Project.config |> Mix.Project.compile_path |> String.replace("/ebin", "")
-        ReleaseManager.Appups.make(app, v1, version, v1_path, v2_path)
+        case ReleaseManager.Appups.make(app, v1, version, v1_path, v2_path) do
+          {:ok, _}         ->
+            info "Generated .appup for #{name} #{v1} -> #{version}"
+          {:error, reason} ->
+            error "Appup generation failed with #{reason}"
+            exit(:normal)
+        end
       end
     end
     # Do release

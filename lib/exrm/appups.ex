@@ -3,7 +3,6 @@ defmodule ReleaseManager.Appups do
   Module for generating auto-generating appups between releases.
   """
   import String, only: [to_char_list!: 1, from_char_list!: 1]
-  import ReleaseManager.Utils, only: [info: 1, error: 1]
 
   @doc """
   Generate a .appup for the given application, start version, and upgrade version.
@@ -107,7 +106,6 @@ defmodule ReleaseManager.Appups do
     |> to_char_list!
     |> :file.write_file(:io_lib.fwrite('~p.\n', [appup]))
 
-    info "Generated .appup for #{application} #{v1} -> #{v2}"
     { :ok, appup }
   end
 
