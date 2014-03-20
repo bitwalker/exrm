@@ -157,4 +157,4 @@ defmodule Test.Server do
 end
 ```
 
-You should be able to replicate my example using these steps. If you can't, please let me know.
+You can find the source code for my example application [here](https://github.com/bitwalker/exrm-test). You should be able to replicate my example using these steps. If you can't, please let me know.
