@@ -2,15 +2,38 @@ defmodule ReleaseManager.Appups do
   @moduledoc """
   Module for generating auto-generating appups between releases.
   """
+  import String, only: [to_char_list!: 1, from_char_list!: 1]
   import ReleaseManager.Utils, only: [info: 1, error: 1]
 
-  def make_appup(application, v1, v2, v1_path, v2_path) do
-    case :file.consult(v1_path ++ '/ebin/' ++ atom_to_list(application) ++ '.app') do
-      { :ok, [ { :application, application, v1_props } ] } ->
+  @doc """
+  Generate a .appup for the given application, start version, and upgrade version.
+
+    ## Parameter information
+    application: the application name as an atom
+    v1:          the start version, such as "0.0.1"
+    v2:          the upgrade version, such as "0.0.2"
+    v1_path:     the path to the v1 artifacts (rel/<app>/lib/<app>-0.0.1)
+    v2_path:     the path to the v2 artifacts (_build/prod/lib/<app>)
+
+  """
+  def make(application, v1, v2, v1_path, v2_path) do
+    v1_release =
+      v1_path
+      |> Path.join("/ebin/")
+      |> Path.join(atom_to_binary(application) <> ".app")
+      |> to_char_list!
+    v2_release =
+      v2_path
+      |> Path.join("/ebin/")
+      |> Path.join(atom_to_binary(application) <> ".app")
+      |> to_char_list!
+
+    case :file.consult(v1_release) do
+      { :ok, [ { :application, ^application, v1_props } ] } ->
         case vsn(v1_props) === v1 do
           true ->
-            case :file.consult(v2_path ++ '/ebin/' ++ atom_to_list(application) ++ '.app') do
-              { :ok, [ { :application, application, v2_props } ] } ->
+            case :file.consult(v2_release) do
+              { :ok, [ { :application, ^application, v2_props } ] } ->
                 case vsn(v2_props) === v2 do
                   true ->
                     make_appup(application, v1, v1_props, v2, v2_path, v2_props)
@@ -28,50 +51,47 @@ defmodule ReleaseManager.Appups do
     end
   end
 
-  def make_appup(application, v1, v1_props, v2, v2_path, v2_props) do
+  defp make_appup(application, v1, v1_props, v2, v2_path, v2_props) do
     add_mods = modules(v2_props) -- modules(v1_props)
     del_mods = modules(v1_props) -- modules(v2_props)
 
     { up_version_change, down_version_change } =
       case start_module(v2_props) do
         { :ok, start_mod, start_args } ->
-          start_mod_beam_file = v2_path ++ '/ebin/' ++ atom_to_list(start_mod) ++ '.beam'
-          {
-            (lc {:ok, beam} inlist :file.read_file(start_mod_beam_file),
-               d           inlist version_change(beam, v1, start_mod, start_args),
-            do: d),
-            (lc {:ok, beam} inlist :file.read_file(start_mod_beam_file),
-               d           inlist version_change(beam, {:down, v1}, start_mod, start_args),
-            do: d)
-          }
+          start_mod_beam_file = 
+            v2_path 
+            |> Path.join("/ebin/")
+            |> Path.join(atom_to_binary(start_mod) <> ".beam")
+          { start_mod_beam_file |> File.read! |> version_change(v1, start_mod, start_args),
+            start_mod_beam_file |> File.read! |> version_change({:down, v1}, start_mod, start_args) }
         :undefined ->
           { [], [] }
       end
 
     up_directives =
-      (lc m          inlist modules(v2_props) -- add_mods,
-         beam_file   inlist (v2_path ++ '/ebin/' ++ atom_to_list(m) ++ '.beam'),
-         {:ok, beam} inlist :file.read_file(beam_file),
-         d           inlist upgrade_directives(v1, v2, m, beam),
-      do: d)
+      (modules(v2_props) -- add_mods) |> Enum.map(fn module ->
+        (v2_path <> "/ebin/" <> atom_to_binary(module) <> ".beam")
+        |> File.read!
+        |> upgrade_directives(v1, v2, module)
+      end)
 
     down_directives = 
-      (lc m          inlist :lists.reverse(modules(v2_props) -- add_mods),
-         beam_file   inlist (v2_path ++ '/ebin' ++ atom_to_list(m) ++ '.beam'),
-         {:ok, beam} inlist :file.read_file(beam_file),
-         d           inlist downgrade_directives(v1, v2, m, beam),
-      do: d)
+      Enum.reverse(modules(v2_props) -- add_mods) |> Enum.map(fn module ->
+        (v2_path <> "/ebin/" <> atom_to_binary(module) <> ".beam")
+        |> File.read!
+        |> downgrade_directives(v1, v2, module)
+      end)
       
     appup =
-      { v2,
-        [ { v1,
+      { v2 |> to_char_list!,
+        [ { v1 |> to_char_list!,
             (lc m inlist add_mods, do: { :add_module, m })
             ++ up_directives
             ++ up_version_change
             ++ (lc m inlist del_mods, do: { :delete_module, m })
           }
         ],
-        [ { v1,
+        [ { v1 |> to_char_list!,
             (lc m inlist :lists.reverse(del_mods), do: { :add_module, m })
             ++ down_version_change
             ++ down_directives
@@ -79,6 +99,13 @@ defmodule ReleaseManager.Appups do
           }
         ]
       }
+
+    # Save the appup to the upgrade's build directory
+    v2_path
+    |> Path.join("ebin")
+    |> Path.join((application |> atom_to_binary) <> ".appup")
+    |> to_char_list!
+    |> :file.write_file(:io_lib.fwrite('~p.\n', [appup]))
 
     info "Generated .appup for #{application} #{v1} -> #{v2}"
     { :ok, appup }
@@ -100,7 +127,7 @@ defmodule ReleaseManager.Appups do
   defp beam_exports(beam, func, arity) do
     case :beam_lib.chunks(beam, [ :exports ]) do
       { :ok, { _, [ { :exports, exports } ] } } ->
-        :lists.member({ func, arity }, exports)
+        exports |> Enum.member?({ func, arity })
       _ ->
         false
     end
@@ -120,10 +147,10 @@ defmodule ReleaseManager.Appups do
     modules
   end
 
-  defp upgrade_directives(v1, v2, m, beam) do
+  defp upgrade_directives(beam, v1, v2, m) do
     case is_supervisor(beam) do
       true ->
-        upgrade_directives_supervisor(v1, v2, m, beam)
+        upgrade_directives_supervisor(beam, v1, v2, m)
       false ->
         case has_code_change(beam) do
           true  -> [ { :update, m, :infinity, { :advanced, [] }, :brutal_purge, :brutal_purge, [] } ]
@@ -132,7 +159,7 @@ defmodule ReleaseManager.Appups do
     end
   end
 
-  defp upgrade_directives_supervisor(v1, v2, m, beam) do
+  defp upgrade_directives_supervisor(beam, v1, v2, m) do
     case beam_exports(beam, :sup_upgrade_notify, 2) do
       true ->
         [ { :update, m, :supervisor },
@@ -142,10 +169,10 @@ defmodule ReleaseManager.Appups do
     end
   end
 
-  defp downgrade_directives(v1, v2, m, beam) do
+  defp downgrade_directives(beam, v1, v2, m) do
     case is_supervisor(beam) do
       true ->
-        downgrade_directives_supervisor(v1, v2, m, beam)
+        downgrade_directives_supervisor(beam, v1, v2, m)
       false ->
         case has_code_change(beam) do
           true  -> [ { :update, m, :infinity, { :advanced, [] }, :brutal_purge, :brutal_purge, [] } ]
@@ -154,7 +181,7 @@ defmodule ReleaseManager.Appups do
     end
   end
 
-  defp downgrade_directives_supervisor(v1, v2, m, beam) do
+  defp downgrade_directives_supervisor(beam, v1, v2, m) do
     case beam_exports(beam, :sup_downgrade_notify, 2) do
       true ->
         [ {
@@ -183,7 +210,7 @@ defmodule ReleaseManager.Appups do
 
   defp vsn(props) do
     { :value, { :vsn, vsn } } = :lists.keysearch(:vsn, 1, props)
-    vsn
+    vsn |> from_char_list!
   end
 
   defp has_element(attr, key, elem) do
