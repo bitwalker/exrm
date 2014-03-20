@@ -54,7 +54,7 @@ Erlang/OTP 17 [RELEASE CANDIDATE 1] [erts-6.0] [source-fdcdaca] [64-bit] [smp:4:
 
 Interactive Elixir (0.12.5) - press Ctrl+C to exit (type h() ENTER for help)
 iex(1)> :gen_server.call(:test, :ping)
-:pong
+:v1
 iex(2)>
 ```
 
