@@ -1,6 +1,6 @@
 defmodule ReleaseManager.Appups do
   @moduledoc """
-  Module for generating auto-generating appups between releases.
+  Module for auto-generating appups between releases.
   """
   import String, only: [to_char_list!: 1, from_char_list!: 1]
 
