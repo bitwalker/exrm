@@ -28,11 +28,19 @@ defmodule ReleaseManager.Utils do
   @doc """
   Call make in the current working directory.
   """
-  def make(command \\ "", args \\ ""), do: do_cmd("make #{command} #{args}", &ignore/1)
+  def make(:quiet),                  do: make("", "", :quiet)
+  def make(:verbose),                do: make("", "", :verbose)
+  def make(command, :quiet),         do: make(command, "", :quiet)
+  def make(command, :verbose),       do: make(command, "", :verbose)
+  def make(command, args, :quiet),   do: do_cmd("make #{command} #{args}", &ignore/1)
+  def make(command, args, :verbose), do: do_cmd("make #{command} #{args}", &IO.write/1)
   @doc """
   Call the _elixir mix binary with the given arguments
   """
-  def mix(command, env \\ :dev), do: do_cmd("MIX_ENV=#{env} mix #{command}", &ignore/1)
+  def mix(command, :quiet),        do: mix(command, :dev, :quiet)
+  def mix(command, :verbose),      do: mix(command, :dev, :verbose)
+  def mix(command, env, :quiet),   do: do_cmd("MIX_ENV=#{env} mix #{command}", &ignore/1)
+  def mix(command, env, :verbose), do: do_cmd("MIX_ENV=#{env} mix #{command}", &IO.write/1)
   @doc """
   Download a file from a url to the provided destination.
   """

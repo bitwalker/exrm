@@ -83,9 +83,17 @@ defmodule Mix.Tasks.Release do
 
   defp build_project(config) do
     # Fetch deps, and compile, using the prepared Elixir binaries
-    mix "deps.get",     :prod
-    mix "deps.compile", :prod
-    mix "compile",      :prod
+    verbosity = config |> Keyword.get(:verbosity)
+    cond do
+      verbosity == :verbose ->
+        mix "deps.get",     :prod, :verbose
+        mix "deps.compile", :prod, :verbose
+        mix "compile",      :prod, :verbose
+      true ->
+        mix "deps.get",     :prod
+        mix "deps.compile", :prod
+        mix "compile",      :prod
+    end
     # Continue...
     config
   end
