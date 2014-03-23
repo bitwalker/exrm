@@ -32,6 +32,7 @@ defmodule ReleaseManager.Utils do
   def make(:verbose),                do: make("", "", :verbose)
   def make(command, :quiet),         do: make(command, "", :quiet)
   def make(command, :verbose),       do: make(command, "", :verbose)
+  def make(command, args),           do: make(command, args, :quiet)
   def make(command, args, :quiet),   do: do_cmd("make #{command} #{args}", &ignore/1)
   def make(command, args, :verbose), do: do_cmd("make #{command} #{args}", &IO.write/1)
   @doc """
@@ -39,6 +40,7 @@ defmodule ReleaseManager.Utils do
   """
   def mix(command, :quiet),        do: mix(command, :dev, :quiet)
   def mix(command, :verbose),      do: mix(command, :dev, :verbose)
+  def mix(command, env),           do: mix(command, env, :quiet)
   def mix(command, env, :quiet),   do: do_cmd("MIX_ENV=#{env} mix #{command}", &ignore/1)
   def mix(command, env, :verbose), do: do_cmd("MIX_ENV=#{env} mix #{command}", &IO.write/1)
   @doc """
