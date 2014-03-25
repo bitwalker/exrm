@@ -88,7 +88,7 @@ export ROOTDIR=$RELEASE_ROOT_DIR
 export BINDIR=$ERTS_DIR/bin
 export EMU=beam
 export PROGNAME=erl
-export LD_LIBRARY_PATH=$ERTS_DIR/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ERTS_DIR/lib
 
 cd $ROOTDIR
 
