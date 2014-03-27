@@ -6,8 +6,6 @@ defmodule ReleaseManager.Utils do
   import Mix.Shell,    only: [cmd: 2]
 
   # Relx constants
-  @relx_pkg_url          "https://github.com/erlware/relx/releases/download/v0.6.0/relx"
-  @relx_build_path       ".relx-build"
   @relx_config_path      "rel/relx.config"
   @relx_output_path      "rel"
 
