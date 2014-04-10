@@ -155,7 +155,10 @@ defmodule Mix.Tasks.Release do
       |> String.replace(@_ERL_OPTS, erl_opts)
     File.write!(dest, contents)
     # Copy sys.config
-    File.copy!(sysconfig, Path.join(base, @_SYSCONFIG))
+    case sysconfig |> File.exists? do
+      true -> :ok
+      _    -> File.copy!(sysconfig, Path.join(base, @_SYSCONFIG))
+    end
     # Make executable
     dest |> chmod("+x")
     # Return the project config after we're done
