@@ -96,6 +96,11 @@ So you've made some changes to your app, and you want to generate a new relase a
 
 Annnnd we're done. Your app was upgraded in place with no downtime, and is now running your modified code. You can use `bin/test remote_console` to connect and test to be sure your changes worked as expected.
 
+You can also provide your own .appup file, by writing one and placing it in
+`rel/<app>.appup`. This location is checked before generating a new
+release, and will be used instead of autogenerating an appup file for
+you.
+
 ## Downgrading Releases
 
 This is even easier! Using the example from before:
