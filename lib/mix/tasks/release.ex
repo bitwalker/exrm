@@ -174,16 +174,31 @@ defmodule Mix.Tasks.Release do
       # Change mix env for appup generation
       with_env :prod do
         # Generate appup
-        app     = name |> binary_to_atom
-        v1      = get_last_release(name)
-        v1_path = Path.join([File.cwd!, "rel", name, "lib", "#{name}-#{v1}"])
-        v2_path = Mix.Project.config |> Mix.Project.compile_path |> String.replace("/ebin", "")
-        case ReleaseManager.Appups.make(app, v1, version, v1_path, v2_path) do
-          {:ok, _}         ->
-            info "Generated .appup for #{name} #{v1} -> #{version}"
-          {:error, reason} ->
-            error "Appup generation failed with #{reason}"
-            exit(:normal)
+        app      = name |> binary_to_atom
+        v1       = get_last_release(name)
+        v1_path  = Path.join([File.cwd!, "rel", name, "lib", "#{name}-#{v1}"])
+        v2_path  = Mix.Project.config |> Mix.Project.compile_path |> String.replace("/ebin", "")
+        own_path = Path.join([File.cwd!, "rel", "#{name}.appup"])
+        # Look for user's own .appup file before generating one
+        case own_path |> File.exists? do
+          true ->
+            # Copy it to ebin
+            case File.cp(own_path, Path.join([v2_path, "/ebin", "#{name}.appup"])) do
+              :ok ->
+                info "Using custom .appup located in rel/#{name}.appup"
+              {:error, reason} ->
+                error "Unable to copy custom .appup file: #{reason}"
+                exit(:normal)
+            end
+          _ ->
+            # No custom .appup found, proceed with autogeneration
+            case ReleaseManager.Appups.make(app, v1, version, v1_path, v2_path) do
+              {:ok, _}         ->
+                info "Generated .appup for #{name} #{v1} -> #{version}"
+              {:error, reason} ->
+                error "Appup generation failed with #{reason}"
+                exit(:normal)
+            end
         end
       end
     end
