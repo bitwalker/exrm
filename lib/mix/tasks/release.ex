@@ -154,7 +154,7 @@ defmodule Mix.Tasks.Release do
       |> String.replace(@_ERTS_VSN, erts)
       |> String.replace(@_ERL_OPTS, erl_opts)
     File.write!(dest, contents)
-    # Copy sys.config
+    # Copy default sys.config only if user hasn't provided their own
     case Path.join(base, @_SYSCONFIG) |> File.exists? do
       true -> :ok
       _    -> File.cp!(sysconfig, Path.join(base, @_SYSCONFIG))
