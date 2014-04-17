@@ -164,7 +164,7 @@ defmodule ReleaseManager.Utils do
   def get_real_path(path) do
     case path |> String.to_char_list! |> :file.read_link_info do
       {:ok, {:file_info, _, :regular, _, _, _, _, _, _, _, _, _, _, _}} ->
-        path
+        path |> String.replace("/bin/elixir", "/lib/elixir")
       {:ok, {:file_info, _, :symlink, _, _, _, _, _, _, _, _, _, _, _}} ->
         {:ok, sym} = path |> String.to_char_list! |> :file.read_link
         case sym |> :filename.pathtype do
