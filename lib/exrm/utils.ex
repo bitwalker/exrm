@@ -168,7 +168,7 @@ defmodule ReleaseManager.Utils do
     end
   end
 
-  def get_real_path(path) do
+  defp get_real_path(path) do
     case path |> String.to_char_list! |> :file.read_link_info do
       {:ok, {:file_info, _, :regular, _, _, _, _, _, _, _, _, _, _, _}} ->
         path
