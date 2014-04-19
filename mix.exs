@@ -3,7 +3,7 @@ defmodule ReleaseManager.Mixfile do
 
   def project do
     [ app: :exrm,
-      version: "0.4.5",
+      version: "0.4.6",
       deps: deps ]
   end
 
