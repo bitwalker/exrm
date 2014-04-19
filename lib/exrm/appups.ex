@@ -3,6 +3,7 @@ defmodule ReleaseManager.Appups do
   Module for auto-generating appups between releases.
   """
   import String, only: [to_char_list!: 1, from_char_list!: 1]
+  import ReleaseManager.Utils, only: [write_term: 2]
 
   @doc """
   Generate a .appup for the given application, start version, and upgrade version.
@@ -103,8 +104,7 @@ defmodule ReleaseManager.Appups do
     v2_path
     |> Path.join("ebin")
     |> Path.join((application |> atom_to_binary) <> ".appup")
-    |> to_char_list!
-    |> :file.write_file(:io_lib.fwrite('~p.\n', [appup]))
+    |> write_term(appup)
 
     { :ok, appup }
   end

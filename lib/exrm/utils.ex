@@ -150,6 +150,13 @@ defmodule ReleaseManager.Utils do
     System.find_executable("elixir") |> get_real_path
   end
 
+  @doc """
+  Writes an Elixir/Erlang term to the provided path
+  """
+  def write_term(path, term) do
+    :file.write_file('#{path}', :io_lib.fwrite('~p.\n', [term]))
+  end
+
   # Ignore a message when used as the callback for Mix.Shell.cmd
   defp ignore(_), do: nil
 
