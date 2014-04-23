@@ -5,7 +5,7 @@ defmodule ReleaseManager.Mixfile do
 
   def project do
     [ app: :exrm,
-      version: "0.4.6",
+      version: "0.4.7",
       description: description,
       package: package,
       deps: [] ]
