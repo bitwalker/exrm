@@ -33,7 +33,7 @@ This project's goal is to make releases with Elixir projects a breeze. It is com
 
 ```elixir
   defp deps do
-    [{:exrm, github: "bitwalker/exrm"}]
+    [{:exrm, "~> 0.5.0"}]
   end
 ```
 
