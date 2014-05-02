@@ -1,11 +1,10 @@
-Code.ensure_loaded?(Hex) and Hex.start
-
 defmodule ReleaseManager.Mixfile do
   use Mix.Project
 
   def project do
     [ app: :exrm,
-      version: "0.4.7",
+      version: "0.5.0",
+      elixir: "~> 0.13.1",
       description: description,
       package: package,
       deps: [] ]
