@@ -20,7 +20,7 @@ defmodule AppupsTest do
     assert appup == expected_appup
   end
 
-  teardown meta do
+  teardown _meta do
     if @v1_path |> File.exists? do
       @v1_path |> File.rm!
     end

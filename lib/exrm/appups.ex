@@ -2,7 +2,6 @@ defmodule ReleaseManager.Appups do
   @moduledoc """
   Module for auto-generating appups between releases.
   """
-  import String, only: [to_char_list!: 1, from_char_list!: 1]
   import ReleaseManager.Utils, only: [write_term: 2]
 
   @doc """
@@ -21,12 +20,12 @@ defmodule ReleaseManager.Appups do
       v1_path
       |> Path.join("/ebin/")
       |> Path.join(atom_to_binary(application) <> ".app")
-      |> to_char_list!
+      |> List.from_char_data!
     v2_release =
       v2_path
       |> Path.join("/ebin/")
       |> Path.join(atom_to_binary(application) <> ".app")
-      |> to_char_list!
+      |> List.from_char_data!
 
     case :file.consult(v1_release) do
       { :ok, [ { :application, ^application, v1_props } ] } ->
@@ -83,19 +82,19 @@ defmodule ReleaseManager.Appups do
       end) |> List.flatten
       
     appup =
-      { v2 |> to_char_list!,
-        [ { v1 |> to_char_list!,
-            (lc m inlist add_mods, do: { :add_module, m })
+      { v2 |> List.from_char_data!,
+        [ { v1 |> List.from_char_data!,
+            (for m <- add_mods, do: { :add_module, m })
             ++ up_directives
             ++ up_version_change
-            ++ (lc m inlist del_mods, do: { :delete_module, m })
+            ++ (for m <- del_mods, do: { :delete_module, m })
           }
         ],
-        [ { v1 |> to_char_list!,
-            (lc m inlist :lists.reverse(del_mods), do: { :add_module, m })
+        [ { v1 |> List.from_char_data!,
+            (for m <- :lists.reverse(del_mods), do: { :add_module, m })
             ++ down_version_change
             ++ down_directives
-            ++ (lc m inlist :lists.reverse(add_mods), do: { :delete_module, m })
+            ++ (for m <- :lists.reverse(add_mods), do: { :delete_module, m })
           }
         ]
       }
@@ -208,7 +207,7 @@ defmodule ReleaseManager.Appups do
 
   defp vsn(props) do
     { :value, { :vsn, vsn } } = :lists.keysearch(:vsn, 1, props)
-    vsn |> from_char_list!
+    vsn |> String.from_char_data!
   end
 
   defp has_element(attr, key, elem) do
