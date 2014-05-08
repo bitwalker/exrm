@@ -139,7 +139,7 @@ defmodule Mix.Tasks.Release do
     priv      = config |> Keyword.get(:priv_path)
     name      = config |> Keyword.get(:name)
     version   = config |> Keyword.get(:version)
-    erts      = :erlang.system_info(:version) |> iolist_to_binary
+    erts      = :erlang.system_info(:version) |> iodata_to_binary
     erl_opts  = config |> Keyword.get(:erl)
     runner    = Path.join([priv, "rel", "files", @_RUNNER])
     sysconfig = Path.join([priv, "rel", "files", @_SYSCONFIG])
