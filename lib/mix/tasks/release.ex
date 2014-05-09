@@ -26,6 +26,7 @@ defmodule Mix.Tasks.Release do
 
   @_RELXCONF    "relx.config"
   @_BOOT_FILE   "boot"
+  @_NODETOOL    "nodetool"
   @_SYSCONFIG   "sys.config"
   @_RELEASE_DEF "release_definition.txt"
   @_RELEASES    "{{{RELEASES}}}"
@@ -61,6 +62,7 @@ defmodule Mix.Tasks.Release do
     |> generate_sys_config
     |> generate_boot_script
     |> do_release
+    |> generate_nodetool
 
     info "Your release is ready!"
   end
@@ -171,7 +173,19 @@ defmodule Mix.Tasks.Release do
     File.write!(dest, contents)
     # Make executable
     dest |> chmod("+x")
-    # Return the project config after we're done
+    # Continue..
+    config
+  end
+
+  defp generate_nodetool(%Config{name: name} = config) do
+    nodetool = rel_file_source_path @_NODETOOL
+    dest     = rel_dest_path [name, "bin", @_NODETOOL]
+    debug "Generating nodetool..."
+    # Copy
+    File.cp!(nodetool, dest)
+    # Make executable
+    dest |> chmod("+x")
+    # Continue..
     config
   end
 

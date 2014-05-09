@@ -186,6 +186,26 @@ case "$1" in
         fi
         ;;
 
+    rpc)
+        ## Execute a command in MFA format on the remote node
+        if [ -z "$3" ]; then
+            echo "RPC requires module, function, and a string of the arguments to be evaluated."
+            echo "The argument string must evaluate to a valid Erlang term."
+            echo "Examples: rpc calendar valid_date \"{2013,3,12}.\""
+            echo "          rpc erlang now"
+            exit 1
+        fi
+        if [ -z "$4" ]; then
+            $NODETOOL rpcterms $2 $3
+        else
+            $NODETOOL rpcterms $2 $3 $4
+        fi
+        ES=$?
+        if [ "$ES" -ne 0 ]; then
+            exit $ES
+        fi
+        ;;
+
     attach)
         # Make sure a node IS running
         RES=`$NODETOOL ping`
@@ -290,7 +310,7 @@ case "$1" in
         exec $CMD -- ${1+"$@"}
         ;;
     *)
-        echo "Usage: $REL_NAME {start|start_boot <file>|foreground|stop|restart|reboot|ping|console|console_clean|console_boot <file>|attach|remote_console|upgrade}"
+        echo "Usage: $REL_NAME {start|start_boot <file>|foreground|stop|restart|reboot|ping|rpc <m> <f> [<a>]|console|console_clean|console_boot <file>|attach|remote_console|upgrade}"
         exit 1
         ;;
 esac
