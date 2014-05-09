@@ -111,16 +111,49 @@ defmodule Mix.Tasks.Release do
     config
   end
 
-  defp generate_sys_config(%Config{name: name, version: version} = config) do
-    sysconfig = rel_file_source_path @_SYSCONFIG
-    dest      = rel_file_dest_path   @_SYSCONFIG
+  defp generate_sys_config(config) do
+    default_sysconfig = rel_file_source_path @_SYSCONFIG
+    user_sysconfig    = rel_dest_path @_SYSCONFIG
+    dest              = rel_file_dest_path   @_SYSCONFIG
+
     debug "Generating sys.config..."
-    # Copy default sys.config only if user hasn't provided their own
-    File.mkdir_p!(dest |> Path.dirname)
-    case dest |> File.exists? do
-      true -> :ok
-      _    -> File.cp!(sysconfig, dest)
+    # Read in current project config
+    project_conf = Mix.Tasks.Loadconfig.load
+    # Merge project config with either the user-provided config, or the default sys.config we provide.
+    # If a sys.config is provided by the user, it will take precedence over project config. If the
+    # default sys.config is used, the project config will take precedence instead.
+    merged = case user_sysconfig |> File.exists? do
+      true -> 
+        # User-provided
+        case user_sysconfig |> List.from_char_data! |> :file.consult do
+          {:ok, []}                                  -> project_conf
+          {:ok, [user_conf]} when is_list(user_conf) -> Mix.Config.merge(project_conf, user_conf)
+          {:ok, [user_conf]}                         -> Mix.Config.merge(project_conf, [user_conf])
+          {:error, {line, type, msg}} ->
+            error "Unable to parse sys.config: Line #{line}, #{type} - #{msg}"
+            exit(:normal)
+          {:error, reason} ->
+            error "Unable to access sys.config #{reason}"
+            exit(:normal)
+        end
+      _ ->
+        # Default
+        case default_sysconfig |> List.from_char_data! |> :file.consult do
+          {:ok, [default_conf]} ->
+            Mix.Config.merge(default_conf, project_conf)
+          {:error, {line, type, msg}} ->
+            error "Unable to parse default sys.config: Line #{line}, #{type} - #{msg}"
+            exit(:normal)
+          {:error, reason} ->
+            error "Unable to access default sys.config #{reason}"
+            exit(:normal)
+        end
     end
+    # Ensure parent directory exists prior to writing
+    File.mkdir_p!(dest |> Path.dirname)
+    # Write the config to disk
+    dest |> write_term(merged)
+    # Continue..
     config
   end
 
