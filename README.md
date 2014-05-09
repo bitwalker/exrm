@@ -60,6 +60,40 @@ iex(2)>
 
 See the next few sections for information on how to deploy, run, upgrade/downgrade, and remotely connect to your release!
 
+## Release Configuration
+
+Elixir has support for providing configuration using Elixir terms in a
+`config/config.exs` file. In addition to this, exrm has support for
+providing your own sys.config file in `rel/sys.config`. Support has been
+added which will merge your provided sys.config over the config loaded
+from `config/config.exs`. If you provide one but not the other, the
+resulting configuration will simply be whichever one you provided. If
+you do not provide your own `rel/sys.config`, your project configuration
+will be merged over the top of the default one, which simply configures
+`sasl` to only log errors.
+
+An example of `config/config.exs`:
+
+```elixir
+[test: [foo: "bar", baz: :qux]]
+```
+
+The equivalent config in `rel/sys.config` would be:
+
+```erlang
+[{test, [{foo, <<"bar">>}, {baz, qux}]}].
+```
+
+Note: `config/config.exs` is considered the default configuration for your
+app. Use `rel/sys.config` to provide deployment specific configuration.
+You also have the option of doing all your configuration in
+`config/config.exs`, and then modifying the `sys.config` file packaged
+with the release. On the server, this will be located in `<deploy
+root>/releases/<version>/sys.config`. Some improvements in this area
+will be coming before long, so if you find the current configuration too
+brittle for your use, I would love to know what would make your life
+easier!
+
 ## Deployment
 
 Now that you've generated your first release, it's time to deploy it! Let's walk through a simulated deployment to the `/tmp` directory on your machine, using the example app from the Appendix.
