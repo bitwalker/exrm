@@ -118,6 +118,20 @@ Ok, you should be staring at a standard `iex` prompt, but slightly different: `i
 
 At this point, you can't just abort from the prompt like usual and make the node shut down. This would be an obviously bad thing in a production environment. Instead, you can issue `:init.stop` from the `iex` prompt, and this will shut down the node. You will still be connected to the shell, but once you quit the shell, the node is gone.
 
+If you want to execute a command against your running node without
+attaching a shell:
+
+`bin/test rpc erlang now`
+
+or
+
+`bin/test rpc calendar valid_date "{2014,3,14}."`
+
+Notice that the arguments required are in module, function, argument
+format. The argument parameter will be evaluated as an Erlang term,
+and applied to the module/function. Multiple args should be formatted as
+a list, i.e. `[arg1, arg2, arg3].`.
+
 ## Upgrading Releases
 
 So you've made some changes to your app, and you want to generate a new relase and perform a no-downtime upgrade. I'm here to tell you that this is going to be a breeze, so I hope you're ready (I'm using my test app as an example here again):
