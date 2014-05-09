@@ -15,8 +15,8 @@ defmodule Mix.Tasks.Release.Clean do
   use     Mix.Task
   import  ReleaseManager.Utils
 
-  @_RELXCONF "relx.config"
-  @_RUNNER   "runner"
+  @_RELXCONF  "relx.config"
+  @_BOOT_FILE "boot"
 
   def run(args) do
     debug "Removing release files..."
@@ -38,11 +38,11 @@ defmodule Mix.Tasks.Release.Clean do
     project  = Mix.project |> Keyword.get(:app) |> atom_to_binary
     version  = Mix.project |> Keyword.get(:version)
     build    = Path.join([cwd, "_build", "prod"])
-    release  = Path.join([cwd, "rel", project, "releases", version])
-    releases = Path.join([cwd, "rel", project, "releases", "RELEASES"])
-    package  = Path.join([cwd, "rel", project, "#{project}-#{version}.tar.gz"])
-    lib      = Path.join([cwd, "rel", project, "lib", "#{project}-#{version}"])
-    relup    = Path.join([cwd, "rel", project, "relup"])
+    release  = rel_dest_path [project, "releases", version]
+    releases = rel_dest_path [project, "releases", "RELEASES"]
+    package  = rel_dest_path [project, "#{project}-#{version}.tar.gz"]
+    lib      = rel_dest_path [project, "lib", "#{project}-#{version}"]
+    relup    = rel_dest_path [project, "relup"]
 
     if File.exists?(release),  do: File.rm_rf!(release)
     if File.exists?(releases), do: File.rm_rf!(releases)
@@ -58,19 +58,16 @@ defmodule Mix.Tasks.Release.Clean do
   end
   # Clean up the template files for release generation
   def do_cleanup(:relfiles) do
-    relfiles = File.cwd! |> Path.join("rel") |> Path.join("files")
-    if File.exists?(relfiles), do: File.rm_rf!(relfiles)
+    rel_files = rel_file_dest_path
+    if File.exists?(rel_files), do: File.rm_rf!(rel_files)
   end
   # Clean up everything
   def do_cleanup(:all) do
     # Execute other clean tasks
     do_cleanup :build
 
-    # Remove generated tools
-    relx = Path.join(File.cwd!, "relx")
-    if File.exists?(relx), do: relx |> File.rm_rf!
     # Remove release folder
-    rel = File.cwd! |> Path.join("rel")
+    rel = rel_dest_path
     if File.exists?(rel), do: File.rm_rf!(rel)
   end
 

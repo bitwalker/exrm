@@ -86,11 +86,12 @@ defmodule ReleaseManager.Utils do
       _        -> 2 # Normal if we get an odd value
     end
     # Let relx do the heavy lifting
+    relx_path = Path.join([priv_path, "bin", "relx"])
     command = case upgrade? do
-      false -> "./relx release tar -V #{v} --config #{config} --relname #{name} --relvsn #{ver} --output-dir #{output_dir} #{dev_mode?}"
+      false -> "#{relx_path} release tar -V #{v} --root #{File.cwd!} --config #{config} --relname #{name} --relvsn #{ver} --output-dir #{output_dir} #{dev_mode?}"
       true  ->
         last_release = get_last_release(name)
-        "./relx release relup tar -V #{v} --config #{config} --relname #{name} --relvsn #{ver} --output-dir #{output_dir} --upfrom \"#{last_release}\" #{dev_mode?}"
+        "#{relx_path} release relup tar -V #{v} --root #{File.cwd!} --config #{config} --relname #{name} --relvsn #{ver} --output-dir #{output_dir} --upfrom \"#{last_release}\" #{dev_mode?}"
     end
     case do_cmd command do
       :ok         -> :ok
@@ -156,6 +157,45 @@ defmodule ReleaseManager.Utils do
   def write_term(path, term) do
     :file.write_file('#{path}', :io_lib.fwrite('~p.\n', [term]))
   end
+
+  @doc "Get the priv path of the exrm dependency"
+  def priv_path, do: Path.join([__DIR__, "..", "..", "priv"]) |> Path.expand
+  @doc "Get the priv/rel path of the exrm dependency"
+  def rel_source_path,       do: Path.join(priv_path, "rel")
+  @doc "Get the path to a file located in priv/rel of the exrm dependency"
+  def rel_source_path(file), do: Path.join(rel_source_path, file)
+  @doc "Get the priv/rel/files path of the exrm dependency"
+  def rel_file_source_path,       do: Path.join([priv_path, "rel", "files"])
+  @doc "Get the path to a file located in priv/rel/files of the exrm dependency"
+  def rel_file_source_path(file), do: Path.join(rel_file_source_path, file)
+  @doc """
+  Get the path to a file located in the rel directory of the current project.
+  You can pass either a file name, or a list of directories to a file, like:
+
+    iex> ReleaseManager.Utils.rel_dest_path "relx.config"
+    "path/to/project/rel/relx.config"
+    iex> ReleaseManager.Utils.rel_dest_path ["<project>", "lib", "<project>.appup"]
+    "path/to/project/rel/<project>/lib/<project>.appup"
+
+  """
+  def rel_dest_path(files) when is_list(files), do: Path.join([rel_dest_path] ++ files)
+  def rel_dest_path(file),                      do: Path.join(rel_dest_path, file)
+  @doc "Get the rel path of the current project."
+  def rel_dest_path,                            do: Path.join(File.cwd!, "rel")
+  @doc """
+  Get the path to a file located in the rel/files directory of the current project.
+  You can pass either a file name, or a list of directories to a file, like:
+
+    iex> ReleaseManager.Utils.rel_file_dest_path "sys.config"
+    "path/to/project/rel/files/sys.config"
+    iex> ReleaseManager.Utils.rel_dest_path ["some", "path", "file.txt"]
+    "path/to/project/rel/files/some/path/file.txt"
+
+  """
+  def rel_file_dest_path(files) when is_list(files), do: Path.join([rel_file_dest_path] ++ files)
+  def rel_file_dest_path(file),                      do: Path.join(rel_file_dest_path, file)
+  @doc "Get the rel/files path of the current project."
+  def rel_file_dest_path,                            do: Path.join([File.cwd!, "rel", "files"])
 
   # Ignore a message when used as the callback for Mix.Shell.cmd
   defp ignore(_), do: nil

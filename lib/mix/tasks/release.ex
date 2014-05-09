@@ -25,7 +25,7 @@ defmodule Mix.Tasks.Release do
   import ReleaseManager.Utils
 
   @_RELXCONF    "relx.config"
-  @_RUNNER      "runner"
+  @_BOOT_FILE   "boot"
   @_SYSCONFIG   "sys.config"
   @_RELEASE_DEF "release_definition.txt"
   @_RELEASES    "{{{RELEASES}}}"
@@ -35,6 +35,18 @@ defmodule Mix.Tasks.Release do
   @_ERL_OPTS    "{{{ERL_OPTS}}}"
   @_ELIXIR_PATH "{{{ELIXIR_PATH}}}"
 
+  defmodule Config do
+    @moduledoc """
+    Configuration for the release task
+    """
+    defstruct name:      "",
+              version:   "",
+              dev:       false,
+              erl:       "",
+              upgrade?:  false,
+              verbosity: :quiet
+  end
+
   def run(args) do
     # Ensure this isn't an umbrella project
     if Mix.Project.umbrella? do
@@ -43,75 +55,39 @@ defmodule Mix.Tasks.Release do
     # Start with a clean slate
     Mix.Tasks.Release.Clean.do_cleanup(:build)
     # Collect release configuration
-    config = [ priv_path:  Path.join([__DIR__, "..", "..", "..", "priv"]) |> Path.expand,
-               name:       Mix.project |> Keyword.get(:app) |> atom_to_binary,
-               version:    Mix.project |> Keyword.get(:version),
-               dev:        false,
-               erl:        "",
-               upgrade?:   false,
-               verbosity:  :quiet]
-    config
-    |> Keyword.merge(args |> parse_args)
-    |> prepare_relx
+    parse_args(args)
     |> build_project
     |> generate_relx_config
-    |> generate_runner
+    |> generate_sys_config
+    |> generate_boot_script
     |> do_release
 
     info "Your release is ready!"
   end
 
-  defp prepare_relx(config) do
-    # Ensure relx has been downloaded
-    verbosity = config |> Keyword.get(:verbosity)
-    priv = config |> Keyword.get(:priv_path)
-    relx = Path.join([priv, "bin", "relx"])
-    dest = Path.join(File.cwd!, "relx")
-    case File.copy(relx, dest) do
-      {:ok, _} ->
-        dest |> chmod("+x")
-        # Continue...
-        config
-      {:error, reason} ->
-        if verbosity == :verbose do
-          error reason
-        end
-        error "Unable to copy relx to your project's directory!"
-        exit(:normal)
-    end
-  end
-
-  defp build_project(config) do
+  defp build_project(%Config{verbosity: verbosity} = config) do
     # Fetch deps, and compile, using the prepared Elixir binaries
-    verbosity = config |> Keyword.get(:verbosity)
     cond do
       verbosity == :verbose ->
         mix "deps.get",     :prod, :verbose
-        mix "deps.compile", :prod, :verbose
         mix "compile",      :prod, :verbose
       true ->
         mix "deps.get",     :prod
-        mix "deps.compile", :prod
         mix "compile",      :prod
     end
     # Continue...
     config
   end
 
-  defp generate_relx_config(config) do
-    # Get configuration
-    priv     = config |> Keyword.get(:priv_path)
-    name     = config |> Keyword.get(:name)
-    version  = config |> Keyword.get(:version)
+  defp generate_relx_config(%Config{name: name, version: version} = config) do
     # Get paths
-    deffile  = Path.join([priv, "rel", "files", @_RELEASE_DEF])
-    source   = Path.join([priv, "rel", @_RELXCONF])
-    base     = Path.join(File.cwd!, "rel")
-    dest     = Path.join(base, @_RELXCONF)
+    rel_def  = rel_file_source_path @_RELEASE_DEF
+    source   = rel_source_path @_RELXCONF
+    dest     = rel_dest_path @_RELXCONF
     # Get relx.config template contents
     relx_config = source |> File.read!
     # Get release definition template contents
-    tmpl = deffile |> File.read!
+    tmpl = rel_def |> File.read!
     # Generate release configuration for historical releases
     releases = get_releases(name)
       |> Enum.map(fn {rname, rver} -> tmpl |> replace_release_info(rname, rver) end)
@@ -119,7 +95,7 @@ defmodule Mix.Tasks.Release do
     # Set upgrade flag if this is an upgrade release
     config = case releases do
       "" -> config
-      _  -> config |> Keyword.merge [upgrade?: true]
+      _  -> %{config | :upgrade? => true}
     end
     # Write release configuration
     relx_config = relx_config
@@ -128,50 +104,46 @@ defmodule Mix.Tasks.Release do
     # Replace placeholders for current release
     relx_config = relx_config |> replace_release_info(name, version)
     # Ensure destination base path exists
-    File.mkdir_p!(base)
+    dest |> Path.dirname |> File.mkdir_p!
     # Write relx.config
     File.write!(dest, relx_config)
     # Return the project config after we're done
     config
   end
 
-  defp generate_runner(config) do
-    priv      = config |> Keyword.get(:priv_path)
-    name      = config |> Keyword.get(:name)
-    version   = config |> Keyword.get(:version)
-    erts      = :erlang.system_info(:version) |> iodata_to_binary
-    erl_opts  = config |> Keyword.get(:erl)
-    runner    = Path.join([priv, "rel", "files", @_RUNNER])
-    sysconfig = Path.join([priv, "rel", "files", @_SYSCONFIG])
-    base      = Path.join([File.cwd!, "rel", "files"])
-    dest      = Path.join(base, @_RUNNER)
+  defp generate_sys_config(%Config{name: name, version: version} = config) do
+    sysconfig = rel_file_source_path @_SYSCONFIG
+    dest      = rel_file_dest_path   @_SYSCONFIG
+    debug "Generating sys.config..."
+    # Copy default sys.config only if user hasn't provided their own
+    File.mkdir_p!(dest |> Path.dirname)
+    case dest |> File.exists? do
+      true -> :ok
+      _    -> File.cp!(sysconfig, dest)
+    end
+    config
+  end
+
+  defp generate_boot_script(%Config{name: name, version: version, erl: erl_opts} = config) do
+    erts = :erlang.system_info(:version) |> iodata_to_binary
+    boot = rel_file_source_path @_BOOT_FILE
+    dest = rel_file_dest_path   @_BOOT_FILE
     # Ensure destination base path exists
-    File.mkdir_p!(base)
     debug "Generating boot script..."
-    contents = File.read!(runner)
+    contents = File.read!(boot)
       |> String.replace(@_NAME, name)
       |> String.replace(@_VERSION, version)
       |> String.replace(@_ERTS_VSN, erts)
       |> String.replace(@_ERL_OPTS, erl_opts)
     File.write!(dest, contents)
-    # Copy default sys.config only if user hasn't provided their own
-    case Path.join(base, @_SYSCONFIG) |> File.exists? do
-      true -> :ok
-      _    -> File.cp!(sysconfig, Path.join(base, @_SYSCONFIG))
-    end
     # Make executable
     dest |> chmod("+x")
     # Return the project config after we're done
     config
   end
 
-  defp do_release(config) do
+  defp do_release(%Config{name: name, version: version, verbosity: verbosity, upgrade?: upgrade?, dev: dev_mode?} = config) do
     debug "Generating release..."
-    name      = config |> Keyword.get(:name)
-    version   = config |> Keyword.get(:version)
-    verbosity = config |> Keyword.get(:verbosity)
-    upgrade?  = config |> Keyword.get(:upgrade?)
-    dev_mode? = config |> Keyword.get(:dev)
     # If this is an upgrade release, generate an appup
     if upgrade? do
       # Change mix env for appup generation
@@ -179,9 +151,9 @@ defmodule Mix.Tasks.Release do
         # Generate appup
         app      = name |> binary_to_atom
         v1       = get_last_release(name)
-        v1_path  = Path.join([File.cwd!, "rel", name, "lib", "#{name}-#{v1}"])
+        v1_path  = rel_dest_path [name, "lib", "#{name}-#{v1}"]
         v2_path  = Mix.Project.config |> Mix.Project.compile_path |> String.replace("/ebin", "")
-        own_path = Path.join([File.cwd!, "rel", "#{name}.appup"])
+        own_path = rel_dest_path "#{name}.appup"
         # Look for user's own .appup file before generating one
         case own_path |> File.exists? do
           true ->
@@ -220,10 +192,19 @@ defmodule Mix.Tasks.Release do
 
   defp parse_args(argv) do
     {args, _, _} = OptionParser.parse(argv)
-    args |> Enum.map(&parse_arg/1)
+    defaults = %Config{
+      name:    Mix.project |> Keyword.get(:app) |> atom_to_binary,
+      version: Mix.project |> Keyword.get(:version),
+    }
+    Enum.reduce args, defaults, fn arg, config ->
+      case arg do
+        {:verbosity, verbosity} ->
+          %{config | :verbosity => binary_to_atom(verbosity)}
+        {key, value} ->
+          Map.put(config, key, value)
+      end
+    end
   end
-  defp parse_arg({:verbosity, verbosity}), do: {:verbosity, binary_to_atom(verbosity)}
-  defp parse_arg({_key, _value} = arg),    do: arg
 
   defp replace_release_info(template, name, version) do
     template
