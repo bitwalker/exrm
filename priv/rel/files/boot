@@ -90,6 +90,19 @@ export EMU=beam
 export PROGNAME=erl
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ERTS_DIR/lib
 
+
+generate_config() {
+    local conf_file="$REL_DIR/$REL_NAME.conf"
+    local schema_file="$REL_DIR/$REL_NAME.schema.exs"
+    local sys_config="$REL_DIR/sys.config"
+    result=`$ROOTDIR/bin/conform --conf $conf_file --schema $schema_file --config $sys_config --output-dir $REL_DIR`
+    exit_status=$?
+    echo $result
+    if [ "$exit_status" -ne 0 ]; then
+        exit $exit_status
+    fi
+}
+
 cd $ROOTDIR
 
 # Setup Elixir remote shell command to control node
@@ -104,7 +117,8 @@ NODETOOL="$BINDIR/escript $ROOTDIR/bin/nodetool $NAME_ARG $COOKIE_ARG"
 # Check the first argument for instructions
 case "$1" in
     start|start_boot)
-
+        # Make sure the config is generated first
+        generate_config
         # Make sure there is not already a node running
         #RES=`$NODETOOL ping`
         #if [ "$RES" = "pong" ]; then
@@ -160,6 +174,8 @@ case "$1" in
         ;;
 
     restart)
+        # Make sure the config is generated first
+        generate_config
         ## Restart the VM without exiting the process
         $NODETOOL restart
         ES=$?
@@ -169,6 +185,8 @@ case "$1" in
         ;;
 
     reboot)
+        # Make sure the config is generated first
+        generate_config
         ## Restart the VM completely (uses heart to restart it)
         $NODETOOL reboot
         ES=$?
@@ -233,6 +251,8 @@ case "$1" in
         ;;
 
     upgrade|downgrade|install)
+        # Make sure the config is generated first
+        generate_config
         if [ -z "$2" ]; then
             echo "Missing package argument"
             echo "Usage: $REL_NAME $1 {package base name}"
@@ -255,6 +275,8 @@ case "$1" in
         ;;
 
     console|console_clean|console_boot)
+        # Make sure the config is generated first
+        generate_config
         # .boot file typically just $REL_NAME (ie, the app name)
         # however, for debugging, sometimes start_clean.boot is useful.
         # For e.g. 'setup', one may even want to name another boot script.
@@ -289,6 +311,8 @@ case "$1" in
         ;;
 
     foreground)
+        # Make sure the config is generated first
+        generate_config
         # start up the release in the foreground for use by runit
         # or other supervision services
 
