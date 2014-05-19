@@ -35,8 +35,8 @@ defmodule Mix.Tasks.Release.Clean do
   # Clean release build
   def do_cleanup(:build) do
     cwd      = File.cwd!
-    project  = Mix.project |> Keyword.get(:app) |> atom_to_binary
-    version  = Mix.project |> Keyword.get(:version)
+    project  = Mix.Project.config |> Keyword.get(:app) |> atom_to_binary
+    version  = Mix.Project.config |> Keyword.get(:version)
     build    = Path.join([cwd, "_build", "prod"])
     release  = rel_dest_path [project, "releases", version]
     releases = rel_dest_path [project, "releases", "RELEASES"]

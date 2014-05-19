@@ -240,8 +240,8 @@ defmodule Mix.Tasks.Release do
   defp parse_args(argv) do
     {args, _, _} = OptionParser.parse(argv)
     defaults = %Config{
-      name:    Mix.project |> Keyword.get(:app) |> atom_to_binary,
-      version: Mix.project |> Keyword.get(:version),
+      name:    Mix.Project.config |> Keyword.get(:app) |> atom_to_binary,
+      version: Mix.Project.config |> Keyword.get(:version),
     }
     Enum.reduce args, defaults, fn arg, config ->
       case arg do
