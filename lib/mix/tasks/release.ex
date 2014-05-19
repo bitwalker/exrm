@@ -50,6 +50,7 @@ defmodule Mix.Tasks.Release do
     |> generate_relx_config
     |> generate_sys_config
     |> generate_boot_script
+    |> execute_plugins
     |> do_release
     |> generate_nodetool
 
@@ -166,16 +167,15 @@ defmodule Mix.Tasks.Release do
     config
   end
 
-  defp generate_nodetool(%Config{name: name} = config) do
-    nodetool = rel_file_source_path @_NODETOOL
-    dest     = rel_dest_path [name, "bin", @_NODETOOL]
-    debug "Generating nodetool..."
-    # Copy
-    File.cp!(nodetool, dest)
-    # Make executable
-    dest |> chmod("+x")
-    # Continue..
-    config
+  defp execute_plugins(%Config{} = config) do
+    plugins = ReleaseManager.Plugin.load_all
+    Enum.reduce plugins, config, fn plugin, conf ->
+      # Handle the case where a child plugin does not return the configuration
+      case plugin.run(conf) do
+        %Config{} = result -> result
+        _                  -> conf
+      end
+    end
   end
 
   defp do_release(%Config{name: name, version: version, verbosity: verbosity, upgrade?: upgrade?, dev: dev_mode?} = config) do
@@ -224,6 +224,18 @@ defmodule Mix.Tasks.Release do
         error message
         exit(:normal)
     end
+  end
+
+  defp generate_nodetool(%Config{name: name} = config) do
+    nodetool = rel_file_source_path @_NODETOOL
+    dest     = rel_dest_path [name, "bin", @_NODETOOL]
+    debug "Generating nodetool..."
+    # Copy
+    File.cp!(nodetool, dest)
+    # Make executable
+    dest |> chmod("+x")
+    # Continue..
+    config
   end
 
   defp parse_args(argv) do
