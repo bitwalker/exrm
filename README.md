@@ -27,13 +27,13 @@ you for confirmation before proceeding with the cleanup.
 
 ## Getting Started
 
-This project's goal is to make releases with Elixir projects a breeze. It is composed of a mix task, and all build files required to successfully take your Elixir project and perform a release build. All you have to do to get started is the following:
+This project's goal is to make releases with Elixir projects a breeze. It is composed of a mix task, and build files required to successfully take your Elixir project and perform a release build, and a [simplified configuration mechanism](https://github.com/bitwalker/conform) which integrates with your current configuration and makes it easy for your operations group to configure the release once deployed. All you have to do to get started is the following:
 
 #### Add exrm as a dependency to your project
 
 ```elixir
   defp deps do
-    [{:exrm, "~> 0.5.0"}]
+    [{:exrm, "~> 0.6.5"}]
   end
 ```
 
@@ -45,6 +45,16 @@ This project's goal is to make releases with Elixir projects a breeze. It is com
 #### Perform a release
 
 - `mix release`
+
+### Configuration
+
+I'm going to go in to more detail on how configuration works later on,
+for now just know that when you run `mix release` for the first time,
+exrm will warn you that it couldn't find a `yourapp.conf` and
+`yourapp.schema.exs` file, and generates them for you based on your
+current configuration which is defined in `config/config.exs`. The
+`.conf` is where you will configure your app, and the `.schema.exs` is
+where you define the configuration available in the `.conf`.
 
 #### Run your app! (my example is based on a simple ping server, see the appendix for more info)
 
@@ -63,36 +73,52 @@ See the next few sections for information on how to deploy, run, upgrade/downgra
 ## Release Configuration
 
 Elixir has support for providing configuration using Elixir terms in a
-`config/config.exs` file. In addition to this, exrm has support for
-providing your own sys.config file in `rel/sys.config`. Support has been
-added which will merge your provided sys.config over the config loaded
-from `config/config.exs`. If you provide one but not the other, the
-resulting configuration will simply be whichever one you provided. If
-you do not provide your own `rel/sys.config`, your project configuration
-will be merged over the top of the default one, which simply configures
-`sasl` to only log errors.
+`config/config.exs` file. While this is perfectly usable, it's not very
+simple for your operations group to work with, and generally contains no
+useful documentation on what each setting is for or what they do. To
+help make configuration much more easy and maintainable, exrm bundles a
+dependency called [conform](https://github.com/bitwalker/conform).
 
-An example of `config/config.exs`:
+Conform relies primarily on two files: a `yourapp.schema.exs` file, and
+a `yourapp.conf` file. The .conf file is where you will configure your
+app, and the .schema.exs file is where you define what configuration is
+available in the .conf, and how it is translated to the final
+`sys.config` that your release loads up at runtime.
 
-```elixir
-[test: [foo: "bar", baz: :qux]]
-```
+Conform itself has the best documentation on how to work with these files,
+and to see an example app which makes use of this, check out the
+[exrm-test project](https://github.com/bitwalker/exrm-test).
 
-The equivalent config in `rel/sys.config` would be:
+Here's a quick rundown on how it works. You probably already have a `config.exs` file, and if
+you don't that's fine, it's not required. If you do have one already,
+you can compile your project and run `mix conform.new` to generate the
+conform schema from your current configuration. If you don't have one,
+check out the conform README on how to create one. Once you have the
+schema file in your `config` directory, you can work off the
+definitions generated from your current config, and/or start adding
+definitions for config settings you wish to add.
 
-```erlang
-[{test, [{foo, <<"bar">>}, {baz, qux}]}].
-```
+Once your schema is all set, you can generate the default .conf file for
+your app using `mix conform.configure`. This will output a .conf file to
+`config/yourapp.conf`. This will be bundled with your release, and
+located in `$DEPLOY_DIR/releases/$RELEASE_VER/myapp.conf`. Your ops
+group can then do all their configuration in production via that file.
 
-Note: `config/config.exs` is considered the default configuration for your
-app. Use `rel/sys.config` to provide deployment specific configuration.
-You also have the option of doing all your configuration in
-`config/config.exs`, and then modifying the `sys.config` file packaged
-with the release. On the server, this will be located in `<deploy
-root>/releases/<version>/sys.config`. Some improvements in this area
-will be coming before long, so if you find the current configuration too
-brittle for your use, I would love to know what would make your life
-easier!
+If you are wondering how that .conf file is usable by the VM, it's very
+simple. When you run `bin/test start`, or any other command which boots
+your app, a conform escript is run which translates the .conf via the
+schema (also bundled with the release) to Elixir terms, that is then
+merged over the top of the sys.config which is also bundled with the
+release, and then saved over the top of the existing sys.config. Once
+the escript has finished executing, your app is booted using that
+sys.config file, and everything carries on like normal.
+
+NOTE: Your `config/config.exs` file is still converted to the
+`sys.config` which is bundled with the release. If you wish to hide
+settings from your end users, put them in there, and remove the
+definitions for them from your schema file. The `sys.config` is merged
+with the configuration which is defined in the .conf, so your settings
+will still be applied, they just won't be exposed for end users.
 
 ## Deployment
 
