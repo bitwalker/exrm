@@ -92,11 +92,11 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ERTS_DIR/lib
 
 cd $ROOTDIR
 
-# Setup Erlang remote shell command to control node
-#REMSH="$BINDIR/erlexec $REMSH_NAME_ARG $REMSH_REMSH_ARG $COOKIE_ARG -user Elixir.IEx.CLI -extra --no-halt +iex"
 # Setup Elixir remote shell command to control node
 IEX_COOKIE=`echo "$COOKIE_ARG" | sed 's/-setcookie //g'`
-REMSH="iex -$REMSH_NAME_ARG --cookie $IEX_COOKIE --remsh $REMSH_NAME"
+REMSH="$BINDIR/erl -pa $ROOTDIR/lib/*/ebin -noshell -boot start_clean \
+    -user Elixir.IEx.CLI $REMSH_NAME_ARG $COOKIE_ARG \
+    -extra --no-halt +iex -$REMSH_NAME_ARG --cookie $IEX_COOKIE --remsh $REMSH_NAME"
 
 # Setup command to control the node
 NODETOOL="$BINDIR/escript $ROOTDIR/bin/nodetool $NAME_ARG $COOKIE_ARG"
