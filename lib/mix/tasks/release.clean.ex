@@ -28,7 +28,7 @@ defmodule Mix.Tasks.Release.Clean do
         end
       true ->
         do_cleanup :build
-        info "The release for #{Mix.project |> Keyword.get(:version)} has been removed."
+        info "The release for #{Mix.Project.config |> Keyword.get(:version)} has been removed."
     end
   end
 
