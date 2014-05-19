@@ -23,6 +23,7 @@ defmodule Mix.Tasks.Release do
 
   use    Mix.Task
   import ReleaseManager.Utils
+  alias  ReleaseManager.Config
 
   @_RELXCONF    "relx.config"
   @_BOOT_FILE   "boot"
@@ -35,18 +36,6 @@ defmodule Mix.Tasks.Release do
   @_ERTS_VSN    "{{{ERTS_VERSION}}}"
   @_ERL_OPTS    "{{{ERL_OPTS}}}"
   @_ELIXIR_PATH "{{{ELIXIR_PATH}}}"
-
-  defmodule Config do
-    @moduledoc """
-    Configuration for the release task
-    """
-    defstruct name:      "",
-              version:   "",
-              dev:       false,
-              erl:       "",
-              upgrade?:  false,
-              verbosity: :quiet
-  end
 
   def run(args) do
     # Ensure this isn't an umbrella project
