@@ -60,12 +60,12 @@ where you define the configuration available in the `.conf`.
 
 ```
 > rel/test/bin/test console
-Erlang/OTP 17 [RELEASE CANDIDATE 1] [erts-6.0] [source-fdcdaca] [64-bit] [smp:4:4] [async-threads:10] [hipe] [kernel-poll:false]
+Erlang/OTP 17 [erts-6.0] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:10] [hipe] [kernel-poll:false] [dtrace]
 
-Interactive Elixir (0.12.5) - press Ctrl+C to exit (type h() ENTER for help)
-iex(1)> :gen_server.call(:test, :ping)
+Interactive Elixir (0.13.2) - press Ctrl+C to exit (type h() ENTER for help)
+iex(test@127.0.0.1)1> :gen_server.call(:test, :ping)
 :v1
-iex(2)>
+iex(test@127.0.0.1)2>
 ```
 
 See the next few sections for information on how to deploy, run, upgrade/downgrade, and remotely connect to your release!
@@ -219,7 +219,7 @@ Then put the following in `lib/test/server.ex`
 
 ```elixir
 defmodule Test.Server do
-  use GenServer.Behaviour
+  use GenServer
 
   def start_link() do
     :gen_server.start_link({:local, :test}, __MODULE__, [], [])
