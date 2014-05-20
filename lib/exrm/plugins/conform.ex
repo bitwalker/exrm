@@ -10,6 +10,9 @@ defmodule ReleaseManager.Plugin.Conform do
     schema_path = Path.join([File.cwd!, "config", "#{app}.schema.exs"])
     conf_path   = Path.join([File.cwd!, "config", "#{app}.conf"])
 
+    # Ensure config directory exists
+    Path.join(File.cwd!, "config") |> File.mkdir_p!
+
     debug "Conform: Checking for #{app}.schema.exs..."
     # If schema is not found, generate one
     unless File.exists?(schema_path) do
