@@ -63,7 +63,7 @@ defmodule ReleaseManager.Plugin do
 
   defp match_plugins(filename, modules) do
     if :re.run(filename, @re_pattern, [capture: :none]) == :match do
-      mod = :filename.rootname(filename, '.beam') |> List.to_atom
+      mod = :filename.rootname(filename, '.beam') |> list_to_atom
       if Code.ensure_loaded?(mod), do: [mod | modules], else: modules
     else
       modules
