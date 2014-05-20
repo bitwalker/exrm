@@ -1,5 +1,8 @@
 # Elixir Release Manager
 
+[![Build
+Status](https://travis-ci.org/bitwalker/exrm.svg?branch=master)](https://travis-ci.org/bitwalker/exrm)
+
 Thanks to @tylerflint for the original Makefile, rel.config, and runner script which inspired this project!
 
 ## Usage
