@@ -66,7 +66,7 @@ defmodule ReleaseManager.Utils do
   def relx(name, version, verbosity, upgrade?, dev) do
     # Setup paths
     config     = @relx_config_path
-    output_dir = "#{@relx_output_path}/#{name}"
+    output_dir = @relx_output_path
     # Determine whether to pass --dev-mode or not
     dev_mode?  = case dev do 
       true  -> "--dev-mode"
