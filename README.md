@@ -33,7 +33,7 @@ This project's goal is to make releases with Elixir projects a breeze. It is com
 
 ```elixir
   defp deps do
-    [{:exrm, "~> 0.6.5"}]
+    [{:exrm, "~> 0.6.7"}]
   end
 ```
 
