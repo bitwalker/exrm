@@ -82,7 +82,7 @@ process_args([Arg | Rest], Acc, Opts) ->
 
 
 start_epmd() ->
-    [] = os:cmd(epmd_path() ++ " -daemon"),
+    [] = os:cmd("\"" ++ epmd_path() ++ "\" -daemon"),
     ok.
 
 epmd_path() ->
