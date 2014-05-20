@@ -31,14 +31,16 @@ defmodule ReleaseManager.Plugin do
   use Behaviour
 
   @doc """
-  A plugin needs to implement `run` which receives a %ReleaseManager.Config struct
+  A plugin needs to implement `before_release/1`, and `after_release/1` 
+  both of which receive a %ReleaseManager.Config struct
   """
-  defcallback run(ReleaseManager.Config.t) :: any
+  defcallback before_release(ReleaseManager.Config.t) :: any
+  defcallback after_release(ReleaseManager.Config.t) :: any
 
   @doc false
   defmacro __using__(_opts) do
     quote do
-      @behaviour Mix.Task
+      @behaviour ReleaseManager.Plugin
       alias  ReleaseManager.Config
       import ReleaseManager.Utils, only: [debug: 1, info: 1, warn: 1, notice: 1, error: 1]
     end

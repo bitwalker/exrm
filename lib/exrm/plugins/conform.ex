@@ -3,7 +3,7 @@ defmodule ReleaseManager.Plugin.Conform do
   alias ReleaseManager.Config
   alias ReleaseManager.Utils
 
-  def run(%Config{name: app, version: version}) do
+  def before_release(%Config{name: app, version: version}) do
     {:ok, relx_config} = Utils.rel_dest_path("relx.config")
       |> List.from_char_data!
       |> :file.consult
@@ -45,4 +45,6 @@ defmodule ReleaseManager.Plugin.Conform do
 
     info "Conform: Done!"
   end
+
+  def after_release(_), do: nil
 end

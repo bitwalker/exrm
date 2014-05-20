@@ -50,9 +50,10 @@ defmodule Mix.Tasks.Release do
     |> generate_relx_config
     |> generate_sys_config
     |> generate_boot_script
-    |> execute_plugins
+    |> execute_before_hooks
     |> do_release
     |> generate_nodetool
+    |> execute_after_hooks
 
     info "Your release is ready!"
   end
@@ -167,13 +168,36 @@ defmodule Mix.Tasks.Release do
     config
   end
 
-  defp execute_plugins(%Config{} = config) do
+  defp execute_before_hooks(%Config{} = config) do
     plugins = ReleaseManager.Plugin.load_all
     Enum.reduce plugins, config, fn plugin, conf ->
-      # Handle the case where a child plugin does not return the configuration
-      case plugin.run(conf) do
-        %Config{} = result -> result
-        _                  -> conf
+      try do
+        # Handle the case where a child plugin does not return the configuration
+        case plugin.before_release(conf) do
+          %Config{} = result -> result
+          _                  -> conf
+        end
+      rescue
+        _ ->
+          error "Failed to execute before_release hook for #{plugin}!"
+          conf
+      end
+    end
+  end
+
+  defp execute_after_hooks(%Config{} = config) do
+    plugins = ReleaseManager.Plugin.load_all
+    Enum.reduce plugins, config, fn plugin, conf ->
+      try do
+        # Handle the case where a child plugin does not return the configuration
+        case plugin.after_release(conf) do
+          %Config{} = result -> result
+          _                  -> conf
+        end
+      rescue
+        _ ->
+          error "Failed to execute after_release hook for #{plugin}!"
+          conf
       end
     end
   end
