@@ -47,20 +47,23 @@ defmodule ReleaseManager.Plugin do
   @doc """
   Loads all plugins in all code paths.
   """
+  @spec load_all() :: [] | [atom]
   def load_all, do: load_plugins(:code.get_path)
 
   @doc """
   Loads all plugins in the given `paths`.
   """
+  @spec load_plugins([binary]) :: [] | [atom]
   def load_plugins(paths) do
     Enum.reduce(paths, [], fn(path, matches) ->
-      {:ok, files} = :erl_prim_loader.list_dir(path |> to_char_list)
+      {:ok, files} = :erl_prim_loader.list_dir(path |> List.from_char_data!)
       Enum.reduce(files, matches, &match_plugins/2)
     end)
   end
 
   @re_pattern Regex.re_pattern(~r/Elixir\.ReleaseManager\.Plugin\..*\.beam$/)
 
+  @spec match_plugins(char_list, [atom]) :: [atom]
   defp match_plugins(filename, modules) do
     if :re.run(filename, @re_pattern, [capture: :none]) == :match do
       mod = :filename.rootname(filename, '.beam') |> list_to_atom
