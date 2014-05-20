@@ -64,7 +64,7 @@ generate_config() {
     local conf_file="$REL_DIR/$REL_NAME.conf"
     local schema_file="$REL_DIR/$REL_NAME.schema.exs"
     local sys_config="$REL_DIR/sys.config"
-    result="$("$ROOTDIR"/bin/conform --conf "$conf_file" --schema "$schema_file" --config "$sys_config" --output-dir "$REL_DIR")"
+    result="$("erts-$ERTS_VSN/bin/escript" "$ROOTDIR"/bin/conform --conf "$conf_file" --schema "$schema_file" --config "$sys_config" --output-dir "$REL_DIR")"
     exit_status="$?"
     if [ "$exit_status" -ne 0 ]; then
         exit "$exit_status"
