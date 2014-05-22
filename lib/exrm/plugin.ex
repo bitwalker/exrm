@@ -8,8 +8,12 @@ defmodule ReleaseManager.Plugin do
       defmodule ReleaseManager.Plugin.Hello do
         use ReleaseManager.Plugin
 
-        def run(%Config{} = config) do
-          info "Hello from my new plugin!"
+        def before_release(%Config{} = config) do
+          info "This is executed just prior to compiling the release"
+        end
+
+        def after_release(%Config{} = config) do
+          info "This is executed just after compiling the release"
         end
       end
 
@@ -19,14 +23,15 @@ defmodule ReleaseManager.Plugin do
   - `debug/1`, `info/1`, `warn/1`, `notice/1`, and `error/1` are imported for you.
     These should be used to do any output for the user.
 
-  The `run/1` function is the only required callback, and is expected to receive a
+  `before_release/1` and `after_release/1` are required callbacks, and will each be passed a
   `Config` struct, containing the configuration for the release task. You can choose
   to return the config struct modified or unmodified, or not at all. In the former case,
   any modifications you made will be passed on to the remaining plugins and the final
   release task.
 
-  All plugins are executed just prior to release, and after some internal tasks, such
-  as generating the sys.config and others.
+  All plugins are executed just prior, and just after compiling the release, as the name of
+  the callbacks reflect. The `before_release/1` callback is called after some internal tasks,
+  such as generating the sys.config and others.
   """
   use Behaviour
 
