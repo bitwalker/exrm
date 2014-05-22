@@ -178,9 +178,10 @@ defmodule Mix.Tasks.Release do
           _                  -> conf
         end
       rescue
-        _ ->
+        exception ->
+          stacktrace = System.stacktrace
           error "Failed to execute before_release hook for #{plugin}!"
-          conf
+          reraise exception, stacktrace
       end
     end
   end
@@ -195,9 +196,10 @@ defmodule Mix.Tasks.Release do
           _                  -> conf
         end
       rescue
-        _ ->
+        exception ->
+          stacktrace = System.stacktrace
           error "Failed to execute after_release hook for #{plugin}!"
-          conf
+          reraise exception, stacktrace
       end
     end
   end
