@@ -22,6 +22,7 @@ defmodule Mix.Tasks.Release do
   @shortdoc "Build a release for the current mix application."
 
   use    Mix.Task
+  import Kernel, except: [reraise: 2]
   import ReleaseManager.Utils
   alias  ReleaseManager.Config
 
