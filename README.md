@@ -28,6 +28,9 @@ had never been run. This is a destructive operation, as you can't get
 your releases back unless they were source-controlled, so exrm will ask
 you for confirmation before proceeding with the cleanup.
 
+NOTE: Umbrella projects work a little differently. Each sub-project is
+built into it's own release, but contains all of it's dependencies
+
 ## Getting Started
 
 This project's goal is to make releases with Elixir projects a breeze. It is composed of a mix task, and build files required to successfully take your Elixir project and perform a release build, and a [simplified configuration mechanism](https://github.com/bitwalker/conform) which integrates with your current configuration and makes it easy for your operations group to configure the release once deployed. All you have to do to get started is the following:
@@ -239,4 +242,4 @@ defmodule Test.Server do
 end
 ```
 
-You can find the source code for my example application [here](https://github.com/bitwalker/exrm-test). You should be able to replicate my example using these steps. If you can't, please let me know.
+You can find the source code for an example application [here](https://github.com/bitwalker/exrm-test), and an example umbrella application [here](https://github.com/bitwalker/exrm-umbrella-test). You should be able to replicate my example using these steps. If you can't, please let me know.
