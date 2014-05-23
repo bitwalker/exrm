@@ -7,7 +7,7 @@ defmodule ReleaseManager.Mixfile do
       elixir: "~> 0.13.2-dev",
       description: description,
       package: package,
-      deps: [{:conform, "~> 0.2.0"}] ]
+      deps: [{:conform, "~> 0.3.0"}] ]
   end
 
   def application, do: []
