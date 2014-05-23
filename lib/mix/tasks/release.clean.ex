@@ -19,16 +19,29 @@ defmodule Mix.Tasks.Release.Clean do
   @_BOOT_FILE "boot"
 
   def run(args) do
-    debug "Removing release files..."
+    if Mix.Project.umbrella? do
+      config = [build_path: Mix.Project.build_path]
+      for %Mix.Dep{app: app, opts: opts} <- Mix.Dep.Umbrella.loaded do
+        Mix.Project.in_project(app, opts[:path], config, fn _ -> do_run(args) end)
+      end
+    else
+      do_run(args)
+    end
+  end
+
+  def do_run(args) do
+    app     = Mix.Project.config |> Keyword.get(:app)
+    version = Mix.Project.config |> Keyword.get(:version)
+    debug "Removing release files for #{app}-#{version}..."
     cond do
       "--implode" in args ->
-        if confirm_implode? do
+        if confirm_implode?(app) do
           do_cleanup :all
-          info "All release files were removed successfully!"
+          info "All release files for #{app}-#{version} were removed successfully!"
         end
       true ->
         do_cleanup :build
-        info "The release for #{Mix.Project.config |> Keyword.get(:version)} has been removed."
+        info "The release for #{app}-#{version} has been removed."
     end
   end
 
@@ -73,10 +86,10 @@ defmodule Mix.Tasks.Release.Clean do
     if File.exists?(rel), do: File.rm_rf!(rel)
   end
 
-  defp confirm_implode? do
+  defp confirm_implode?(app) do
     IO.puts IO.ANSI.yellow
     confirmed? = Mix.Shell.IO.yes?("""
-      THIS WILL REMOVE ALL RELEASES AND RELATED CONFIGURATION!
+      THIS WILL REMOVE ALL RELEASES AND RELATED CONFIGURATION FOR #{app |> atom_to_binary |> String.upcase}!
       Are you absolutely sure you want to proceed?
       """)
     IO.puts IO.ANSI.reset

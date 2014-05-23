@@ -36,17 +36,26 @@ defmodule Mix.Tasks.Release do
   @_VERSION     "{{{PROJECT_VERSION}}}"
   @_ERTS_VSN    "{{{ERTS_VERSION}}}"
   @_ERL_OPTS    "{{{ERL_OPTS}}}"
-  @_ELIXIR_PATH "{{{ELIXIR_PATH}}}"
+  @_LIB_DIRS    "{{{LIB_DIRS}}}"
 
   def run(args) do
-    # Ensure this isn't an umbrella project
     if Mix.Project.umbrella? do
-      raise Mix.Error, message: "Umbrella projects are not currently supported!"
+      config = [build_path: Mix.Project.build_path, umbrella?: true]
+      for %Mix.Dep{app: app, opts: opts} <- Mix.Dep.Umbrella.loaded do
+        Mix.Project.in_project(app, opts[:path], config, fn _ -> do_run(args) end)
+      end
+    else
+      do_run(args)
     end
+  end
+
+  defp do_run(args) do
     # Start with a clean slate
     Mix.Tasks.Release.Clean.do_cleanup(:build)
     # Collect release configuration
-    parse_args(args)
+    config = parse_args(args)
+
+    config
     |> build_project
     |> generate_relx_config
     |> generate_sys_config
@@ -56,7 +65,7 @@ defmodule Mix.Tasks.Release do
     |> generate_nodetool
     |> execute_after_hooks
 
-    info "Your release is ready!"
+    info "The release for #{config.name}-#{config.version} is ready!"
   end
 
   defp build_project(%Config{verbosity: verbosity} = config) do
@@ -91,10 +100,20 @@ defmodule Mix.Tasks.Release do
       "" -> config
       _  -> %{config | :upgrade? => true}
     end
+    elixir_path = get_elixir_path() |> Path.join("lib") |> List.from_char_data!
+    lib_dirs = case Mix.Project.config |> Keyword.get(:umbrella?, false) do
+      true ->
+        [ elixir_path,
+          '../_build/prod',
+          '../#{Mix.Project.config |> Keyword.get(:deps_path) |> List.from_char_data!}' ]
+      _ ->
+        [ elixir_path,
+          '../_build/prod' ]
+    end
     # Write release configuration
     relx_config = relx_config
       |> String.replace(@_RELEASES, releases)
-      |> String.replace(@_ELIXIR_PATH, get_elixir_path() |> Path.join("lib"))
+      |> String.replace(@_LIB_DIRS, :io_lib.fwrite('~p.\n\n', [{:lib_dirs, lib_dirs}]) |> String.from_char_data!)
     # Replace placeholders for current release
     relx_config = relx_config |> replace_release_info(name, version)
     # Ensure destination base path exists
