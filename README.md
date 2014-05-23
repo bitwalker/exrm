@@ -7,8 +7,6 @@ Thanks to @tylerflint for the original Makefile, rel.config, and runner script w
 
 ## Usage
 
-NOTE: Due to a bug in Elixir's compilation process (fixed in v0.13), the v0.12.x versions of Elixir will require you to add `:kernel`, `:stdlib`, and `:elixir` to your projects application dependencies array in order for releases to work for you. If you encounter issues, please let me know and I will work with you to make sure you are able to use exrm with your project.
-
 You can build a release with the `release` task:
 
 - `mix release`
