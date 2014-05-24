@@ -50,7 +50,7 @@ relx_gen_id() {
 relx_nodetool() {
     command="$1"; shift
     "erts-$ERTS_VSN/bin/escript" "$ROOTDIR/bin/nodetool" "$NAME_TYPE" "$NAME" \
-                                 -setcookie "$COOKIE" "$command"
+                                 -setcookie "$COOKIE" "$command" "$@"
 }
 
 # Output a start command for the last argument of run_erl
