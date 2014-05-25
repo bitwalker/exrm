@@ -13,6 +13,7 @@ defmodule Mix.Tasks.Release.Clean do
   @shortdoc "Clean up any release-related files."
 
   use     Mix.Task
+  import  Kernel, except: [reraise: 2]
   import  ReleaseManager.Utils
 
   @_RELXCONF  "relx.config"
@@ -37,10 +38,12 @@ defmodule Mix.Tasks.Release.Clean do
       "--implode" in args ->
         if confirm_implode?(app) do
           do_cleanup :all
+          execute_after_hooks(args)
           info "All release files for #{app}-#{version} were removed successfully!"
         end
       true ->
         do_cleanup :build
+        execute_after_hooks(args)
         info "The release for #{app}-#{version} has been removed."
     end
   end
@@ -84,6 +87,20 @@ defmodule Mix.Tasks.Release.Clean do
     # Remove release folder
     rel = rel_dest_path
     if File.exists?(rel), do: File.rm_rf!(rel)
+  end
+
+  defp execute_after_hooks(args) do
+    plugins = ReleaseManager.Plugin.load_all
+    Enum.each plugins, fn plugin ->
+      try do
+        plugin.after_cleanup(args) 
+      rescue
+        exception ->
+          stacktrace = System.stacktrace
+          error "Failed to execute after_cleanup hook for #{plugin}!"
+          reraise exception, stacktrace
+      end
+    end
   end
 
   defp confirm_implode?(app) do

@@ -15,6 +15,10 @@ defmodule ReleaseManager.Plugin do
         def after_release(%Config{} = config) do
           info "This is executed just after compiling the release"
         end
+
+        def after_cleanup(_args) do
+          info "This is executed just after running cleanup"
+        end
       end
 
   A couple things are imported or aliased for you. Those things are:
@@ -27,7 +31,8 @@ defmodule ReleaseManager.Plugin do
   `Config` struct, containing the configuration for the release task. You can choose
   to return the config struct modified or unmodified, or not at all. In the former case,
   any modifications you made will be passed on to the remaining plugins and the final
-  release task.
+  release task. The required callback `after_cleanup/1` is passed the command line arguments. 
+  The return value is not used. 
 
   All plugins are executed just prior, and just after compiling the release, as the name of
   the callbacks reflect. The `before_release/1` callback is called after some internal tasks,
