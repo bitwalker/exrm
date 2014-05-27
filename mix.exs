@@ -3,7 +3,7 @@ defmodule ReleaseManager.Mixfile do
 
   def project do
     [ app: :exrm,
-      version: "0.8.0",
+      version: "0.8.1",
       elixir: "~> 0.13.3",
       description: description,
       package: package,
