@@ -100,12 +100,12 @@ defmodule Mix.Tasks.Release do
       "" -> config
       _  -> %{config | :upgrade? => true}
     end
-    elixir_path = get_elixir_path() |> Path.join("lib") |> List.from_char_data!
+    elixir_path = get_elixir_path() |> Path.join("lib") |> String.to_char_list
     lib_dirs = case Mix.Project.config |> Keyword.get(:umbrella?, false) do
       true ->
         [ elixir_path,
           '../_build/prod',
-          '../#{Mix.Project.config |> Keyword.get(:deps_path) |> List.from_char_data!}' ]
+          '../#{Mix.Project.config |> Keyword.get(:deps_path) |> String.to_char_list}' ]
       _ ->
         [ elixir_path,
           '../_build/prod' ]
@@ -113,7 +113,7 @@ defmodule Mix.Tasks.Release do
     # Write release configuration
     relx_config = relx_config
       |> String.replace(@_RELEASES, releases)
-      |> String.replace(@_LIB_DIRS, :io_lib.fwrite('~p.\n\n', [{:lib_dirs, lib_dirs}]) |> String.from_char_data!)
+      |> String.replace(@_LIB_DIRS, :io_lib.fwrite('~p.\n\n', [{:lib_dirs, lib_dirs}]) |> List.to_string)
     # Replace placeholders for current release
     relx_config = relx_config |> replace_release_info(name, version)
     # Ensure destination base path exists
@@ -138,7 +138,7 @@ defmodule Mix.Tasks.Release do
     merged = case user_sysconfig |> File.exists? do
       true -> 
         # User-provided
-        case user_sysconfig |> List.from_char_data! |> :file.consult do
+        case user_sysconfig |> String.to_char_list |> :file.consult do
           {:ok, []}                                  -> project_conf
           {:ok, [user_conf]} when is_list(user_conf) -> Mix.Config.merge(project_conf, user_conf)
           {:ok, [user_conf]}                         -> Mix.Config.merge(project_conf, [user_conf])
@@ -151,7 +151,7 @@ defmodule Mix.Tasks.Release do
         end
       _ ->
         # Default
-        case default_sysconfig |> List.from_char_data! |> :file.consult do
+        case default_sysconfig |> String.to_char_list |> :file.consult do
           {:ok, [default_conf]} ->
             Mix.Config.merge(default_conf, project_conf)
           {:error, {line, type, msg}} ->

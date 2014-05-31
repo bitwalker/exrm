@@ -245,11 +245,11 @@ defmodule ReleaseManager.Utils do
   end
 
   defp get_real_path(path) do
-    case path |> List.from_char_data! |> :file.read_link_info do
+    case path |> String.to_char_list |> :file.read_link_info do
       {:ok, {:file_info, _, :regular, _, _, _, _, _, _, _, _, _, _, _}} ->
         path
       {:ok, {:file_info, _, :symlink, _, _, _, _, _, _, _, _, _, _, _}} ->
-        {:ok, sym} = path |> List.from_char_data! |> :file.read_link
+        {:ok, sym} = path |> String.to_char_list |> :file.read_link
         case sym |> :filename.pathtype do
           :absolute ->
             sym |> iodata_to_binary

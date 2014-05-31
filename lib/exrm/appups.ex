@@ -20,12 +20,12 @@ defmodule ReleaseManager.Appups do
       v1_path
       |> Path.join("/ebin/")
       |> Path.join(atom_to_binary(application) <> ".app")
-      |> List.from_char_data!
+      |> String.to_char_list
     v2_release =
       v2_path
       |> Path.join("/ebin/")
       |> Path.join(atom_to_binary(application) <> ".app")
-      |> List.from_char_data!
+      |> String.to_char_list
 
     case :file.consult(v1_release) do
       { :ok, [ { :application, ^application, v1_props } ] } ->
@@ -82,15 +82,15 @@ defmodule ReleaseManager.Appups do
       end) |> List.flatten
       
     appup =
-      { v2 |> List.from_char_data!,
-        [ { v1 |> List.from_char_data!,
+      { v2 |> String.to_char_list,
+        [ { v1 |> String.to_char_list,
             (for m <- add_mods, do: { :add_module, m })
             ++ up_directives
             ++ up_version_change
             ++ (for m <- del_mods, do: { :delete_module, m })
           }
         ],
-        [ { v1 |> List.from_char_data!,
+        [ { v1 |> String.to_char_list,
             (for m <- :lists.reverse(del_mods), do: { :add_module, m })
             ++ down_version_change
             ++ down_directives
@@ -207,7 +207,7 @@ defmodule ReleaseManager.Appups do
 
   defp vsn(props) do
     { :value, { :vsn, vsn } } = :lists.keysearch(:vsn, 1, props)
-    vsn |> String.from_char_data!
+    vsn |> List.to_string
   end
 
   defp has_element(attr, key, elem) do

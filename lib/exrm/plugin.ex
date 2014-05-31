@@ -68,7 +68,7 @@ defmodule ReleaseManager.Plugin do
   @spec load_plugins([binary]) :: [] | [atom]
   def load_plugins(paths) do
     Enum.reduce(paths, [], fn(path, matches) ->
-      {:ok, files} = :erl_prim_loader.list_dir(path |> List.from_char_data!)
+      {:ok, files} = :erl_prim_loader.list_dir(path |> String.to_char_list)
       Enum.reduce(files, matches, &match_plugins/2)
     end)
   end

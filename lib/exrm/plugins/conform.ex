@@ -5,7 +5,7 @@ defmodule ReleaseManager.Plugin.Conform do
 
   def before_release(%Config{name: app, version: version}) do
     {:ok, relx_config} = Utils.rel_dest_path("relx.config")
-      |> List.from_char_data!
+      |> String.to_char_list
       |> :file.consult
     schema_path = Path.join([File.cwd!, "config", "#{app}.schema.exs"])
     conf_path   = Path.join([File.cwd!, "config", "#{app}.conf"])
@@ -32,15 +32,15 @@ defmodule ReleaseManager.Plugin.Conform do
     debug "Conform: Adding overlays to relx.config"
     updated = Enum.reduce relx_config, [], fn
       {:overlay, overlays}, config ->
-        schema_overlay  = {:copy, schema_path |> List.from_char_data!, 'releases/#{version}/#{app}.schema.exs'}
-        conf_overlay    = {:copy, conf_path |> List.from_char_data!, 'releases/#{version}/#{app}.conf'}
-        escript_overlay = {:copy, escript_path |> List.from_char_data!, 'bin/conform'}
+        schema_overlay  = {:copy, schema_path |> String.to_char_list, 'releases/#{version}/#{app}.schema.exs'}
+        conf_overlay    = {:copy, conf_path |> String.to_char_list, 'releases/#{version}/#{app}.conf'}
+        escript_overlay = {:copy, escript_path |> String.to_char_list, 'bin/conform'}
         [{:overlay, overlays ++ [schema_overlay, conf_overlay, escript_overlay]} | config]
       element, config ->
         [element | config]
     end
     # Persist relx.config
-    format_str = String.duplicate("~p.\n\n", Enum.count(updated)) |> List.from_char_data!
+    format_str = String.duplicate("~p.\n\n", Enum.count(updated)) |> String.to_char_list
     :file.write_file('#{Utils.rel_dest_path("relx.config")}', :io_lib.fwrite(format_str, updated |> Enum.reverse))
 
     info "Conform: Done!"
