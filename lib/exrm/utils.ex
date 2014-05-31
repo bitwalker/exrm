@@ -23,42 +23,6 @@ defmodule ReleaseManager.Utils do
     end
   end
 
-
-  @doc """
-  Rip 0.13.3's `reraise` macro for 0.13.2, remove once 0.13.3 is released
-  """
-  defmacro reraise(msg, stacktrace) do
-     # Try to figure out the type at compilation time
-    # to avoid dead code and make dialyzer happy.
-
-    case Macro.expand(msg, __CALLER__) do
-      msg when is_binary(msg) ->
-        quote do
-          :erlang.raise :error, RuntimeError.exception(unquote(msg)), unquote(stacktrace)
-        end
-      {:<<>>, _, _} = msg ->
-        quote do
-          :erlang.raise :error, RuntimeError.exception(unquote(msg)), unquote(stacktrace)
-        end
-      alias when is_atom(alias) ->
-        quote do
-          :erlang.raise :error, unquote(alias).exception([]), unquote(stacktrace)
-        end
-      msg ->
-        quote do
-          stacktrace = unquote(stacktrace)
-          case unquote(msg) do
-            msg when is_binary(msg) ->
-              :erlang.raise :error, RuntimeError.exception(msg), stacktrace
-            atom when is_atom(atom) ->
-              :erlang.raise :error, atom.exception([]), stacktrace
-            %{__struct__: struct, __exception__: true} = other when is_atom(struct) ->
-              :erlang.raise :error, other, stacktrace
-          end
-        end
-    end
-  end
-
   @doc """
   Call make in the current working directory.
   """

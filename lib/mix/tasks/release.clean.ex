@@ -13,7 +13,6 @@ defmodule Mix.Tasks.Release.Clean do
   @shortdoc "Clean up any release-related files."
 
   use     Mix.Task
-  import  Kernel, except: [reraise: 2]
   import  ReleaseManager.Utils
 
   @_RELXCONF  "relx.config"
