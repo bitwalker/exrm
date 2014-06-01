@@ -17,9 +17,23 @@ defmodule ReleaseManager.Utils do
       old_env = Mix.env
       # Change env
       Mix.env(unquote(env))
-      unquote(body)
+      result = unquote(body)
       # Change back
       Mix.env(old_env)
+      result
+    end
+  end
+
+  @doc """
+  Load the current project's configuration
+  """
+  def load_config() do
+    with_env :prod do
+      if File.regular?("config/config.exs") do
+        Mix.Config.read! "config/config.exs"
+      else
+        []
+      end
     end
   end
 

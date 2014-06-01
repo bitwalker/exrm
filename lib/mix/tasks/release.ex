@@ -130,7 +130,7 @@ defmodule Mix.Tasks.Release do
 
     debug "Generating sys.config..."
     # Read in current project config
-    project_conf = Mix.Tasks.Loadconfig.load
+    project_conf = load_config()
     # Merge project config with either the user-provided config, or the default sys.config we provide.
     # If a sys.config is provided by the user, it will take precedence over project config. If the
     # default sys.config is used, the project config will take precedence instead.
