@@ -4,15 +4,18 @@ defmodule Mix.Tasks.Release do
 
   ## Examples
 
-    # Build a release using defaults
-    mix release
-    # Pass args to erlexec when running the release
-    mix release --erl="-env TZ UTC"
-    # Enable dev mode. Make changes, compile using MIX_ENV=prod
-    # and execute your release again to pick up the changes
-    mix release --dev
-    # Set the verbosity level
-    mix release --verbosity=[silent|quiet|normal|verbose]
+      # Build a release using defaults
+      mix release
+
+      # Pass args to erlexec when running the release
+      mix release --erl="-env TZ UTC"
+
+      # Enable dev mode. Make changes, compile using MIX_ENV=prod
+      # and execute your release again to pick up the changes
+      mix release --dev
+
+      # Set the verbosity level
+      mix release --verbosity=[silent|quiet|normal|verbose]
 
   You may pass any number of arguments as needed. Make sure you pass arguments
   using `--key=value`, not `--key value`, as the args may be interpreted incorrectly
@@ -135,7 +138,7 @@ defmodule Mix.Tasks.Release do
     # If a sys.config is provided by the user, it will take precedence over project config. If the
     # default sys.config is used, the project config will take precedence instead.
     merged = case user_sysconfig |> File.exists? do
-      true -> 
+      true ->
         # User-provided
         case user_sysconfig |> String.to_char_list |> :file.consult do
           {:ok, []}                                  -> project_conf
