@@ -1,9 +1,10 @@
 defmodule ReleaseManager.Plugin do
   @moduledoc """
   This module provide a simple way to add additional steps to
-  the release task. You can define your own plugins using the
-  sample definition below. Note that the module namespace must
-  be nested under `ReleaseManager.Plugin.*`.
+  the release task.
+
+  You can define your own plugins using the sample definition below. Note that
+  the module namespace must be nested under `ReleaseManager.Plugin.*`.
 
       defmodule ReleaseManager.Plugin.Hello do
         use ReleaseManager.Plugin
@@ -23,16 +24,16 @@ defmodule ReleaseManager.Plugin do
 
   A couple things are imported or aliased for you. Those things are:
 
-  - The ReleaseManager.Config struct is aliased for you to just Config
-  - `debug/1`, `info/1`, `warn/1`, `notice/1`, and `error/1` are imported for you.
-    These should be used to do any output for the user.
+    - The ReleaseManager.Config struct is aliased for you to just Config
+    - `debug/1`, `info/1`, `warn/1`, `notice/1`, and `error/1` are imported for you.
+      These should be used to do any output for the user.
 
   `before_release/1` and `after_release/1` are required callbacks, and will each be passed a
   `Config` struct, containing the configuration for the release task. You can choose
   to return the config struct modified or unmodified, or not at all. In the former case,
   any modifications you made will be passed on to the remaining plugins and the final
-  release task. The required callback `after_cleanup/1` is passed the command line arguments. 
-  The return value is not used. 
+  release task. The required callback `after_cleanup/1` is passed the command line arguments.
+  The return value is not used.
 
   All plugins are executed just prior, and just after compiling the release, as the name of
   the callbacks reflect. The `before_release/1` callback is called after some internal tasks,
@@ -41,7 +42,7 @@ defmodule ReleaseManager.Plugin do
   use Behaviour
 
   @doc """
-  A plugin needs to implement `before_release/1`, and `after_release/1` 
+  A plugin needs to implement `before_release/1`, and `after_release/1`
   both of which receive a %ReleaseManager.Config struct
   """
   defcallback before_release(ReleaseManager.Config.t) :: any

@@ -7,12 +7,12 @@ defmodule ReleaseManager.Appups do
   @doc """
   Generate a .appup for the given application, start version, and upgrade version.
 
-    ## Parameter information
-    application: the application name as an atom
-    v1:          the start version, such as "0.0.1"
-    v2:          the upgrade version, such as "0.0.2"
-    v1_path:     the path to the v1 artifacts (rel/<app>/lib/<app>-0.0.1)
-    v2_path:     the path to the v2 artifacts (_build/prod/lib/<app>)
+      ## Parameter information
+      application: the application name as an atom
+      v1:          the start version, such as "0.0.1"
+      v2:          the upgrade version, such as "0.0.2"
+      v1_path:     the path to the v1 artifacts (rel/<app>/lib/<app>-0.0.1)
+      v2_path:     the path to the v2 artifacts (_build/prod/lib/<app>)
 
   """
   def make(application, v1, v2, v1_path, v2_path) do
@@ -57,8 +57,8 @@ defmodule ReleaseManager.Appups do
     { up_version_change, down_version_change } =
       case start_module(v2_props) do
         { :ok, start_mod, start_args } ->
-          start_mod_beam_file = 
-            v2_path 
+          start_mod_beam_file =
+            v2_path
             |> Path.join("/ebin/")
             |> Path.join(atom_to_binary(start_mod) <> ".beam")
           { start_mod_beam_file |> File.read! |> version_change(v1, start_mod, start_args),
@@ -74,13 +74,13 @@ defmodule ReleaseManager.Appups do
         |> upgrade_directives(v1, v2, module)
       end) |> List.flatten
 
-    down_directives = 
+    down_directives =
       Enum.reverse(modules(v2_props) -- add_mods) |> Enum.map(fn module ->
         (v2_path <> "/ebin/" <> atom_to_binary(module) <> ".beam")
         |> File.read!
         |> downgrade_directives(v1, v2, module)
       end) |> List.flatten
-      
+
     appup =
       { v2 |> String.to_char_list,
         [ { v1 |> String.to_char_list,
@@ -182,10 +182,10 @@ defmodule ReleaseManager.Appups do
     case beam_exports(beam, :sup_downgrade_notify, 2) do
       true ->
         [ {
-            :apply, { m, :sup_downgrade_notify, [ v1, v2 ] } 
+            :apply, { m, :sup_downgrade_notify, [ v1, v2 ] }
           },
-          { 
-            :update, m, :supervisor 
+          {
+            :update, m, :supervisor
           } ]
       false ->
         [ { :update, m, :supervisor } ]

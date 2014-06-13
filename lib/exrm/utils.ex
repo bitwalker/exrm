@@ -82,7 +82,7 @@ defmodule ReleaseManager.Utils do
     config     = @relx_config_path
     output_dir = @relx_output_path
     # Determine whether to pass --dev-mode or not
-    dev_mode?  = case dev do 
+    dev_mode?  = case dev do
       true  -> "--dev-mode"
       false -> ""
     end
@@ -134,9 +134,10 @@ defmodule ReleaseManager.Utils do
   @doc """
   Get a list of tuples representing the previous releases:
 
-    ## Examples
+  ## Examples
 
-    get_releases #=> [{"test", "0.0.1"}, {"test", "0.0.2"}]
+      get_releases #=> [{"test", "0.0.1"}, {"test", "0.0.2"}]
+
   """
   def get_releases(project) do
     release_path = Path.join([File.cwd!, "rel", project, "releases"])
@@ -186,10 +187,11 @@ defmodule ReleaseManager.Utils do
   Get the path to a file located in the rel directory of the current project.
   You can pass either a file name, or a list of directories to a file, like:
 
-    iex> ReleaseManager.Utils.rel_dest_path "relx.config"
-    "path/to/project/rel/relx.config"
-    iex> ReleaseManager.Utils.rel_dest_path ["<project>", "lib", "<project>.appup"]
-    "path/to/project/rel/<project>/lib/<project>.appup"
+      iex> ReleaseManager.Utils.rel_dest_path "relx.config"
+      "path/to/project/rel/relx.config"
+
+      iex> ReleaseManager.Utils.rel_dest_path ["<project>", "lib", "<project>.appup"]
+      "path/to/project/rel/<project>/lib/<project>.appup"
 
   """
   def rel_dest_path(files) when is_list(files), do: Path.join([rel_dest_path] ++ files)
@@ -200,10 +202,11 @@ defmodule ReleaseManager.Utils do
   Get the path to a file located in the rel/files directory of the current project.
   You can pass either a file name, or a list of directories to a file, like:
 
-    iex> ReleaseManager.Utils.rel_file_dest_path "sys.config"
-    "path/to/project/rel/files/sys.config"
-    iex> ReleaseManager.Utils.rel_dest_path ["some", "path", "file.txt"]
-    "path/to/project/rel/files/some/path/file.txt"
+      iex> ReleaseManager.Utils.rel_file_dest_path "sys.config"
+      "path/to/project/rel/files/sys.config"
+
+      iex> ReleaseManager.Utils.rel_dest_path ["some", "path", "file.txt"]
+      "path/to/project/rel/files/some/path/file.txt"
 
   """
   def rel_file_dest_path(files) when is_list(files), do: Path.join([rel_file_dest_path] ++ files)
