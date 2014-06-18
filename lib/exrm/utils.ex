@@ -233,9 +233,9 @@ defmodule ReleaseManager.Utils do
         {:ok, sym} = path |> String.to_char_list |> :file.read_link
         case sym |> :filename.pathtype do
           :absolute ->
-            sym |> iodata_to_binary
+            sym |> IO.iodata_to_binary
           :relative ->
-            symlink = sym |> iodata_to_binary
+            symlink = sym |> IO.iodata_to_binary
             path |> Path.dirname |> Path.join(symlink) |> Path.expand
         end
     end |> String.replace("/bin/elixir", "")
