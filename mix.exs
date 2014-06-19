@@ -7,7 +7,7 @@ defmodule ReleaseManager.Mixfile do
       elixir: "~> 0.14.2-dev",
       description: description,
       package: package,
-      deps: [{:conform, "bitwalker/conform", branch: "develop"}] ]
+      deps: [{:conform, github: "bitwalker/conform", branch: "develop"}] ]
   end
 
   def application, do: []
