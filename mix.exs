@@ -4,10 +4,10 @@ defmodule ReleaseManager.Mixfile do
   def project do
     [ app: :exrm,
       version: "0.10.0",
-      elixir: "~> 0.14.1",
+      elixir: "~> 0.14.2-dev",
       description: description,
       package: package,
-      deps: [{:conform, "~> 0.6.0"}] ]
+      deps: [{:conform, "bitwalker/conform", branch: "develop"}] ]
   end
 
   def application, do: []
