@@ -173,7 +173,7 @@ defmodule Mix.Tasks.Release do
   end
 
   defp generate_boot_script(%Config{name: name, version: version, erl: erl_opts} = config) do
-    erts = :erlang.system_info(:version) |> iodata_to_binary
+    erts = :erlang.system_info(:version) |> IO.iodata_to_binary
     boot = rel_file_source_path @_BOOT_FILE
     dest = rel_file_dest_path   @_BOOT_FILE
     # Ensure destination base path exists
@@ -233,7 +233,7 @@ defmodule Mix.Tasks.Release do
       # Change mix env for appup generation
       with_env :prod do
         # Generate appup
-        app      = name |> binary_to_atom
+        app      = name |> String.to_atom
         v1       = get_last_release(name)
         v1_path  = rel_dest_path [name, "lib", "#{name}-#{v1}"]
         v2_path  = Mix.Project.config |> Mix.Project.compile_path |> String.replace("/ebin", "")
@@ -277,7 +277,7 @@ defmodule Mix.Tasks.Release do
   defp generate_nodetool(%Config{name: name, version: version} = config) do
     nodetool = rel_file_source_path @_NODETOOL
     dest     = rel_dest_path [name, "bin", @_NODETOOL]
-    erts     = "erts-#{:erlang.system_info(:version) |> iodata_to_binary}"
+    erts     = "erts-#{:erlang.system_info(:version) |> IO.iodata_to_binary}"
     debug "Generating nodetool..."
     # Copy
     File.cp! nodetool, dest
@@ -310,13 +310,13 @@ defmodule Mix.Tasks.Release do
   defp parse_args(argv) do
     {args, _, _} = OptionParser.parse(argv)
     defaults = %Config{
-      name:    Mix.Project.config |> Keyword.get(:app) |> atom_to_binary,
+      name:    Mix.Project.config |> Keyword.get(:app) |> Atom.to_string,
       version: Mix.Project.config |> Keyword.get(:version),
     }
     Enum.reduce args, defaults, fn arg, config ->
       case arg do
         {:verbosity, verbosity} ->
-          %{config | :verbosity => binary_to_atom(verbosity)}
+          %{config | :verbosity => String.to_atom(verbosity)}
         {key, value} ->
           Map.put(config, key, value)
       end

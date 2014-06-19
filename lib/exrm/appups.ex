@@ -19,12 +19,12 @@ defmodule ReleaseManager.Appups do
     v1_release =
       v1_path
       |> Path.join("/ebin/")
-      |> Path.join(atom_to_binary(application) <> ".app")
+      |> Path.join(Atom.to_string(application) <> ".app")
       |> String.to_char_list
     v2_release =
       v2_path
       |> Path.join("/ebin/")
-      |> Path.join(atom_to_binary(application) <> ".app")
+      |> Path.join(Atom.to_string(application) <> ".app")
       |> String.to_char_list
 
     case :file.consult(v1_release) do
@@ -60,7 +60,7 @@ defmodule ReleaseManager.Appups do
           start_mod_beam_file =
             v2_path
             |> Path.join("/ebin/")
-            |> Path.join(atom_to_binary(start_mod) <> ".beam")
+            |> Path.join(Atom.to_string(start_mod) <> ".beam")
           { start_mod_beam_file |> File.read! |> version_change(v1, start_mod, start_args),
             start_mod_beam_file |> File.read! |> version_change({:down, v1}, start_mod, start_args) }
         :undefined ->
@@ -69,14 +69,14 @@ defmodule ReleaseManager.Appups do
 
     up_directives =
       (modules(v2_props) -- add_mods) |> Enum.map(fn module ->
-        (v2_path <> "/ebin/" <> atom_to_binary(module) <> ".beam")
+        (v2_path <> "/ebin/" <> Atom.to_string(module) <> ".beam")
         |> File.read!
         |> upgrade_directives(v1, v2, module)
       end) |> List.flatten
 
     down_directives =
       Enum.reverse(modules(v2_props) -- add_mods) |> Enum.map(fn module ->
-        (v2_path <> "/ebin/" <> atom_to_binary(module) <> ".beam")
+        (v2_path <> "/ebin/" <> Atom.to_string(module) <> ".beam")
         |> File.read!
         |> downgrade_directives(v1, v2, module)
       end) |> List.flatten
@@ -102,7 +102,7 @@ defmodule ReleaseManager.Appups do
     # Save the appup to the upgrade's build directory
     v2_path
     |> Path.join("ebin")
-    |> Path.join((application |> atom_to_binary) <> ".appup")
+    |> Path.join((application |> Atom.to_string) <> ".appup")
     |> write_term(appup)
 
     { :ok, appup }

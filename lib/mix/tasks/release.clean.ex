@@ -51,7 +51,7 @@ defmodule Mix.Tasks.Release.Clean do
   # Clean release build
   def do_cleanup(:build) do
     cwd       = File.cwd!
-    project   = Mix.Project.config |> Keyword.get(:app) |> atom_to_binary
+    project   = Mix.Project.config |> Keyword.get(:app) |> Atom.to_string
     version   = Mix.Project.config |> Keyword.get(:version)
     build     = Path.join([cwd, "_build", "prod"])
     release   = rel_dest_path [project, "releases", version]
@@ -106,7 +106,7 @@ defmodule Mix.Tasks.Release.Clean do
   defp confirm_implode?(app) do
     IO.puts IO.ANSI.yellow
     confirmed? = Mix.Shell.IO.yes?("""
-      THIS WILL REMOVE ALL RELEASES AND RELATED CONFIGURATION FOR #{app |> atom_to_binary |> String.upcase}!
+      THIS WILL REMOVE ALL RELEASES AND RELATED CONFIGURATION FOR #{app |> Atom.to_string |> String.upcase}!
       Are you absolutely sure you want to proceed?
       """)
     IO.puts IO.ANSI.reset
