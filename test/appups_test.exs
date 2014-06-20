@@ -9,6 +9,16 @@ defmodule AppupsTest do
   setup do
     @v1_path |> write_term(v1_app)
     @v2_path |> write_term(v2_app)
+
+    on_exit fn ->
+      if @v1_path |> File.exists? do
+        @v1_path |> File.rm!
+      end
+      if @v2_path |> File.exists? do
+        @v2_path |> File.rm!
+      end
+    end
+
     :ok
   end
 
@@ -18,16 +28,6 @@ defmodule AppupsTest do
     {:ok, appup} = ReleaseManager.Appups.make(:test, "0.0.1", "0.0.2", v1_path, v2_path)
 
     assert appup == expected_appup
-  end
-
-  teardown _meta do
-    if @v1_path |> File.exists? do
-      @v1_path |> File.rm!
-    end
-    if @v2_path |> File.exists? do
-      @v2_path |> File.rm!
-    end
-    :ok
   end
 
   defp v1_app do
