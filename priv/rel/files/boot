@@ -8,6 +8,7 @@ REL_NAME="{{{PROJECT_NAME}}}"
 REL_VSN="{{{PROJECT_VERSION}}}"
 ERTS_VSN="{{{ERTS_VERSION}}}"
 REL_DIR="$RELEASE_ROOT_DIR/releases/$REL_VSN"
+REL_LIB_DIR="$RELEASE_ROOT_DIR/lib"
 ERL_OPTS="{{{ERL_OPTS}}}"
 PIPE_DIR="/tmp/erl_pipes/{{{PROJECT_NAME}}}/"
 RUNNER_LOG_DIR="${RUNNER_LOG_DIR:-$RELEASE_ROOT_DIR/log}"
@@ -36,7 +37,7 @@ relx_rem_sh() {
          #-setcookie "$COOKIE"
 
     # Setup Elixir remote shell command to control node
-    exec "$BINDIR/erl" -pa "$ROOTDIR/lib/*/ebin" -noshell -boot start_clean \
+    exec "$BINDIR/erl" -pa "$ROOTDIR/lib/*/ebin" -pa "$ROOTDIR/lib/consolidated" -noshell -boot start_clean \
                  -user Elixir.IEx.CLI "$NAME_TYPE" "$id" -setcookie "$COOKIE" \
                  -extra --no-halt +iex -"$NAME_TYPE" "$id" --cookie "$COOKIE" --remsh "$NAME"
 }
@@ -349,7 +350,8 @@ case "$1" in
         # Build an array of arguments to pass to exec later on
         # Build it here because this command will be used for logging.
         set -- "$BINDIR/erlexec" -boot "$BOOTFILE" \
-            -env ERL_LIBS "$REL_DIR/lib" -config "$CONFIG_PATH" \
+            -env ERL_LIBS "$REL_LIB_DIR" -config "$CONFIG_PATH" \
+            -pa "$REL_LIB_DIR/consolidated" \
             -args_file "$VMARGS_PATH" \
             -user Elixir.IEx.CLI -extra --no-halt +iex
 
