@@ -66,6 +66,7 @@ defmodule Mix.Tasks.Release do
     |> do_release
     |> generate_nodetool
     |> execute_after_hooks
+    |> update_release_package
 
     info "The release for #{config.name}-#{config.version} is ready!"
   end
@@ -274,35 +275,35 @@ defmodule Mix.Tasks.Release do
     end
   end
 
-  defp generate_nodetool(%Config{name: name, version: version} = config) do
+  defp generate_nodetool(%Config{name: name} = config) do
+    debug "Generating nodetool..."
     nodetool = rel_file_source_path @_NODETOOL
     dest     = rel_dest_path [name, "bin", @_NODETOOL]
-    erts     = "erts-#{:erlang.system_info(:version) |> IO.iodata_to_binary}"
-    debug "Generating nodetool..."
     # Copy
     File.cp! nodetool, dest
     # Make executable
     dest |> chmod("+x")
-    # Extract release package
+    # Continue..
+    config
+  end
+
+  defp update_release_package(%Config{name: name, version: version} = config) do
+    debug "Packaging release..."
+    erts = "erts-#{:erlang.system_info(:version) |> IO.iodata_to_binary}"
+    # Delete original release package
     tarball = rel_dest_path [name, "#{name}-#{version}.tar.gz"]
-    tmp_dir = rel_dest_path [name, "#{name}-#{version}"]
-    :erl_tar.extract('#{tarball}', [{:cwd, '#{tmp_dir}'}, :compressed])
-    # Update nodetool
-    extracted_nodetool = Path.join([tmp_dir, "bin", @_NODETOOL])
-    File.rm! extracted_nodetool
-    File.cp! nodetool, extracted_nodetool
-    # Re-package release
+    File.rm! tarball
+    # Re-package release with modifications
     :ok = :erl_tar.create(
       '#{tarball}',
       [
-        {'lib', '#{Path.join(tmp_dir, "lib")}'},
-        {'releases', '#{Path.join(tmp_dir, "releases")}'},
-        {'bin', '#{Path.join(tmp_dir, "bin")}'},
-        {'#{erts}', '#{Path.join(tmp_dir, erts)}'}
+        {'lib',      '#{rel_dest_path([name, "lib"])}'},
+        {'releases', '#{rel_dest_path([name, "releases"])}'},
+        {'bin',      '#{rel_dest_path([name, "bin"])}'},
+        {'#{erts}',  '#{rel_dest_path([name, erts])}'}
       ],
       [:compressed]
     )
-    File.rm_rf! tmp_dir
     # Continue..
     config
   end
