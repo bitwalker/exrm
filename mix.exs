@@ -3,11 +3,11 @@ defmodule ReleaseManager.Mixfile do
 
   def project do
     [ app: :exrm,
-      version: "0.12.2",
+      version: "0.12.3",
       elixir: "~> 0.14.3-dev",
       description: description,
       package: package,
-      deps: [{:conform, "~> 0.7.4"}] ]
+      deps: [{:conform, github: "bitwalker/conform", branch: "develop"}] ]
   end
 
   def application, do: []
