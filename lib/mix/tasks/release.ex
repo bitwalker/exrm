@@ -232,7 +232,7 @@ defmodule Mix.Tasks.Release do
     # If this is an upgrade release, generate an appup
     if upgrade? do
       # Change mix env for appup generation
-      with_env :prod do
+      with_env :prod, fn ->
         # Generate appup
         app      = name |> String.to_atom
         v1       = get_last_release(name)
