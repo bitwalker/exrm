@@ -6,7 +6,7 @@ defmodule ReleaseManager.Plugin.Consolidation do
 
   def before_release(%Config{verbosity: verbosity}) do
     debug "Performing protocol consolidation..."
-    with_env :prod do
+    with_env :prod, fn ->
       cond do
         verbosity == :verbose ->
           mix "compile.protocols", :prod, :verbose
