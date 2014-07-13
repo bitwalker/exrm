@@ -1,1 +1,1 @@
-%{"conform": {:git, "git://github.com/bitwalker/conform.git", "c40f58a459d4ebc987605888f44b9386978f25dc", [branch: "develop"]}}
+%{"conform": {:package, "0.8.2"}}
