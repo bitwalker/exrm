@@ -12,15 +12,15 @@ defmodule ReleaseManager.Utils do
   @doc """
   Perform some actions within the context of a specific mix environment
   """
-  defmacro with_env(env, body) do
-    quote do
-      old_env = Mix.env
+  def with_env(env, fun) do
+    old_env = Mix.env
+    try do
       # Change env
-      Mix.env(unquote(env))
-      result = unquote(body)
+      Mix.env(env)
+      fun.()
+    after
       # Change back
       Mix.env(old_env)
-      result
     end
   end
 
@@ -28,7 +28,7 @@ defmodule ReleaseManager.Utils do
   Load the current project's configuration
   """
   def load_config() do
-    with_env :prod do
+    with_env :prod, fn ->
       if File.regular?("config/config.exs") do
         Mix.Config.read! "config/config.exs"
       else
