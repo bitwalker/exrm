@@ -177,22 +177,24 @@ defmodule Mix.Tasks.Release do
   end
 
   defp generate_vm_args(%Config{version: version} = config) do
-    debug "Generating vm.args..."
-    relx_config_path = Utils.rel_dest_path("relx.config")
     vmargs_path      = Utils.rel_dest_path("vm.args")
-    # Read in relx.config
-    {:ok, relx_config} = relx_config_path |> String.to_char_list |> :file.consult
-    # Update configuration to add new overlay for vm.args
-    updated = Enum.reduce relx_config, [], fn
-      {:overlay, overlays}, conf ->
-        vmargs_overlay = {:copy, vmargs_path |> String.to_char_list, 'releases/#{version}/vm.args'}
-        [{:overlay, overlays ++ [vmargs_overlay]} | conf]
-      element, conf ->
-        [element | conf]
+    if vmargs_path |> File.exists? do
+      debug "Generating vm.args..."
+      relx_config_path = Utils.rel_file_dest_path("relx.config")
+      # Read in relx.config
+      {:ok, relx_config} = relx_config_path |> String.to_char_list |> :file.consult
+      # Update configuration to add new overlay for vm.args
+      updated = Enum.reduce relx_config, [], fn
+        {:overlay, overlays}, conf ->
+          vmargs_overlay = {:copy, vmargs_path |> String.to_char_list, 'releases/#{version}/vm.args'}
+          [{:overlay, overlays ++ [vmargs_overlay]} | conf]
+        element, conf ->
+          [element | conf]
+      end
+      # Persist relx.config
+      format_str = String.duplicate("~p.\n\n", Enum.count(updated)) |> String.to_char_list
+      :file.write_file('#{Utils.rel_dest_path("relx.config")}', :io_lib.fwrite(format_str, updated |> Enum.reverse))
     end
-    # Persist relx.config
-    format_str = String.duplicate("~p.\n\n", Enum.count(updated)) |> String.to_char_list
-    :file.write_file('#{Utils.rel_dest_path("relx.config")}', :io_lib.fwrite(format_str, updated |> Enum.reverse))
     # Continue..
     config
   end
