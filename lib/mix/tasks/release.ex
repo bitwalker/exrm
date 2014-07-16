@@ -26,12 +26,14 @@ defmodule Mix.Tasks.Release do
 
   use    Mix.Task
   import ReleaseManager.Utils
+  alias  ReleaseManager.Utils
   alias  ReleaseManager.Config
 
   @_RELXCONF    "relx.config"
   @_BOOT_FILE   "boot"
   @_NODETOOL    "nodetool"
   @_SYSCONFIG   "sys.config"
+  @_VMARGS      "vm.args"
   @_RELEASE_DEF "release_definition.txt"
   @_RELEASES    "{{{RELEASES}}}"
   @_NAME        "{{{PROJECT_NAME}}}"
@@ -61,6 +63,7 @@ defmodule Mix.Tasks.Release do
     |> build_project
     |> generate_relx_config
     |> generate_sys_config
+    |> generate_vm_args
     |> generate_boot_script
     |> execute_before_hooks
     |> do_release
@@ -169,6 +172,27 @@ defmodule Mix.Tasks.Release do
     File.mkdir_p!(dest |> Path.dirname)
     # Write the config to disk
     dest |> write_term(merged)
+    # Continue..
+    config
+  end
+
+  defp generate_vm_args(%Config{version: version} = config) do
+    debug "Generating vm.args..."
+    relx_config_path = Utils.rel_dest_path("relx.config")
+    vmargs_path      = Utils.rel_dest_path("vm.args")
+    # Read in relx.config
+    {:ok, relx_config} = relx_config_path |> String.to_char_list |> :file.consult
+    # Update configuration to add new overlay for vm.args
+    updated = Enum.reduce relx_config, [], fn
+      {:overlay, overlays}, conf ->
+        vmargs_overlay = {:copy, vmargs_path |> String.to_char_list, 'releases/#{version}/vm.args'}
+        [{:overlay, overlays ++ [vmargs_overlay]} | conf]
+      element, conf ->
+        [element | conf]
+    end
+    # Persist relx.config
+    format_str = String.duplicate("~p.\n\n", Enum.count(updated)) |> String.to_char_list
+    :file.write_file('#{Utils.rel_dest_path("relx.config")}', :io_lib.fwrite(format_str, updated |> Enum.reverse))
     # Continue..
     config
   end
