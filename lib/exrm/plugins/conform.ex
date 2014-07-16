@@ -4,9 +4,7 @@ defmodule ReleaseManager.Plugin.Conform do
   alias ReleaseManager.Utils
 
   def before_release(%Config{name: app, version: version}) do
-    {:ok, relx_config} = Utils.rel_dest_path("relx.config")
-      |> String.to_char_list
-      |> :file.consult
+    relx_config = Utils.rel_file_dest_path("relx.config") |> Utils.read_terms
     schema_path = Path.join([File.cwd!, "config", "#{app}.schema.exs"])
     conf_path   = Path.join([File.cwd!, "config", "#{app}.conf"])
 
@@ -30,18 +28,14 @@ defmodule ReleaseManager.Plugin.Conform do
     escript_path = Mix.Task.run("conform.release")
     # Add .conf, .schema.exs, and escript to relx.config as overlays
     debug "Conform: Adding overlays to relx.config"
-    updated = Enum.reduce relx_config, [], fn
-      {:overlay, overlays}, config ->
-        schema_overlay  = {:copy, schema_path |> String.to_char_list, 'releases/#{version}/#{app}.schema.exs'}
-        conf_overlay    = {:copy, conf_path |> String.to_char_list, 'releases/#{version}/#{app}.conf'}
-        escript_overlay = {:copy, escript_path |> String.to_char_list, 'bin/conform'}
-        [{:overlay, overlays ++ [schema_overlay, conf_overlay, escript_overlay]} | config]
-      element, config ->
-        [element | config]
-    end
+    overlays = [overlay: [
+      {:copy, schema_path  |> String.to_char_list, 'releases/#{version}/#{app}.schema.exs'},
+      {:copy, conf_path    |> String.to_char_list, 'releases/#{version}/#{app}.conf'},
+      {:copy, escript_path |> String.to_char_list, 'bin/conform'},
+    ]]
+    updated = Utils.merge(relx_config, overlays)
     # Persist relx.config
-    format_str = String.duplicate("~p.\n\n", Enum.count(updated)) |> String.to_char_list
-    :file.write_file('#{Utils.rel_dest_path("relx.config")}', :io_lib.fwrite(format_str, updated |> Enum.reverse))
+    Utils.write_terms(Utils.rel_file_dest_path("relx.config"), updated)
 
     info "Conform: Done!"
   end

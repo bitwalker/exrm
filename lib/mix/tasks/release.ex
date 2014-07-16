@@ -89,10 +89,11 @@ defmodule Mix.Tasks.Release do
   end
 
   defp generate_relx_config(%Config{name: name, version: version} = config) do
+    debug "Generating relx configuration..."
     # Get paths
     rel_def  = rel_file_source_path @_RELEASE_DEF
     source   = rel_source_path @_RELXCONF
-    dest     = rel_dest_path @_RELXCONF
+    dest     = rel_file_dest_path @_RELXCONF
     # Get relx.config template contents
     relx_config = source |> File.read!
     # Get release definition template contents
@@ -110,22 +111,37 @@ defmodule Mix.Tasks.Release do
     lib_dirs = case Mix.Project.config |> Keyword.get(:umbrella?, false) do
       true ->
         [ elixir_path,
-          '../_build/prod',
-          '../#{Mix.Project.config |> Keyword.get(:deps_path) |> String.to_char_list}' ]
+          '../../_build/prod',
+          '../../#{Mix.Project.config |> Keyword.get(:deps_path) |> String.to_char_list}' ]
       _ ->
         [ elixir_path,
-          '../_build/prod' ]
+          '../../_build/prod' ]
     end
-    # Write release configuration
+    # Build release configuration
     relx_config = relx_config
       |> String.replace(@_RELEASES, releases)
       |> String.replace(@_LIB_DIRS, :io_lib.fwrite('~p.\n\n', [{:lib_dirs, lib_dirs}]) |> List.to_string)
     # Replace placeholders for current release
     relx_config = relx_config |> replace_release_info(name, version)
+    # Read config as Erlang terms
+    relx_config = Utils.string_to_terms(relx_config)
+    # Merge user provided relx.config
+    user_config_path = rel_dest_path @_RELXCONF
+    merged = case user_config_path |> File.exists? do
+      true  ->
+        debug "Merging custom relx configuration from #{user_config_path |> Path.relative_to_cwd}..."
+        case Utils.read_terms(user_config_path) do
+          []                                      -> relx_config
+          [user_config] when is_list(user_config) -> Utils.merge(relx_config, user_config)
+          [user_config]                           -> Utils.merge(relx_config, [user_config])
+        end
+      _ ->
+        relx_config
+    end
     # Ensure destination base path exists
     dest |> Path.dirname |> File.mkdir_p!
-    # Write relx.config
-    File.write!(dest, relx_config)
+    # Persist relx.config
+    Utils.write_terms(dest, merged)
     # Return the project config after we're done
     config
   end
@@ -143,57 +159,40 @@ defmodule Mix.Tasks.Release do
     # default sys.config is used, the project config will take precedence instead.
     merged = case user_sysconfig |> File.exists? do
       true ->
+        debug "Merging custom sys.config from #{user_sysconfig |> Path.relative_to_cwd}..."
         # User-provided
-        case user_sysconfig |> String.to_char_list |> :file.consult do
-          {:ok, []}                                  -> project_conf
-          {:ok, [user_conf]} when is_list(user_conf) -> Mix.Config.merge(project_conf, user_conf)
-          {:ok, [user_conf]}                         -> Mix.Config.merge(project_conf, [user_conf])
-          {:error, {line, type, msg}} ->
-            error "Unable to parse sys.config: Line #{line}, #{type} - #{msg}"
-            exit(:normal)
-          {:error, reason} ->
-            error "Unable to access sys.config #{reason}"
-            exit(:normal)
+        case user_sysconfig |> Utils.read_terms do
+          []                                  -> project_conf
+          [user_conf] when is_list(user_conf) -> Mix.Config.merge(project_conf, user_conf)
+          [user_conf]                         -> Mix.Config.merge(project_conf, [user_conf])
         end
       _ ->
         # Default
-        case default_sysconfig |> String.to_char_list |> :file.consult do
-          {:ok, [default_conf]} ->
-            Mix.Config.merge(default_conf, project_conf)
-          {:error, {line, type, msg}} ->
-            error "Unable to parse default sys.config: Line #{line}, #{type} - #{msg}"
-            exit(:normal)
-          {:error, reason} ->
-            error "Unable to access default sys.config #{reason}"
-            exit(:normal)
-        end
+        [default_conf] = default_sysconfig |> Utils.read_terms
+        Mix.Config.merge(default_conf, project_conf)
     end
     # Ensure parent directory exists prior to writing
     File.mkdir_p!(dest |> Path.dirname)
     # Write the config to disk
-    dest |> write_term(merged)
+    dest |> Utils.write_term(merged)
     # Continue..
     config
   end
 
   defp generate_vm_args(%Config{version: version} = config) do
-    vmargs_path      = Utils.rel_dest_path("vm.args")
+    vmargs_path = Utils.rel_dest_path("vm.args")
     if vmargs_path |> File.exists? do
       debug "Generating vm.args..."
       relx_config_path = Utils.rel_file_dest_path("relx.config")
       # Read in relx.config
-      {:ok, relx_config} = relx_config_path |> String.to_char_list |> :file.consult
+      relx_config = relx_config_path |> Utils.read_terms
       # Update configuration to add new overlay for vm.args
-      updated = Enum.reduce relx_config, [], fn
-        {:overlay, overlays}, conf ->
-          vmargs_overlay = {:copy, vmargs_path |> String.to_char_list, 'releases/#{version}/vm.args'}
-          [{:overlay, overlays ++ [vmargs_overlay]} | conf]
-        element, conf ->
-          [element | conf]
-      end
+      overlays = [overlay: [
+        {:copy, vmargs_path |> String.to_char_list, 'releases/#{version}/vm.args'}
+      ]]
+      updated = Utils.merge(relx_config, overlays)
       # Persist relx.config
-      format_str = String.duplicate("~p.\n\n", Enum.count(updated)) |> String.to_char_list
-      :file.write_file('#{Utils.rel_file_dest_path("relx.config")}', :io_lib.fwrite(format_str, updated |> Enum.reverse))
+      Utils.write_terms(relx_config_path, updated)
     end
     # Continue..
     config

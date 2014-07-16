@@ -6,7 +6,6 @@ defmodule ReleaseManager.Utils do
   import Mix.Shell,    only: [cmd: 2]
 
   # Relx constants
-  @relx_config_path      "rel/relx.config"
   @relx_output_path      "rel"
 
   @doc """
@@ -79,7 +78,7 @@ defmodule ReleaseManager.Utils do
   """
   def relx(name, version, verbosity, upgrade?, dev) do
     # Setup paths
-    config     = @relx_config_path
+    config     = rel_file_dest_path "relx.config"
     output_dir = @relx_output_path
     # Determine whether to pass --dev-mode or not
     dev_mode?  = case dev do
