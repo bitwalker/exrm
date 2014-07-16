@@ -172,6 +172,89 @@ defmodule ReleaseManager.Utils do
     :file.write_file('#{path}', :io_lib.fwrite('~p.\n', [term]))
   end
 
+  @doc """
+  Writes a collection of Elixir/Erlang terms to the provided path
+  """
+  def write_terms(path, terms) when is_list(terms) do
+    format_str = String.duplicate("~p.\n\n", Enum.count(terms)) |> String.to_char_list
+    :file.write_file('#{path}', :io_lib.fwrite(format_str, terms |> Enum.reverse))
+  end
+
+  @doc """
+  Reads a file as Erlang terms
+  """
+  def read_terms(path) do
+    result = case '#{path}' |> :file.consult do
+      {:ok, terms} ->
+        terms
+      {:error, {line, type, msg}} ->
+        error "Unable to parse #{path}: Line #{line}, #{type}, - #{msg}"
+        exit(:normal)
+      {:error, reason} ->
+        error "Unable to access #{path}: #{reason}"
+        exit(:normal)
+    end
+    result
+  end
+
+
+  @doc """
+  Convert a string to Erlang terms
+  """
+  def string_to_terms(str) do
+    str 
+    |> String.split("}.")
+    |> Stream.map(&(String.strip(&1, ?\n)))
+    |> Stream.map(&String.strip/1)
+    |> Stream.map(&('#{&1}}.'))
+    |> Stream.map(&(:erl_scan.string(&1)))
+    |> Stream.map(fn {:ok, tokens, _} -> :erl_parse.parse_term(tokens) end)
+    |> Stream.filter(fn {:ok, _} -> true; {:error, _} -> false end)
+    |> Enum.reduce([], fn {:ok, term}, acc -> [term|acc] end)
+    |> Enum.reverse
+  end
+
+  @doc """
+  Merges two sets of Elixir/Erlang terms, where the terms come
+  in the form of lists of tuples. For example, such as is found
+  in the relx.config file
+  """
+  def merge(old, new) when is_list(old) and is_list(new) do
+    do_merge(old, new, []) |> Enum.reverse
+  end
+
+  defp do_merge([h|t], new, acc) when is_tuple(h) do
+    case :lists.keysearch(elem(h, 0), 1, new) do
+      {:value, new_value} ->
+        # Value is present in new, so merge the value
+        merged = do_merge_term(h, new_value)
+        do_merge(t, new, [merged|acc])
+      false ->
+        # Value doesn't exist in new, so add it
+        do_merge(t, new, [h|acc])
+    end
+  end
+  defp do_merge([], _new, acc) do
+    acc
+  end
+
+  defp do_merge_term(old, new) when is_tuple(old) and is_tuple(new) do
+    old
+    |> Tuple.to_list
+    |> Enum.with_index
+    |> Enum.reduce([], fn
+        {val, idx}, acc when is_list(val) ->
+          merged = val |> Enum.concat(elem(new, idx)) |> Enum.uniq
+          [merged|acc]
+        {val, idx}, acc when is_tuple(val) ->
+          [do_merge_term(val, elem(new, idx))|acc]
+        {_val, idx}, acc ->
+          [elem(new, idx)|acc]
+       end)
+    |> Enum.reverse
+    |> List.to_tuple
+  end
+
   @doc "Get the priv path of the exrm dependency"
   def priv_path, do: Path.join([__DIR__, "..", "..", "priv"]) |> Path.expand
   @doc "Get the priv/rel path of the exrm dependency"
