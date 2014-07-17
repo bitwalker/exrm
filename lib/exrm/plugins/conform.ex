@@ -1,4 +1,16 @@
 defmodule ReleaseManager.Plugin.Conform do
+  @name "conform"
+  @shortdoc "Generates a .conf for your release"
+  @moduledoc """
+  Generates a .conf for your release
+
+  This plugin ensures that your application has a .schema.exs
+  and .conf file for setting up configuration via the `conform`
+  library. This .conf file then offers a simplified interface
+  for sysadmins and other deployment staff for easily configuring
+  your release in production.
+  """
+  
   use   ReleaseManager.Plugin
   alias ReleaseManager.Config
   alias ReleaseManager.Utils
