@@ -82,7 +82,7 @@ defmodule ReleaseManager.Utils do
         {:error, "Failed to build release. Please fix any errors and try again."}
     end
   end
-  
+
   @doc "Print an informational message without color"
   def debug(message), do: IO.puts "==> #{message}"
   @doc "Print an informational message in green"
@@ -109,7 +109,7 @@ defmodule ReleaseManager.Utils do
       true  ->
         release_path
         |> File.ls!
-        |> Enum.reject(fn entry -> entry == "RELEASES" end)
+        |> Enum.reject(fn entry -> entry in ["RELEASES", "start_erl.data"] end)
         |> Enum.map(fn version -> {project, version} end)
     end
   end
