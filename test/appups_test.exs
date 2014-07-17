@@ -1,21 +1,23 @@
 defmodule AppupsTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   import ReleaseManager.Utils, only: [write_term: 2]
 
-  @v1_path Path.join([File.cwd!, "test", "beams", "v1", "ebin", "test.app"])
-  @v2_path Path.join([File.cwd!, "test", "beams", "v2", "ebin", "test.app"])
+  @v1_path     Path.join([File.cwd!, "test", "beams", "v1"])
+  @v2_path     Path.join([File.cwd!, "test", "beams", "v2"])
+  @v1_app_path Path.join([File.cwd!, "test", "beams", "v1", "ebin", "test.app"])
+  @v2_app_path Path.join([File.cwd!, "test", "beams", "v2", "ebin", "test.app"])
 
   setup do
-    @v1_path |> write_term(v1_app)
-    @v2_path |> write_term(v2_app)
+    @v1_app_path |> write_term(v1_app)
+    @v2_app_path |> write_term(v2_app)
 
     on_exit fn ->
-      if @v1_path |> File.exists? do
-        @v1_path |> File.rm!
+      if @v1_app_path |> File.exists? do
+        @v1_app_path |> File.rm!
       end
-      if @v2_path |> File.exists? do
-        @v2_path |> File.rm!
+      if @v2_app_path |> File.exists? do
+        @v2_app_path |> File.rm!
       end
     end
 
@@ -23,10 +25,7 @@ defmodule AppupsTest do
   end
 
   test "generates valid .appup file" do
-    v1_path = Path.join([File.cwd!, "test", "beams", "v1"])
-    v2_path = Path.join([File.cwd!, "test", "beams", "v2"])
-    {:ok, appup} = ReleaseManager.Appups.make(:test, "0.0.1", "0.0.2", v1_path, v2_path)
-
+    {:ok, appup} = ReleaseManager.Appups.make(:test, "0.0.1", "0.0.2", @v1_path, @v2_path)
     assert appup == expected_appup
   end
 

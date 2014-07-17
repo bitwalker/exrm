@@ -1,11 +1,22 @@
 defmodule UtilsTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   alias ReleaseManager.Utils
 
-  @old_path      Path.join([File.cwd!, "test", "configs", "old_relx.config"])
-  @new_path      Path.join([File.cwd!, "test", "configs", "new_relx.config"])
-  @expected_path Path.join([File.cwd!, "test", "configs", "merged_relx.config"])
+  @example_app_path Path.join([File.cwd!, "test", "example_app"])
+  @old_path         Path.join([File.cwd!, "test", "configs", "old_relx.config"])
+  @new_path         Path.join([File.cwd!, "test", "configs", "new_relx.config"])
+  @expected_path    Path.join([File.cwd!, "test", "configs", "merged_relx.config"])
+
+
+  defmacrop with_app(body) do
+    quote do
+      cwd = File.cwd!
+      File.cd! @example_app_path
+      unquote(body)
+      File.cd! cwd
+    end
+  end
 
   test "can merge two relx.config files" do
     old      = @old_path |> Utils.read_terms
@@ -24,4 +35,46 @@ defmodule UtilsTest do
 
     assert expected == terms
   end
+
+  test "can run a function in a specific Mix environment" do
+    execution_env = Utils.with_env :prod, fn -> Mix.env end
+    assert :prod = execution_env
+  end
+
+  test "can load the current project configuration" do
+    with_app do
+      [test: config] = Utils.load_config
+      assert List.keymember?(config, :foo, 0)
+    end
+  end
+
+  test "can invoke mix to perform a task for a given environment" do
+    with_app do
+      assert :ok = Utils.mix("clean", :prod)
+    end
+  end
+
+  test "can get the current elixir library path" do
+    path        = Path.join([Utils.get_elixir_path, "bin", "elixir"])
+    {result, _} = System.cmd(path, ["--version"])
+    version     = result |> String.strip(?\n)
+    assert "Elixir #{System.version}" == version
+  end
+
+  @tag :expensive
+  test "can build a release and boot it up" do
+    with_app do
+      # Build release
+      assert :ok = Utils.mix("compile", :dev)
+      assert :ok = Utils.mix("release", :dev)
+      assert [{"test", "0.0.1"}] == Utils.get_releases("test")
+      # Boot it, ping it, and shut it down
+      bin_path = Path.join(["rel", "test", "bin", "test"])
+      assert {_, 0}        = System.cmd(bin_path, ["start"])
+      :timer.sleep(1000) # Required, since starting up takes a sec
+      assert {"pong\n", 0} = System.cmd(bin_path, ["ping"])
+      assert {"ok\n", 0}   = System.cmd(bin_path, ["stop"])
+    end
+  end
+
 end
