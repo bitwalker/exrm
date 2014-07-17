@@ -45,10 +45,6 @@ defmodule ReleaseManager.Utils do
   def mix(command, env, :quiet),   do: do_cmd("MIX_ENV=#{env} mix #{command}", &ignore/1)
   def mix(command, env, :verbose), do: do_cmd("MIX_ENV=#{env} mix #{command}", &IO.write/1)
   @doc """
-  Download a file from a url to the provided destination.
-  """
-  def wget(url, destination), do: do_cmd("wget -O #{destination} #{url}", &ignore/1)
-  @doc """
   Change user permissions for a target file or directory
   """
   def chmod(target, flags), do: do_cmd("chmod #{flags} #{target}", &ignore/1)
