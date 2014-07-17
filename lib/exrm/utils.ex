@@ -49,17 +49,6 @@ defmodule ReleaseManager.Utils do
   """
   def chmod(target, flags), do: do_cmd("chmod #{flags} #{target}", &ignore/1)
   @doc """
-  Clone a git repository to the provided destination, or current directory
-  """
-  def clone(repo_url, destination), do: do_cmd("git clone #{repo_url} #{destination}", &ignore/1)
-  def clone(repo_url, destination, branch) do
-    case branch do
-      :default -> clone repo_url, destination
-      ""       -> clone repo_url, destination
-      _        -> do_cmd "git clone --branch #{branch} #{repo_url} #{destination}", &ignore/1
-    end
-  end
-  @doc """
   Execute `relx`
   """
   def relx(name, version, verbosity, upgrade?, dev) do
