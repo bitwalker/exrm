@@ -60,11 +60,6 @@ defmodule ReleaseManager.Utils do
       true  -> "--dev-mode"
       false -> ""
     end
-    # Get the release version
-    ver = case version do
-      "" -> git_describe
-      _  -> version
-    end
     # Convert friendly verbosity names to relx values
     v = case verbosity do
       :silent  -> 0
@@ -76,10 +71,10 @@ defmodule ReleaseManager.Utils do
     # Let relx do the heavy lifting
     relx_path = Path.join([priv_path, "bin", "relx"])
     command = case upgrade? do
-      false -> "#{relx_path} release tar -V #{v} --root #{File.cwd!} --config #{config} --relname #{name} --relvsn #{ver} --output-dir #{output_dir} #{dev_mode?}"
+      false -> "#{relx_path} release tar -V #{v} --root #{File.cwd!} --config #{config} --relname #{name} --relvsn #{version} --output-dir #{output_dir} #{dev_mode?}"
       true  ->
         last_release = get_last_release(name)
-        "#{relx_path} release relup tar -V #{v} --root #{File.cwd!} --config #{config} --relname #{name} --relvsn #{ver} --output-dir #{output_dir} --upfrom \"#{last_release}\" #{dev_mode?}"
+        "#{relx_path} release relup tar -V #{v} --root #{File.cwd!} --config #{config} --relname #{name} --relvsn #{version} --output-dir #{output_dir} --upfrom \"#{last_release}\" #{dev_mode?}"
     end
     case do_cmd command do
       :ok         -> :ok
@@ -87,13 +82,7 @@ defmodule ReleaseManager.Utils do
         {:error, "Failed to build release. Please fix any errors and try again."}
     end
   end
-  @doc """
-  Get the current project revision's short hash from git
-  """
-  def git_describe do
-    System.cmd "git describe --always --tags | sed -e s/^v//"
-  end
-
+  
   @doc "Print an informational message without color"
   def debug(message), do: IO.puts "==> #{message}"
   @doc "Print an informational message in green"
