@@ -5,8 +5,8 @@ defmodule PluginTest do
     active = [
       ReleaseManager.Plugin.Consolidation,
       ReleaseManager.Plugin.Conform
-    ]
+    ] |> Enum.sort
 
-    assert active == ReleaseManager.Plugin.load_all
+    assert active == ReleaseManager.Plugin.load_all |> Enum.sort
   end
 end
