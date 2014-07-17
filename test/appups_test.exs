@@ -3,8 +3,8 @@ defmodule AppupsTest do
 
   import ReleaseManager.Utils, only: [write_term: 2]
 
-  @v1_path Path.join([File.cwd!, "test", "testapp", "v1", "ebin", "test.app"])
-  @v2_path Path.join([File.cwd!, "test", "testapp", "v2", "ebin", "test.app"])
+  @v1_path Path.join([File.cwd!, "test", "beams", "v1", "ebin", "test.app"])
+  @v2_path Path.join([File.cwd!, "test", "beams", "v2", "ebin", "test.app"])
 
   setup do
     @v1_path |> write_term(v1_app)
@@ -23,8 +23,8 @@ defmodule AppupsTest do
   end
 
   test "generates valid .appup file" do
-    v1_path = Path.join([File.cwd!, "test", "testapp", "v1"])
-    v2_path = Path.join([File.cwd!, "test", "testapp", "v2"])
+    v1_path = Path.join([File.cwd!, "test", "beams", "v1"])
+    v2_path = Path.join([File.cwd!, "test", "beams", "v2"])
     {:ok, appup} = ReleaseManager.Appups.make(:test, "0.0.1", "0.0.2", v1_path, v2_path)
 
     assert appup == expected_appup
