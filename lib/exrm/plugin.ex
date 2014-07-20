@@ -54,6 +54,10 @@ defmodule ReleaseManager.Plugin do
       @behaviour ReleaseManager.Plugin
       alias  ReleaseManager.Config
       import ReleaseManager.Utils, only: [debug: 1, info: 1, warn: 1, notice: 1, error: 1]
+
+      Module.register_attribute __MODULE__, :name, accumulate: false, persist: true
+      Module.register_attribute __MODULE__, :moduledoc, accumulate: false, persist: true
+      Module.register_attribute __MODULE__, :shortdoc, accumulate: false, persist: true
     end
   end
 

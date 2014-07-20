@@ -1,4 +1,7 @@
 defmodule ReleaseManager.Plugin.Consolidation do
+  @name "protocol.consolidation"
+  @shortdoc "Performs protocol consolidation for your release."
+  
   use    ReleaseManager.Plugin
   alias  ReleaseManager.Config
   alias  ReleaseManager.Utils

@@ -37,7 +37,7 @@ This project's goal is to make releases with Elixir projects a breeze. It is com
 
 ```elixir
   defp deps do
-    [{:exrm, "~> 0.12.5"}]
+    [{:exrm, "~> 0.12.7"}]
   end
 ```
 
@@ -52,7 +52,16 @@ This project's goal is to make releases with Elixir projects a breeze. It is com
 
 ### Configuration
 
-I'm going to go in to more detail on how configuration works later on,
+There are two forms of configuration I will deal with here. One is
+configuration for the release process, the latter is handling
+application configuration for your release. The following custom release
+configuration is supported:
+
+- `sys.config` - This is the configuration file the release will use in production. I would use `config/config.exs` or `config/myapp.conf` instead of this, but it's there if you want it.
+- `vm.args` - This file contains line-separated arguments that the Erlang VM will use when booting up. Provide your own here and it will be used instead of the default one. Make sure you provide values for `sname` and `cookie` though, or you won't be able to connect to your release!
+- `relx.config` - This file is used to provide configuration to exrm's underyling relx dependency. The dependency will be going away in the future, but the configuration file will remain (though it may be renamed). See the documentation at [relx's GitHub page](https://github.com/erlware/relx) for more information on what you can provide here. The default one should cover 99% of cases, but if you need to tweak values, you can provide your own relx configuration, by creating a file at `rel/relx.config` and setting the config values you care about. You do not need to provide the entire configuration, as your customizations will be merged with the defaults exrm uses.
+
+I'm going to go in to more detail on how application configuration works later on,
 for now just know that when you run `mix release` for the first time,
 exrm will warn you that it couldn't find a `yourapp.conf` and
 `yourapp.schema.exs` file, and generates them for you based on your
@@ -66,7 +75,7 @@ where you define the configuration available in the `.conf`.
 > rel/test/bin/test console
 Erlang/OTP 17 [erts-6.0] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:10] [hipe] [kernel-poll:false] [dtrace]
 
-Interactive Elixir (0.13.2) - press Ctrl+C to exit (type h() ENTER for help)
+Interactive Elixir (0.14.3) - press Ctrl+C to exit (type h() ENTER for help)
 iex(test@127.0.0.1)1> :gen_server.call(:test, :ping)
 :v1
 iex(test@127.0.0.1)2>
@@ -195,13 +204,13 @@ building releases. As soon as I feel like I have a firm grasp of all the
 edge cases, I'll formalize this in a better format perhaps as a
 "Preparing for Release" document.
 
-- Ensure all dependencies for your application are defined in the
-  `:applications` block of your `mix.exs` file. This is how the build
+- Ensure all dependencies for your application are defined in either the
+  `:applications` or `:included_applications` block of your `mix.exs` file. This is how the build
   process knows that those dependencies need to be bundled in to the
   release. **This includes dependencies of your dependencies, if they were
   not properly configured**. For instance, if you depend on `mongoex`, and
   `mongoex` depends on `erlang-mongodb`, but `mongoex` doesn't have `erlang-mongodb`
-  in it's applications section, your app will fail in it's release form,
+  in it's applications list, your app will fail in it's release form,
   because `erlang-mongodb` won't be loaded.
 - If you are running into issues with your dependencies missing their
   dependencies, it's likely that the author did not put the dependencies in
@@ -210,34 +219,8 @@ edge cases, I'll formalize this in a better format perhaps as a
   you know what the dependency is, you can put it in your own `mix.exs`, and
   the release process will ensure that it is loaded with everything else.
 
-If you run into problems, this is still early in the project's development, so please create an issue, and I'll address ASAP.
+If you run into problems, please create an issue, and I'll address ASAP.
 
 ## Appendix
 
-The example server I setup was as simple as this:
-
-1. `mix new test`
-2. `cd test && touch lib/test/server.ex`
-
-Then put the following in `lib/test/server.ex`
-
-```elixir
-defmodule Test.Server do
-  use GenServer
-
-  def start_link() do
-    :gen_server.start_link({:local, :test}, __MODULE__, [], [])
-  end
-
-  def init([]) do
-    { :ok, [] }
-  end
-  
-  def handle_call(:ping, _from, state) do
-    { :reply, :pong, state }
-  end
-
-end
-```
-
-You can find the source code for an example application [here](https://github.com/bitwalker/exrm-test), and an example umbrella application [here](https://github.com/bitwalker/exrm-umbrella-test). You should be able to replicate my example using these steps. If you can't, please let me know.
+You can find the source code for the example application [here](https://github.com/bitwalker/exrm-test), and an example umbrella application [here](https://github.com/bitwalker/exrm-umbrella-test). Everything mentioned here should work out of the box with those projects. If it does not, please file a bug!

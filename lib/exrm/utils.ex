@@ -37,16 +37,6 @@ defmodule ReleaseManager.Utils do
   end
 
   @doc """
-  Call make in the current working directory.
-  """
-  def make(:quiet),                  do: make("", "", :quiet)
-  def make(:verbose),                do: make("", "", :verbose)
-  def make(command, :quiet),         do: make(command, "", :quiet)
-  def make(command, :verbose),       do: make(command, "", :verbose)
-  def make(command, args),           do: make(command, args, :quiet)
-  def make(command, args, :quiet),   do: do_cmd("make #{command} #{args}", &ignore/1)
-  def make(command, args, :verbose), do: do_cmd("make #{command} #{args}", &IO.write/1)
-  @doc """
   Call the _elixir mix binary with the given arguments
   """
   def mix(command, :quiet),        do: mix(command, :dev, :quiet)
@@ -55,24 +45,9 @@ defmodule ReleaseManager.Utils do
   def mix(command, env, :quiet),   do: do_cmd("MIX_ENV=#{env} mix #{command}", &ignore/1)
   def mix(command, env, :verbose), do: do_cmd("MIX_ENV=#{env} mix #{command}", &IO.write/1)
   @doc """
-  Download a file from a url to the provided destination.
-  """
-  def wget(url, destination), do: do_cmd("wget -O #{destination} #{url}", &ignore/1)
-  @doc """
   Change user permissions for a target file or directory
   """
   def chmod(target, flags), do: do_cmd("chmod #{flags} #{target}", &ignore/1)
-  @doc """
-  Clone a git repository to the provided destination, or current directory
-  """
-  def clone(repo_url, destination), do: do_cmd("git clone #{repo_url} #{destination}", &ignore/1)
-  def clone(repo_url, destination, branch) do
-    case branch do
-      :default -> clone repo_url, destination
-      ""       -> clone repo_url, destination
-      _        -> do_cmd "git clone --branch #{branch} #{repo_url} #{destination}", &ignore/1
-    end
-  end
   @doc """
   Execute `relx`
   """
@@ -134,7 +109,7 @@ defmodule ReleaseManager.Utils do
       true  ->
         release_path
         |> File.ls!
-        |> Enum.reject(fn entry -> entry == "RELEASES" end)
+        |> Enum.reject(fn entry -> entry in ["RELEASES", "start_erl.data"] end)
         |> Enum.map(fn version -> {project, version} end)
     end
   end
