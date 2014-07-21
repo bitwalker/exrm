@@ -26,7 +26,7 @@ defmodule ReleaseManager.Plugin.Conform do
 
     debug "Conform: Updating schema..."
     # Get top-level schema...
-    schema = Conform.Schema.load(app |> String.to_atom)
+    schema = Conform.Schema.read(app |> String.to_atom)
     # Get schemas from all dependencies
     dep_schemas = Conform.Schema.coalesce
     # Merge together
@@ -37,7 +37,7 @@ defmodule ReleaseManager.Plugin.Conform do
         warn "Conform: No schema found, proceeding without one."
         false
       true ->
-        Conform.Schema.write(merged, schema_path)
+        Conform.Schema.write_quoted(merged, schema_path)
         info "Conform: #{app}.schema.exs updated succesfully!"
         true
     end
