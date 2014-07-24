@@ -36,7 +36,7 @@
 		]
 	],
 	translations: [
-		"test.debug.level": fn val ->
+		"test.debug.level": fn _mapping, val ->
 			case(val) do
 				:active ->
 					{:on, []}
