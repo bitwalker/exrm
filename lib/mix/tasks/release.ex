@@ -132,6 +132,7 @@ defmodule Mix.Tasks.Release do
         debug "Merging custom relx configuration from #{user_config_path |> Path.relative_to_cwd}..."
         case Utils.read_terms(user_config_path) do
           []                                      -> relx_config
+          [{_, _}|_] = user_config                -> Utils.merge(relx_config, user_config)
           [user_config] when is_list(user_config) -> Utils.merge(relx_config, user_config)
           [user_config]                           -> Utils.merge(relx_config, [user_config])
         end
