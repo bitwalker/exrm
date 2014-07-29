@@ -111,11 +111,11 @@ defmodule Mix.Tasks.Release do
     lib_dirs = case Mix.Project.config |> Keyword.get(:umbrella?, false) do
       true ->
         [ elixir_path,
-          '../../_build/prod',
-          '../../#{Mix.Project.config |> Keyword.get(:deps_path) |> String.to_char_list}' ]
+          '#{"_build/prod" |> Path.expand}',
+          '#{Mix.Project.Config |> Keyword.get(:deps_path) |> Path.expand}' ]
       _ ->
         [ elixir_path,
-          '../../_build/prod' ]
+          '#{"_build/prod" |> Path.expand}' ]
     end
     # Build release configuration
     relx_config = relx_config
