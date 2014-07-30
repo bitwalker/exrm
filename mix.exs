@@ -1,3 +1,5 @@
+Code.eval_file "tasks/docs.exs"
+
 defmodule ReleaseManager.Mixfile do
   use Mix.Project
 
