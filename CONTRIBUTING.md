@@ -111,6 +111,15 @@ After your changes are done, please remember to run the full test suite with
 
 With tests running and passing, and your [documentation](#contributing-documentation) done, your ready to send a PR!
 
+If you decide you want to build the html docs as well, you'll need the following in order to use the `mix docs` task:
+
+- python
+- node
+- bower and grunt: `npm install -g bower grunt`
+- sphinx: `pip install Sphinx`
+
+Then you should be able to run `mix docs` or `mix docs watch` to build and/or watch the html docs during development.
+
 ## Contributing Documentation
 
 Please make sure all modules are well documented with a `@moduledoc`, any relevant
