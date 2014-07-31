@@ -1,4 +1,7 @@
-Code.eval_file "tasks/docs.exs"
+docs_task = "tasks/docs.exs"
+if File.exists?(docs_task) do
+  Code.eval_file "tasks/docs.exs"
+end
 
 defmodule ReleaseManager.Mixfile do
   use Mix.Project
