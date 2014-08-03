@@ -57,7 +57,7 @@ defmodule Mix.Tasks.Release.Plugins do
   defp display_plugin_long(plugin) do
     name      = get_name(plugin)
     moduledoc = get_moduledoc(plugin)
-    if IO.ANSI.terminal? do
+    if IO.ANSI.enabled? do
       opts = [width: 80]
       IO.ANSI.Docs.print_heading("#{name}", opts)
       IO.ANSI.Docs.print(moduledoc, opts)
