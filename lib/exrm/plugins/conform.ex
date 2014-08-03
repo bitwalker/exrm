@@ -16,17 +16,14 @@ defmodule ReleaseManager.Plugin.Conform do
   alias ReleaseManager.Utils
 
   def before_release(%Config{name: app, version: version}) do
-    empty_schema = Conform.Schema.empty
-    relx_config  = Utils.rel_file_dest_path("relx.config") |> Utils.read_terms
-    schema_path  = Conform.Schema.schema_path(app)
-    conf_path    = Path.join([File.cwd!, "config", "#{app}.conf"])
+    empty_schema   = Conform.Schema.empty
+    relx_conf_path = Utils.rel_file_dest_path("relx.config")
+    schema_dest    = Utils.rel_file_dest_path("#{app}.schema.exs")
+    conf_src       = Path.join([File.cwd!, "config", "#{app}.conf"])
 
-    # Ensure config directory exists
-    Path.join(File.cwd!, "config") |> File.mkdir_p!
-
-    debug "Conform: Updating schema..."
+    debug "Conform: Loading schema..."
     # Get top-level schema...
-    schema = Conform.Schema.load(app |> String.to_atom)
+    schema = app |> String.to_atom |> Conform.Schema.read
     # Get schemas from all dependencies
     dep_schemas = Conform.Schema.coalesce
     # Merge together
@@ -34,34 +31,36 @@ defmodule ReleaseManager.Plugin.Conform do
     # If the merged schema is non-empty, save the schema to config/{app}.schema.exs
     continue? = cond do
       merged == empty_schema ->
-        warn "Conform: No schema found, proceeding without one."
+        warn "Conform: No schema found, conform will not be packaged in this release!"
         false
       true ->
-        Conform.Schema.write(merged, schema_path)
-        info "Conform: #{app}.schema.exs updated succesfully!"
+        Conform.Schema.write_quoted(merged, schema_dest)
+        info "Conform: Schema succesfully loaded!"
         true
     end
 
     if continue? do
-      debug "Conform: Checking for #{app}.conf..."
-      # If .conf is not found, generate default one
-      unless File.exists?(conf_path) do
-        warn "Conform: No .conf found, generating one at config/#{app}.conf"
-        Mix.Task.run("conform.configure")
+      # Define overlays for relx.config
+      overlays = [{:copy, '#{schema_dest}', 'releases/#{version}/#{app}.schema.exs'}]
+      overlays = case File.exists?(conf_src) do
+        true ->
+          [{:copy, '#{conf_src}', 'releases/#{version}/#{app}.conf'}|overlays]
+        false ->
+          overlays
       end
+
       # Generate escript for release
       debug "Conform: Generating escript.."
       escript_path = Mix.Task.run("conform.release")
+      overlays = [{:copy, escript_path |> String.to_char_list, 'bin/conform'}|overlays]
+
       # Add .conf, .schema.exs, and escript to relx.config as overlays
-      debug "Conform: Adding overlays to relx.config"
-      overlays = [overlay: [
-        {:copy, schema_path  |> String.to_char_list, 'releases/#{version}/#{app}.schema.exs'},
-        {:copy, conf_path    |> String.to_char_list, 'releases/#{version}/#{app}.conf'},
-        {:copy, escript_path |> String.to_char_list, 'bin/conform'},
-      ]]
-      updated = Utils.merge(relx_config, overlays)
+      debug "Conform: Adding overlays to relx.config..."
+      relx_config = relx_conf_path |> Utils.read_terms 
+      updated = Utils.merge(relx_config, [overlay: overlays])
+
       # Persist relx.config
-      Utils.write_terms(Utils.rel_file_dest_path("relx.config"), updated)
+      Utils.write_terms(relx_conf_path, updated)
 
       info "Conform: Done!"
     end

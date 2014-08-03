@@ -1,6 +1,7 @@
 /_build
 /deps
 /tmp
+/docs/build
 erl_crash.dump
 *.ez
 .exenv-version

@@ -1,10 +1,15 @@
+docs_task = "tasks/docs.exs"
+if File.exists?(docs_task) do
+  Code.eval_file "tasks/docs.exs"
+end
+
 defmodule ReleaseManager.Mixfile do
   use Mix.Project
 
   def project do
     [ app: :exrm,
-      version: "0.13.3",
-      elixir: "~> 0.14.4-dev",
+      version: "0.14.0",
+      elixir: "~> 0.15.0",
       description: description,
       package: package,
       deps: [{:conform, github: "bitwalker/conform", branch: "develop"}] ]
@@ -23,7 +28,7 @@ defmodule ReleaseManager.Mixfile do
     [ files: ["lib", "priv", "mix.exs", "README.md", "LICENSE"],
       contributors: ["Paul Schoenfelder"],
       licenses: ["MIT"],
-      links: [ { "GitHub", "https://github.com/bitwalker/exrm" } ] ]
+      links: %{ "GitHub": "https://github.com/bitwalker/exrm" } ]
   end
 
 end
