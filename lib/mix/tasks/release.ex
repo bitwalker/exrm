@@ -112,7 +112,7 @@ defmodule Mix.Tasks.Release do
       true ->
         [ elixir_path,
           '#{"_build/prod" |> Path.expand}',
-          '#{Mix.Project.Config |> Keyword.get(:deps_path) |> Path.expand}' ]
+          '#{Mix.Project.config |> Keyword.get(:deps_path) |> Path.expand}' ]
       _ ->
         [ elixir_path,
           '#{"_build/prod" |> Path.expand}' ]
