@@ -17,5 +17,6 @@ defmodule ReleaseManager.Config do
             dev:       false,
             erl:       "",
             upgrade?:  false,
-            verbosity: :quiet
+            verbosity: :quiet,
+            relx_config: []
 end

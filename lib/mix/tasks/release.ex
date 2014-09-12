@@ -139,6 +139,8 @@ defmodule Mix.Tasks.Release do
       _ ->
         relx_config
     end
+    # Save relx config for use later
+    config = %{config | :relx_config => merged}
     # Ensure destination base path exists
     dest |> Path.dirname |> File.mkdir_p!
     # Persist relx.config
@@ -313,12 +315,20 @@ defmodule Mix.Tasks.Release do
     config
   end
 
-  defp update_release_package(%Config{name: name, version: version} = config) do
+  defp update_release_package(%Config{name: name, version: version, relx_config: relx_config} = config) do
     debug "Packaging release..."
     erts = "erts-#{:erlang.system_info(:version) |> IO.iodata_to_binary}"
     # Delete original release package
     tarball = rel_dest_path [name, "#{name}-#{version}.tar.gz"]
     File.rm! tarball
+    # Get include_erts value from relx_config
+    include_erts = Keyword.get(relx_config, :include_erts, true)
+    extras = case include_erts do
+      false -> []
+      true  -> [{'#{erts}', '#{rel_dest_path([name, erts])}'}]
+      path when is_binary(path) ->
+        [{'#{erts}', '#{path}'}]
+    end
     # Re-package release with modifications
     :ok = :erl_tar.create(
       '#{tarball}',
@@ -326,8 +336,7 @@ defmodule Mix.Tasks.Release do
         {'lib',      '#{rel_dest_path([name, "lib"])}'},
         {'releases', '#{rel_dest_path([name, "releases"])}'},
         {'bin',      '#{rel_dest_path([name, "bin"])}'},
-        {'#{erts}',  '#{rel_dest_path([name, erts])}'}
-      ],
+      ] ++ extras,
       [:compressed]
     )
     # Continue..

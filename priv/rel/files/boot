@@ -12,6 +12,8 @@ REL_LIB_DIR="$RELEASE_ROOT_DIR/lib"
 ERL_OPTS="{{{ERL_OPTS}}}"
 PIPE_DIR="/tmp/erl_pipes/{{{PROJECT_NAME}}}/"
 RUNNER_LOG_DIR="${RUNNER_LOG_DIR:-$RELEASE_ROOT_DIR/log}"
+ERTS_DIR=""
+ROOTDIR=""
 
 find_erts_dir() {
     local erts_dir="$RELEASE_ROOT_DIR/erts-$ERTS_VSN"
@@ -20,7 +22,7 @@ find_erts_dir() {
         ROOTDIR="$RELEASE_ROOT_DIR"
     else
         local erl="$(which erl)"
-        local erl_root="$("$erl" -noshell -eval "io:format(\\"~s\\", [code:root_dir()])." -s init stop)"
+        local erl_root="$("$erl" -noshell -eval "io:format(\"~s\", [code:root_dir()])." -s init stop)"
         ERTS_DIR="$erl_root/erts-$ERTS_VSN"
         ROOTDIR="$erl_root"
     fi
@@ -32,14 +34,21 @@ relx_rem_sh() {
     # transparently
     id="remsh$(relx_gen_id)-${NAME}"
 
+    # Get the node's ticktime so that we use the same thing
+    TICKTIME="$(relx_nodetool rpcterms net_kernel get_net_ticktime)"
+
     # Setup Erlang remote shell command to control node
-    #exec "$BINDIR/erl" "$NAME_TYPE" "$id" -remsh "$NAME" -boot start_clean \
-         #-setcookie "$COOKIE"
+    #exec "$ERTS_DIR/bin/erl" "$NAME_TYPE" "$id" -remsh "$NAME" -boot start_clean \
+         #-setcookie "$COOKIE" -kernel net_ticktime "$TICKTIME"
 
     # Setup Elixir remote shell command to control node
-    exec "$BINDIR/erl" -pa "$ROOTDIR/lib/*/ebin" -pa "$ROOTDIR/lib/consolidated" -noshell -boot start_clean \
-                 -user Elixir.IEx.CLI "$NAME_TYPE" "$id" -setcookie "$COOKIE" \
-                 -extra --no-halt +iex -"$NAME_TYPE" "$id" --cookie "$COOKIE" --remsh "$NAME"
+    set -- "$ERTS_DIR/bin/erl" \
+                -pa "$ROOTDIR"/lib/*/ebin "$ROOTDIR"/lib/consolidated \
+                -noshell -boot start_clean \
+                -kernel net_ticktime "$TICKTIME" \
+                -user Elixir.IEx.CLI "$NAME_TYPE" "$id" -setcookie "$COOKIE" \
+                -extra --no-halt +iex -"$NAME_TYPE" "$id" --cookie "$COOKIE" --remsh "$NAME"
+    exec "$@"
 }
 
 # Generate a random id
@@ -50,7 +59,7 @@ relx_gen_id() {
 # Control a node
 relx_nodetool() {
     command="$1"; shift
-    "erts-$ERTS_VSN/bin/escript" "$ROOTDIR/bin/nodetool" "$NAME_TYPE" "$NAME" \
+    "$ERTS_DIR/bin/escript" "$ROOTDIR/bin/nodetool" "$NAME_TYPE" "$NAME" \
                                  -setcookie "$COOKIE" "$command" "$@"
 }
 
@@ -66,7 +75,7 @@ generate_config() {
     local schema_file="$REL_DIR/$REL_NAME.schema.exs"
     local sys_config="$REL_DIR/sys.config"
     if [ -f "$schema_file" ]; then
-        result="$("erts-$ERTS_VSN/bin/escript" "$ROOTDIR"/bin/conform --conf "$conf_file" --schema "$schema_file" --config "$sys_config" --output-dir "$REL_DIR")"
+        result="$("$ERTS_DIR/bin/escript" "$ROOTDIR"/bin/conform --conf "$conf_file" --schema "$schema_file" --config "$sys_config" --output-dir "$REL_DIR")"
         exit_status="$?"
         if [ "$exit_status" -ne 0 ]; then
             exit "$exit_status"
@@ -160,6 +169,8 @@ case "$1" in
         #    echo "Node is already running!"
         #    exit 1
         #fi
+        # Save this for later
+        CMD="$1"
         case "$1" in
             start)
                 shift
@@ -179,7 +190,7 @@ case "$1" in
         [ "$RUN_PARAM" ] && set -- "$@" "$RUN_PARAM"
 
         # Export the HEART_COMMAND
-        HEART_COMMAND="$@"
+        HEART_COMMAND="$RELEASE_ROOT_DIR/bin/$REL_NAME $CMD"
         export HEART_COMMAND
 
         mkdir -p "$PIPE_DIR"
@@ -324,7 +335,7 @@ case "$1" in
         # For e.g. 'setup', one may even want to name another boot script.
         case "$1" in
             console)
-                if [ "$REL_DIR/$REL_NAME.boot" ]; then
+                if [ -f "$REL_DIR/$REL_NAME.boot" ]; then
                     BOOTFILE="$REL_DIR/$REL_NAME"
                 else
                     BOOTFILE="$REL_DIR/start"
@@ -351,7 +362,7 @@ case "$1" in
 
         # Build an array of arguments to pass to exec later on
         # Build it here because this command will be used for logging.
-        set -- "$BINDIR/erlexec" -boot "$BOOTFILE" \
+        set -- "$ERTS_DIR/bin/erlexec" -boot "$BOOTFILE" \
             -env ERL_LIBS "$REL_LIB_DIR" -config "$CONFIG_PATH" \
             -pa "$REL_LIB_DIR/consolidated" \
             -args_file "$VMARGS_PATH" \
