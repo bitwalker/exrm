@@ -321,6 +321,10 @@ defmodule Mix.Tasks.Release do
     # Delete original release package
     tarball = rel_dest_path [name, "#{name}-#{version}.tar.gz"]
     File.rm! tarball
+    # Make sure we have a start.boot file for upgrades/downgrades
+    source_boot = rel_dest_path([name, "releases", version, "#{name}.boot"])
+    dest_boot   = rel_dest_path([name, "releases", version, "start.boot"])
+    File.cp! source_boot, dest_boot
     # Get include_erts value from relx_config
     include_erts = Keyword.get(relx_config, :include_erts, true)
     extras = case include_erts do
