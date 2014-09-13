@@ -207,9 +207,16 @@ defmodule ReleaseManager.Utils do
     |> Tuple.to_list
     |> Enum.with_index
     |> Enum.reduce([], fn
+        {[], idx}, acc ->
+          [elem(new, idx)|acc]
         {val, idx}, acc when is_list(val) ->
-          merged = val |> Enum.concat(elem(new, idx)) |> Enum.uniq
-          [merged|acc]
+          case :io_lib.char_list(val) do
+            true ->
+              [elem(new, idx)|acc]
+            false ->
+              merged = val |> Enum.concat(elem(new, idx)) |> Enum.uniq
+              [merged|acc]
+          end
         {val, idx}, acc when is_tuple(val) ->
           [do_merge_term(val, elem(new, idx))|acc]
         {_val, idx}, acc ->
