@@ -26,8 +26,8 @@ defmodule ReleaseManager.Utils do
   @doc """
   Load the current project's configuration
   """
-  def load_config() do
-    with_env :prod, fn ->
+  def load_config(env) do
+    with_env env, fn ->
       if File.regular?("config/config.exs") do
         Mix.Config.read! "config/config.exs"
       else

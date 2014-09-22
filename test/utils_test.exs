@@ -41,9 +41,9 @@ defmodule UtilsTest do
     assert :prod = execution_env
   end
 
-  test "can load the current project configuration" do
+  test "can load the current project configuration for a given environment" do
     with_app do
-      [test: config] = Utils.load_config
+      [test: config] = Utils.load_config(:prod)
       assert List.keymember?(config, :foo, 0)
     end
   end

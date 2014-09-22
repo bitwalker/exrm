@@ -74,21 +74,21 @@ defmodule Mix.Tasks.Release do
     info "The release for #{config.name}-#{config.version} is ready!"
   end
 
-  defp build_project(%Config{verbosity: verbosity} = config) do
+  defp build_project(%Config{verbosity: verbosity, env: env} = config) do
     # Fetch deps, and compile, using the prepared Elixir binaries
     cond do
       verbosity == :verbose ->
-        mix "deps.get",     :prod, :verbose
-        mix "compile",      :prod, :verbose
+        mix "deps.get",     env, :verbose
+        mix "compile",      env, :verbose
       true ->
-        mix "deps.get",     :prod
-        mix "compile",      :prod
+        mix "deps.get",     env
+        mix "compile",      env
     end
     # Continue...
     config
   end
 
-  defp generate_relx_config(%Config{name: name, version: version} = config) do
+  defp generate_relx_config(%Config{name: name, version: version, env: env} = config) do
     debug "Generating relx configuration..."
     # Get paths
     rel_def  = rel_file_source_path @_RELEASE_DEF
@@ -111,11 +111,11 @@ defmodule Mix.Tasks.Release do
     lib_dirs = case Mix.Project.config |> Keyword.get(:umbrella?, false) do
       true ->
         [ elixir_path,
-          '#{"_build/prod" |> Path.expand}',
+          '#{"_build/#{env}" |> Path.expand}',
           '#{Mix.Project.config |> Keyword.get(:deps_path) |> Path.expand}' ]
       _ ->
         [ elixir_path,
-          '#{"_build/prod" |> Path.expand}' ]
+          '#{"_build/#{env}" |> Path.expand}' ]
     end
     # Build release configuration
     relx_config = relx_config
@@ -149,14 +149,14 @@ defmodule Mix.Tasks.Release do
     config
   end
 
-  defp generate_sys_config(config) do
+  defp generate_sys_config(%Config{env: env} = config) do
     default_sysconfig = rel_file_source_path @_SYSCONFIG
     user_sysconfig    = rel_dest_path @_SYSCONFIG
     dest              = rel_file_dest_path   @_SYSCONFIG
 
     debug "Generating sys.config..."
     # Read in current project config
-    project_conf = load_config()
+    project_conf = load_config(env)
     # Merge project config with either the user-provided config, or the default sys.config we provide.
     # If a sys.config is provided by the user, it will take precedence over project config. If the
     # default sys.config is used, the project config will take precedence instead.
@@ -255,12 +255,12 @@ defmodule Mix.Tasks.Release do
     end
   end
 
-  defp do_release(%Config{name: name, version: version, verbosity: verbosity, upgrade?: upgrade?, dev: dev_mode?} = config) do
+  defp do_release(%Config{name: name, version: version, verbosity: verbosity, upgrade?: upgrade?, dev: dev_mode?, env: env} = config) do
     debug "Generating release..."
     # If this is an upgrade release, generate an appup
     if upgrade? do
       # Change mix env for appup generation
-      with_env :prod, fn ->
+      with_env env, fn ->
         # Generate appup
         app      = name |> String.to_atom
         v1       = get_last_release(name)
@@ -352,6 +352,7 @@ defmodule Mix.Tasks.Release do
     defaults = %Config{
       name:    Mix.Project.config |> Keyword.get(:app) |> Atom.to_string,
       version: Mix.Project.config |> Keyword.get(:version),
+      env:     (System.get_env("MIX_ENV") || "prod") |> String.to_atom,
     }
     Enum.reduce args, defaults, fn arg, config ->
       case arg do
