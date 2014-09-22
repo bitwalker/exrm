@@ -58,7 +58,8 @@ defmodule Mix.Tasks.Release do
     Mix.Tasks.Release.Clean.do_cleanup(:build)
     # Collect release configuration
     config = parse_args(args)
-
+    info "Building release with MIX_ENV=#{config.env}."
+    # Begin release pipeline
     config
     |> build_project
     |> generate_relx_config
@@ -352,7 +353,7 @@ defmodule Mix.Tasks.Release do
     defaults = %Config{
       name:    Mix.Project.config |> Keyword.get(:app) |> Atom.to_string,
       version: Mix.Project.config |> Keyword.get(:version),
-      env:     (System.get_env("MIX_ENV") || "prod") |> String.to_atom,
+      env:     Mix.env
     }
     Enum.reduce args, defaults, fn arg, config ->
       case arg do
