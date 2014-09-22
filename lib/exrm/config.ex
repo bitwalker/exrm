@@ -7,6 +7,7 @@ defmodule ReleaseManager.Config do
       name:      The name of your application
       version:   The version of your application
       dev?:      Is this release being built in dev mode
+      env:       The mix environment the app should be build for
       erl:       The binary containing all options to pass to erl
       upgrade?:  Is this release an upgrade?
       verbosity: The verbosity level, one of [silent|quiet|normal|verbose]
@@ -15,6 +16,7 @@ defmodule ReleaseManager.Config do
   defstruct name:      "",
             version:   "",
             dev:       false,
+            env:       :prod,
             erl:       "",
             upgrade?:  false,
             verbosity: :quiet,
