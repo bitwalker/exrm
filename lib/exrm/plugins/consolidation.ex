@@ -7,21 +7,21 @@ defmodule ReleaseManager.Plugin.Consolidation do
   alias  ReleaseManager.Utils
   import ReleaseManager.Utils
 
-  def before_release(%Config{verbosity: verbosity}) do
+  def before_release(%Config{verbosity: verbosity, env: env}) do
     debug "Performing protocol consolidation..."
-    with_env :prod, fn ->
+    with_env env, fn ->
       cond do
         verbosity == :verbose ->
-          mix "compile.protocols", :prod, :verbose
+          mix "compile.protocols", env, :verbose
         true ->
-          mix "compile.protocols", :prod
+          mix "compile.protocols", env
       end
     end
 
     # Load relx.config
     relx_config = Utils.rel_file_dest_path("relx.config") |> Utils.read_terms
     # Add overlay to relx.config which copies consolidated dir to release
-    consolidated_path = Path.join([File.cwd!, "_build", "prod", "consolidated"])
+    consolidated_path = Path.join([File.cwd!, "_build", "#{env}", "consolidated"])
     overlays = [overlay: [
       {:copy, '#{consolidated_path}', 'lib/consolidated'}
     ]]
