@@ -173,7 +173,7 @@ a list, i.e. `[arg1, arg2, arg3].`.
 
 ## Upgrading Releases
 
-So you've made some changes to your app, and you want to generate a new relase and perform a no-downtime upgrade. I'm here to tell you that this is going to be a breeze, so I hope you're ready (I'm using my test app as an example here again):
+So you've made some changes to your app, and you want to generate a new release and perform a no-downtime upgrade. I'm here to tell you that this is going to be a breeze, so I hope you're ready (I'm using my test app as an example here again):
 
 1. `mix release`
 2. `mkdir -p /tmp/test/releases/0.0.2`
