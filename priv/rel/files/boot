@@ -45,7 +45,8 @@ relx_rem_sh() {
     # Setup Elixir remote shell command to control node
     set -- "$ERTS_DIR/bin/erl" \
                 -pa "$ROOTDIR"/lib/*/ebin "$ROOTDIR"/lib/consolidated \
-                -noshell -boot start_clean \
+                -hidden -noshell \
+                -boot start_clean \
                 -kernel net_ticktime "$TICKTIME" \
                 -user Elixir.IEx.CLI "$NAME_TYPE" "$id" -setcookie "$COOKIE" \
                 -extra --no-halt +iex -"$NAME_TYPE" "$id" --cookie "$COOKIE" --remsh "$NAME"
