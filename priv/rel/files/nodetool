@@ -123,9 +123,17 @@ append_node_suffix(Name, Suffix) ->
 %% Given a string or binary, parse it into a list of terms, ala file:consult/0
 %%
 consult(Str) when is_list(Str) ->
-    consult([], Str, []);
+    [Result] = consult([], Str, []),
+    case is_list(Result) of
+        true  -> Result;
+        false -> [Result]
+    end;
 consult(Bin) when is_binary(Bin)->
-    consult([], binary_to_list(Bin), []).
+    [Result] = consult([], binary_to_list(Bin), [])
+    case is_list(Result) of
+        true  -> Result;
+        false -> [Result]
+    end.
 
 consult(Cont, Str, Acc) ->
     case erl_scan:tokens(Cont, Str, 0) of
