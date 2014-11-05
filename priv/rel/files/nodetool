@@ -129,7 +129,7 @@ consult(Str) when is_list(Str) ->
         false -> [Result]
     end;
 consult(Bin) when is_binary(Bin)->
-    [Result] = consult([], binary_to_list(Bin), [])
+    [Result] = consult([], binary_to_list(Bin), []),
     case is_list(Result) of
         true  -> Result;
         false -> [Result]
