@@ -23,7 +23,8 @@ find_erts_dir() {
         ROOTDIR="$RELEASE_ROOT_DIR"
     else
         local erl="$(which erl)"
-        local erl_root="$("$erl" -noshell -eval "io:format(\"~s\", [code:root_dir()])." -s init stop)"
+        local code="io:format(\"~s\", [code:root_dir()])."
+        local erl_root="$("$erl" -noshell -eval "$code" -s init stop)"
         ERTS_DIR="$erl_root/erts-$ERTS_VSN"
         ROOTDIR="$erl_root"
     fi
@@ -43,14 +44,13 @@ relx_rem_sh() {
          #-setcookie "$COOKIE" -kernel net_ticktime "$TICKTIME"
 
     # Setup Elixir remote shell command to control node
-    set -- "$ERTS_DIR/bin/erl" \
-                -pa "$ROOTDIR"/lib/*/ebin "$ROOTDIR"/lib/consolidated \
-                -hidden -noshell \
-                -boot start_clean \
-                -kernel net_ticktime "$TICKTIME" \
-                -user Elixir.IEx.CLI "$NAME_TYPE" "$id" -setcookie "$COOKIE" \
-                -extra --no-halt +iex -"$NAME_TYPE" "$id" --cookie "$COOKIE" --remsh "$NAME"
-    exec "$@"
+    exec "$BINDIR/erl" \
+        -pa "$ROOTDIR"/lib/*/ebin "$ROOTDIR"/lib/consolidated \
+        -hidden -noshell \
+        -boot start_clean -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
+        -kernel net_ticktime "$TICKTIME" \
+        -user Elixir.IEx.CLI "$NAME_TYPE" "$id" -setcookie "$COOKIE" \
+        -extra --no-halt +iex -"$NAME_TYPE" "$id" --cookie "$COOKIE" --remsh "$NAME"
 }
 
 # Generate a random id
@@ -61,8 +61,15 @@ relx_gen_id() {
 # Control a node
 relx_nodetool() {
     command="$1"; shift
-    "$ERTS_DIR/bin/escript" "$ROOTDIR/bin/nodetool" "$NAME_TYPE" "$NAME" \
+    "$BINDIR/escript" "$ROOTDIR/bin/nodetool" "$NAME_TYPE" "$NAME" \
                                  -setcookie "$COOKIE" "$command" "$@"
+}
+
+# Run an escript in the node's environment
+relx_escript() {
+    shift; local scriptpath="$1"; shift
+    export RELEASE_ROOT_DIR
+    "$BINDIR/escript" "$ROOTDIR/$scriptpath" $@
 }
 
 # Output a start command for the last argument of run_erl
@@ -77,7 +84,7 @@ generate_config() {
     local schema_file="$REL_DIR/$REL_NAME.schema.exs"
     local sys_config="$REL_DIR/sys.config"
     if [ -f "$schema_file" ]; then
-        result="$("$ERTS_DIR/bin/escript" "$ROOTDIR"/bin/conform --conf "$conf_file" --schema "$schema_file" --config "$sys_config" --output-dir "$REL_DIR")"
+        result="$("$BINDIR/escript" "$ROOTDIR"/bin/conform --conf "$conf_file" --schema "$schema_file" --config "$sys_config" --output-dir "$REL_DIR")"
         exit_status="$?"
         if [ "$exit_status" -ne 0 ]; then
             exit "$exit_status"
@@ -137,9 +144,18 @@ case $NAME in
         ;;
     *)
         # Add @hostname
-        NAME=$NAME@`hostname`
+        case $NAME_TYPE in
+            -sname)
+                NAME=$NAME@`hostname -s`
+                ;;
+            -name)
+                NAME=$NAME@`hostname -f`
+                ;;
+        esac
         ;;
 esac
+
+PIPE_DIR="${PIPE_DIR:-/tmp/erl_pipes/$NAME/}"
 
 # Extract the target cookie
 COOKIE_ARG="$(grep '^-setcookie' "$VMARGS_PATH")"
@@ -157,6 +173,7 @@ export BINDIR="$ERTS_DIR/bin"
 export EMU="beam"
 export PROGNAME="erl"
 export LD_LIBRARY_PATH="$ERTS_DIR/lib:$LD_LIBRARY_PATH"
+ERTS_LIB_DIR="$ERTS_DIR/../lib"
 
 cd "$ROOTDIR"
 
@@ -207,22 +224,20 @@ case "$1" in
             Linux|Darwin|FreeBSD|DragonFly|NetBSD|OpenBSD)
                 # PID COMMAND
                 PID=$(ps ax -o pid= -o command=|
-                      grep "$SCRIPT_DIR/.*/[b]eam"|awk '{print $1}')
+                      grep "$RELEASE_ROOT_DIR/.*/[b]eam"|awk '{print $1}')
                 ;;
             SunOS)
                 # PID COMMAND
                 PID=$(ps -ef -o pid= -o args=|
-                      grep "$SCRIPT_DIR/.*/[b]eam"|awk '{print $1}')
+                      grep "$RELEASE_ROOT_DIR/.*/[b]eam"|awk '{print $1}')
                 ;;
             CYGWIN*)
                 # UID PID PPID TTY STIME COMMAND
-                PID=$(ps -efw|grep "$SCRIPT_DIR/.*/[b]eam"|awk '{print $2}')
+                PID=$(ps -efw|grep "$RELEASE_ROOT_DIR/.*/[b]eam"|awk '{print $2}')
                 ;;
         esac
-        relx_nodetool "stop"
-        ES="$?"
-        if [ "$ES" -ne 0 ]; then
-            exit "$ES"
+        if ! relx_nodetool "stop"; then
+            exit $?
         fi
         while $(kill -0 "$PID" 2>/dev/null);
         do
@@ -234,10 +249,8 @@ case "$1" in
         # Make sure the config is generated first
         generate_config
         ## Restart the VM without exiting the process
-        relx_nodetool "restart"
-        ES="$?"
-        if [ "$ES" -ne 0 ]; then
-            exit "$ES"
+        if ! relx_nodetool "restart"; then
+            exit $?
         fi
         ;;
 
@@ -245,19 +258,22 @@ case "$1" in
         # Make sure the config is generated first
         generate_config
         ## Restart the VM completely (uses heart to restart it)
-        relx_nodetool "reboot"
-        ES="$?"
-        if [ "$ES" -ne 0 ]; then
-            exit "$ES"
+        if ! relx_nodetool "reboot"; then
+            exit $?
         fi
         ;;
 
     ping)
         ## See if the VM is alive
-        relx_nodetool "ping"
-        ES="$?"
-        if [ "$ES" -ne 0 ]; then
-            exit "$ES"
+        if ! relx_nodetool "ping"; then
+            exit $?
+        fi
+        ;;
+
+    escript)
+        ## Run an escript under the node's environment
+        if ! relx_escript $@; then
+            exit $?
         fi
         ;;
 
@@ -283,11 +299,10 @@ case "$1" in
 
     attach)
         # Make sure a node IS running
-        RES="$(relx_nodetool "ping")"
-        ES="$?"
-        if [ "$ES" -ne 0 ]; then
+        if ! relx_nodetool "ping" > /dev/null; then
+            ES="$?"
             echo "Node is not running!"
-            exit "$ES"
+            exit $ES
         fi
 
         shift
@@ -296,11 +311,10 @@ case "$1" in
 
     remote_console)
         # Make sure a node IS running
-        RES="$(relx_nodetool "ping")"
-        ES="$?"
-        if [ "$ES" -ne 0 ]; then
+        if ! relx_nodetool "ping" > /dev/null; then
+            ES="$?"
             echo "Node is not running!"
-            exit "$ES"
+            exit $ES
         fi
 
         shift
@@ -318,11 +332,10 @@ case "$1" in
         fi
 
         # Make sure a node IS running
-        RES="$(relx_nodetool "ping")"
-        ES="$?"
-        if [ "$ES" -ne 0 ]; then
+        if ! relx_nodetool "ping" > /dev/null; then
+            ES="$?"
             echo "Node is not running!"
-            exit "$ES"
+            exit $ES
         fi
 
         exec "$BINDIR/escript" "$ROOTDIR/bin/install_upgrade.escript" \
@@ -364,14 +377,15 @@ case "$1" in
 
         # Build an array of arguments to pass to exec later on
         # Build it here because this command will be used for logging.
-        set -- "$ERTS_DIR/bin/erlexec" -boot "$BOOTFILE" \
+        set -- "$BINDIR/erlexec" -boot "$BOOTFILE" \
+            -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
             -env ERL_LIBS "$REL_LIB_DIR" -config "$CONFIG_PATH" \
             -pa "$REL_LIB_DIR/consolidated" \
             -args_file "$VMARGS_PATH" \
             -user Elixir.IEx.CLI -extra --no-halt +iex
 
         # Dump environment info for logging purposes
-        echo "Exec: $@ -- ${1+$ARGS}"
+        echo "Exec: $@" -- ${1+$ARGS}
         echo "Root: $ROOTDIR"
 
         # Log the startup
@@ -379,7 +393,7 @@ case "$1" in
         logger -t "$REL_NAME[$$]" "Starting up"
 
         # Start the VM
-        exec "$@" -- "${1+$ARGS}"
+        exec "$@" -- ${1+$ARGS}
         ;;
 
     foreground)
@@ -405,17 +419,18 @@ case "$1" in
         # Build it here because this command will be used for logging.
         set -- "$BINDIR/erlexec" $FOREGROUNDOPTIONS \
             -boot "$REL_DIR/$BOOTFILE" -mode embedded -config "$CONFIG_PATH" \
+            -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
             -args_file "$VMARGS_PATH"
 
         # Dump environment info for logging purposes
-        echo "Exec: $@" -- "${1+$ARGS}"
+        echo "Exec: $@" -- ${1+$ARGS}
         echo "Root: $ROOTDIR"
 
         # Start the VM
-        exec "$@" -- "${1+$ARGS}"
+        exec "$@" -- ${1+$ARGS}
         ;;
     *)
-        echo "Usage: $REL_NAME {start|start_boot <file>|foreground|stop|restart|reboot|ping|rpc <m> <f> [<a>]|console|console_clean|console_boot <file>|attach|remote_console|upgrade}"
+        echo "Usage: $REL_NAME {start|start_boot <file>|foreground|stop|restart|reboot|ping|rpc <m> <f> [<a>]|console|console_clean|console_boot <file>|attach|remote_console|upgrade|escript}"
         exit 1
         ;;
 esac
