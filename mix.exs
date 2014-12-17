@@ -12,7 +12,7 @@ defmodule ReleaseManager.Mixfile do
       elixir: ">= 0.15.1 and ~> 1.0.0",
       description: description,
       package: package,
-      deps: [{:conform, "~> 0.10.5"}] ]
+      deps: [{:conform, "~> 0.11.0"}] ]
   end
 
   def application, do: []
