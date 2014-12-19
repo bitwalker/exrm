@@ -236,8 +236,10 @@ case "$1" in
                 PID=$(ps -efw|grep "$RELEASE_ROOT_DIR/.*/[b]eam"|awk '{print $2}')
                 ;;
         esac
-        if ! relx_nodetool "stop"; then
-            exit $?
+        relx_nodetool "stop"
+        exit_status=$?
+        if [ "$exit_status" -ne 0 ]; then
+            exit $exit_status
         fi
         while $(kill -0 "$PID" 2>/dev/null);
         do
@@ -249,8 +251,10 @@ case "$1" in
         # Make sure the config is generated first
         generate_config
         ## Restart the VM without exiting the process
-        if ! relx_nodetool "restart"; then
-            exit $?
+        relx_nodetool "restart"
+        exit_status=$?
+        if [ "$exit_status" -ne 0 ]; then
+            exit $exit_status
         fi
         ;;
 
@@ -258,22 +262,28 @@ case "$1" in
         # Make sure the config is generated first
         generate_config
         ## Restart the VM completely (uses heart to restart it)
-        if ! relx_nodetool "reboot"; then
-            exit $?
+        relx_nodetool "reboot"
+        exit_status=$?
+        if [ "$exit_status" -ne 0 ]; then
+            exit $exit_status
         fi
         ;;
 
     ping)
         ## See if the VM is alive
-        if ! relx_nodetool "ping"; then
-            exit $?
+        relx_nodetool "ping"
+        exit_status=$?
+        if [ "$exit_status" -ne 0 ]; then
+            exit $exit_status
         fi
         ;;
 
     escript)
         ## Run an escript under the node's environment
-        if ! relx_escript $@; then
-            exit $?
+        relx_escript $@
+        exit_status=$?
+        if [ "$exit_status" -ne 0 ]; then
+            exit $exit_status
         fi
         ;;
 
@@ -291,18 +301,19 @@ case "$1" in
         else
             relx_nodetool "rpcterms" "$2" "$3" "$4"
         fi
-        ES="$?"
-        if [ "$ES" -ne 0 ]; then
-            exit "$ES"
+        exit_status="$?"
+        if [ "$exit_status" -ne 0 ]; then
+            exit $exit_status
         fi
         ;;
 
     attach)
         # Make sure a node IS running
-        if ! relx_nodetool "ping" > /dev/null; then
-            ES="$?"
+        relx_nodetool "ping" > /dev/null
+        exit_status=$?
+        if [ "$exit_status" -ne 0 ]; then
             echo "Node is not running!"
-            exit $ES
+            exit $exit_status
         fi
 
         shift
@@ -311,10 +322,11 @@ case "$1" in
 
     remote_console)
         # Make sure a node IS running
-        if ! relx_nodetool "ping" > /dev/null; then
-            ES="$?"
+        relx_nodetool "ping" > /dev/null
+        exit_status=$?
+        if [ "$exit_status" -ne 0 ]; then
             echo "Node is not running!"
-            exit $ES
+            exit $exit_status
         fi
 
         shift
@@ -332,10 +344,11 @@ case "$1" in
         fi
 
         # Make sure a node IS running
-        if ! relx_nodetool "ping" > /dev/null; then
-            ES="$?"
+        relx_nodetool "ping" > /dev/null
+        exit_status=$?
+        if [ "$exit_status" -ne 0 ]; then
             echo "Node is not running!"
-            exit $ES
+            exit $exit_status
         fi
 
         exec "$BINDIR/escript" "$ROOTDIR/bin/install_upgrade.escript" \
