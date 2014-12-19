@@ -23,7 +23,7 @@ defmodule ReleaseManager.Plugin.Conform do
 
     debug "Conform: Loading schema..."
     # Get top-level schema...
-    schema = app |> String.to_atom |> Conform.Schema.read
+    schema = app |> String.to_atom |> Conform.Schema.read!
     # Get schemas from all dependencies
     dep_schemas = Conform.Schema.coalesce
     # Merge together
