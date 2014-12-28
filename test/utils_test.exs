@@ -70,7 +70,7 @@ defmodule UtilsTest do
       assert :ok = Utils.mix("release", :dev)
       assert [{"test", "0.0.1"}] == Utils.get_releases("test")
       # Boot it, ping it, and shut it down
-      bin_path = Path.join(["rel", "test", "bin", "test"])
+      bin_path = Path.join([File.cwd!, "rel", "test", "bin", "test"])
       assert {_, 0}        = System.cmd(bin_path, ["start"])
       :timer.sleep(1000) # Required, since starting up takes a sec
       assert {"pong\n", 0} = System.cmd(bin_path, ["ping"])
