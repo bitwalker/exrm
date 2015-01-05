@@ -227,7 +227,7 @@ defmodule ReleaseManager.Utils do
   end
 
   @doc "Get the priv path of the exrm dependency"
-  def priv_path, do: Path.join([__DIR__, "..", "..", "priv"]) |> Path.expand
+  def priv_path, do: "#{:code.priv_dir('exrm')}"
   @doc "Get the priv/rel path of the exrm dependency"
   def rel_source_path,       do: Path.join(priv_path, "rel")
   @doc "Get the path to a file located in priv/rel of the exrm dependency"
