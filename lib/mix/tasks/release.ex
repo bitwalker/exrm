@@ -44,7 +44,7 @@ defmodule Mix.Tasks.Release do
 
   def run(args) do
     if Mix.Project.umbrella? do
-      config = [build_path: Mix.Project.build_path, umbrella?: true]
+      config = [umbrella?: true]
       for %Mix.Dep{app: app, opts: opts} <- Mix.Dep.Umbrella.loaded do
         Mix.Project.in_project(app, opts[:path], config, fn _ -> do_run(args) end)
       end
