@@ -277,7 +277,7 @@ defmodule Mix.Tasks.Release do
                 info "Using custom .appup located in rel/#{name}.appup"
               {:error, reason} ->
                 error "Unable to copy custom .appup file: #{reason}"
-                exit(:normal)
+                abort!
             end
           _ ->
             # No custom .appup found, proceed with autogeneration
@@ -286,7 +286,7 @@ defmodule Mix.Tasks.Release do
                 info "Generated .appup for #{name} #{v1} -> #{version}"
               {:error, reason} ->
                 error "Appup generation failed with #{reason}"
-                exit(:normal)
+                abort!
             end
         end
       end
@@ -300,7 +300,7 @@ defmodule Mix.Tasks.Release do
         config
       {:error, message} ->
         error message
-        exit(:normal)
+        abort!
     end
   end
 

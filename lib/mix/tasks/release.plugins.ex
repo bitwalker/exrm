@@ -48,7 +48,7 @@ defmodule Mix.Tasks.Release.Plugins do
     case result do
       nil ->
         notice "No plugin by that name could be found!"
-        exit(:normal)
+        abort!
       _ ->
         result
     end
@@ -87,7 +87,7 @@ defmodule Mix.Tasks.Release.Plugins do
       {_, [plugin], _} -> [action: :details, plugin: plugin]
       {_, _, _} ->
         error "Invalid arguments for `mix release.plugins`!"
-        exit(:normal)
+        abort!
     end
   end
 
