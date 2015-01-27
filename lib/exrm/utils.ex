@@ -94,6 +94,9 @@ defmodule ReleaseManager.Utils do
   @doc "Print an error message in red"
   def error(message), do: IO.puts "==> #{IO.ANSI.red}#{message}#{IO.ANSI.reset}"
 
+  @doc "Exits with exit status 1"
+  def abort!, do: exit({:shutdown, 1})
+
   @doc """
   Get a list of tuples representing the previous releases:
 
@@ -153,10 +156,10 @@ defmodule ReleaseManager.Utils do
         terms
       {:error, {line, type, msg}} ->
         error "Unable to parse #{path}: Line #{line}, #{type}, - #{msg}"
-        exit(:normal)
+        abort!
       {:error, reason} ->
         error "Unable to access #{path}: #{reason}"
-        exit(:normal)
+        abort!
     end
     result
   end
