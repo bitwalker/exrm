@@ -36,7 +36,7 @@ defmodule Mix.Tasks.Release.Clean do
     debug "Removing release files for #{app}-#{version}..."
     cond do
       "--implode" in args ->
-        if confirm_implode?(app) do
+        if "--no-confirm" in args or confirm_implode?(app) do
           do_cleanup :all
           execute_after_hooks(args)
           info "All release files for #{app}-#{version} were removed successfully!"
