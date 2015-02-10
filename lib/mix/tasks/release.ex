@@ -330,9 +330,7 @@ defmodule Mix.Tasks.Release do
     include_erts = Keyword.get(relx_config, :include_erts, true)
     extras = case include_erts do
       false -> []
-      true  -> [{'#{erts}', '#{rel_dest_path([name, erts])}'}]
-      path when is_binary(path) ->
-        [{'#{erts}', '#{path}'}]
+      _     -> [{'#{erts}', '#{rel_dest_path([name, erts])}'}]
     end
     # Re-package release with modifications
     :ok = :erl_tar.create(
