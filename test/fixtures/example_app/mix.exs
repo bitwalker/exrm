@@ -19,7 +19,7 @@ defmodule Test.Mixfile do
   # To specify particular versions, regardless of the tag, do:
   # { :barbat, "~> 0.1", github: "elixir-lang/barbat" }
   defp deps do
-    [{:exrm, path: "../../"},
-      {:conform, path: "../../deps/conform", override: true}]
+    [{:exrm, path: "../../../"},
+      {:conform, path: "../../../deps/conform", override: true}]
   end
 end
