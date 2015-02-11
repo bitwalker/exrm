@@ -169,7 +169,7 @@ defmodule ReleaseManager.Utils do
   Convert a string to Erlang terms
   """
   def string_to_terms(str) do
-    str 
+    str
     |> String.split("}.")
     |> Stream.map(&(String.strip(&1, ?\n)))
     |> Stream.map(&String.strip/1)
@@ -187,25 +187,25 @@ defmodule ReleaseManager.Utils do
   in the relx.config file
   """
   def merge(old, new) when is_list(old) and is_list(new) do
-    do_merge(old, new, []) |> Enum.reverse
+    merge(old, new, [])
   end
 
-  defp do_merge([h|t], new, acc) when is_tuple(h) do
-    case :lists.keysearch(elem(h, 0), 1, new) do
-      {:value, new_value} ->
+  defp merge([h|t], new, acc) when is_tuple(h) do
+    case :lists.keytake(elem(h, 0), 1, new) do
+      {:value, new_value, rest} ->
         # Value is present in new, so merge the value
-        merged = do_merge_term(h, new_value)
-        do_merge(t, new, [merged|acc])
+        merged = merge_term(h, new_value)
+        merge(t, rest, [merged|acc])
       false ->
         # Value doesn't exist in new, so add it
-        do_merge(t, new, [h|acc])
+        merge(t, new, [h|acc])
     end
   end
-  defp do_merge([], _new, acc) do
-    acc
+  defp merge([], new, acc) do
+    Enum.reverse(acc, new)
   end
 
-  defp do_merge_term(old, new) when is_tuple(old) and is_tuple(new) do
+  defp merge_term(old, new) when is_tuple(old) and is_tuple(new) do
     old
     |> Tuple.to_list
     |> Enum.with_index
@@ -221,7 +221,7 @@ defmodule ReleaseManager.Utils do
               [merged|acc]
           end
         {val, idx}, acc when is_tuple(val) ->
-          [do_merge_term(val, elem(new, idx))|acc]
+          [merge_term(val, elem(new, idx))|acc]
         {_val, idx}, acc ->
           [elem(new, idx)|acc]
        end)
