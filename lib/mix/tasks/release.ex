@@ -333,13 +333,12 @@ defmodule Mix.Tasks.Release do
       _     -> [{'#{erts}', '#{rel_dest_path([name, erts])}'}]
     end
     # Re-package release with modifications
+    file_list = File.ls!(rel_dest_path(name))
+      |> Enum.reject(&(&1 == erts))
+      |> Enum.map(&({'#{&1}', '#{rel_dest_path([name, &1])}'}))
     :ok = :erl_tar.create(
       '#{tarball}',
-      [
-        {'lib',      '#{rel_dest_path([name, "lib"])}'},
-        {'releases', '#{rel_dest_path([name, "releases"])}'},
-        {'bin',      '#{rel_dest_path([name, "bin"])}'},
-      ] ++ extras,
+      file_list ++ extras,
       [:compressed]
     )
     # Continue..
