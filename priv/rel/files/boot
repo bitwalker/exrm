@@ -111,6 +111,12 @@ fi
 # Make sure log directory exists
 mkdir -p "$RUNNER_LOG_DIR"
 
+# Make sure the current user has write permission
+if ! [ -w $RUNNER_LOG_DIR ] ; then 
+    echo "Unable to write to $RUNNER_LOG_DIR. Quitting."
+    exit 1
+fi
+
 if [ -z "$CONFIG_PATH" ]; then
     if [ -f "$USE_DIR/sys.config" ]; then
         CONFIG_PATH="$USE_DIR/sys.config"
@@ -213,6 +219,12 @@ case "$1" in
         export HEART_COMMAND
 
         mkdir -p "$PIPE_DIR"
+        
+        # Make sure the current user has write permission
+        if ! [ -w $PIPE_DIR ] ; then 
+            echo "Unable to write to $PIPE_DIR. Quitting."
+            exit 1
+        fi
 
         "$BINDIR/run_erl" -daemon "$PIPE_DIR" "$RUNNER_LOG_DIR" \
                           "$(relx_start_command)"
