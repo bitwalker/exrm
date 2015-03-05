@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ReleaseManager.Plugin.Conform</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="css/style.css" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="css/elixir.css" type="text/css" media="screen" charset="utf-8" />
+    <script type="text/javascript" charset="utf-8">
+      relpath = '';
+      if (relpath != '') relpath += '/';
+    </script>
+
+    <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/highlight.pack.js"></script>
+    <script type="text/javascript" charset="utf-8">
+      hljs.initHighlightingOnLoad();
+      hljs.configure({languages: []}); //disable autodetect
+    </script>
+  </head>
+
+  <body>
+    <script type="text/javascript" charset="utf-8">
+      if (window.top.frames.main) document.body.className = 'frames';
+    </script>
+
+    <section id="content">
+      <div class="breadcrumbs">exrm v0.15.2 &rarr; <a href="overview.html">Overview</a> &rarr; ReleaseManager &rarr; <a href="ReleaseManager.Plugin.html">Plugin</a> &rarr; <a href="ReleaseManager.Plugin.Conform.html">Conform</a></div>
+      <h1>
+        ReleaseManager.Plugin.Conform
+        
+      </h1>
+
+      <ul class="summary_links">
+        
+          <li><a href="#summary">Summary</a></li>
+        
+        
+        
+          <li><a href="#functions_details">Functions</a></li>
+        
+        
+        
+      </ul>
+
+      
+        <section id="moduledoc" class="docstring">
+          <p>Generates a .conf for your release</p>
+<p>This plugin ensures that your application has a .schema.exs
+and .conf file for setting up configuration via the <code class="inline">conform</code>
+library. This .conf file then offers a simplified interface
+for sysadmins and other deployment staff for easily configuring
+your release in production.</p>
+
+        </section>
+      
+
+      
+
+      
+        <h2 id="summary">Summary<span class="detail_header_links"><a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a></span></h2>
+        <table class="summary">
+          <tr>
+  <td class="summary_signature"><a href="#after_cleanup/1">after_cleanup()</a></td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#after_release/1">after_release()</a></td>
+  
+    <td class="summary_synopsis"><p>Callback implementation of <a href="ReleaseManager.Plugin.html#after_release/1"><code class="inline">ReleaseManager.Plugin.after_release/1</code></a></p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#before_release/1">before_release(config)</a></td>
+  
+    <td class="summary_synopsis"><p>Callback implementation of <a href="ReleaseManager.Plugin.html#before_release/1"><code class="inline">ReleaseManager.Plugin.before_release/1</code></a></p>
+</td>
+  
+</tr>
+
+        </table>
+      
+
+      
+
+      
+        <section id="functions_details" class="details_list">
+          <h2>Functions</h2>
+          <section class="detail">
+  <div class="detail_header" id="after_cleanup/1">
+    <span class="signature"><strong>after_cleanup()</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#after_cleanup/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="after_release/1">
+    <span class="signature"><strong>after_release()</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#after_release/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Callback implementation of <a href="ReleaseManager.Plugin.html#after_release/1"><code class="inline">ReleaseManager.Plugin.after_release/1</code></a>.</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="before_release/1">
+    <span class="signature"><strong>before_release(config)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#before_release/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Callback implementation of <a href="ReleaseManager.Plugin.html#before_release/1"><code class="inline">ReleaseManager.Plugin.before_release/1</code></a>.</p>
+
+  </section>
+  
+</section>
+
+        </section>
+      
+
+      
+
+      
+    </section>
+  </body>
+</html>

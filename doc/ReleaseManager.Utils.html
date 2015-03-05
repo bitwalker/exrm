@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ReleaseManager.Utils</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="css/style.css" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="css/elixir.css" type="text/css" media="screen" charset="utf-8" />
+    <script type="text/javascript" charset="utf-8">
+      relpath = '';
+      if (relpath != '') relpath += '/';
+    </script>
+
+    <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/highlight.pack.js"></script>
+    <script type="text/javascript" charset="utf-8">
+      hljs.initHighlightingOnLoad();
+      hljs.configure({languages: []}); //disable autodetect
+    </script>
+  </head>
+
+  <body>
+    <script type="text/javascript" charset="utf-8">
+      if (window.top.frames.main) document.body.className = 'frames';
+    </script>
+
+    <section id="content">
+      <div class="breadcrumbs">exrm v0.15.2 &rarr; <a href="overview.html">Overview</a> &rarr; ReleaseManager &rarr; <a href="ReleaseManager.Utils.html">Utils</a></div>
+      <h1>
+        ReleaseManager.Utils
+        
+      </h1>
+
+      <ul class="summary_links">
+        
+          <li><a href="#summary">Summary</a></li>
+        
+        
+        
+          <li><a href="#functions_details">Functions</a></li>
+        
+        
+        
+      </ul>
+
+      
+        <section id="moduledoc" class="docstring">
+          <p>This module provides helper functions for the <code class="inline">mix release</code> and
+<code class="inline">mix release.clean</code> tasks.</p>
+
+        </section>
+      
+
+      
+
+      
+        <h2 id="summary">Summary<span class="detail_header_links"><a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a></span></h2>
+        <table class="summary">
+          <tr>
+  <td class="summary_signature"><a href="#abort!/0">abort!()</a></td>
+  
+    <td class="summary_synopsis"><p>Exits with exit status 1</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#chmod/2">chmod(target, flags)</a></td>
+  
+    <td class="summary_synopsis"><p>Change user permissions for a target file or directory</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#debug/1">debug(message)</a></td>
+  
+    <td class="summary_synopsis"><p>Print an informational message without color</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#error/1">error(message)</a></td>
+  
+    <td class="summary_synopsis"><p>Print an error message in red</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#get_elixir_path/0">get_elixir_path()</a></td>
+  
+    <td class="summary_synopsis"><p>Get the local path of the current elixir executable</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#get_last_release/1">get_last_release(project)</a></td>
+  
+    <td class="summary_synopsis"><p>Get the most recent release prior to the current one</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#get_releases/1">get_releases(project)</a></td>
+  
+    <td class="summary_synopsis"><p>Get a list of tuples representing the previous releases:</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#info/1">info(message)</a></td>
+  
+    <td class="summary_synopsis"><p>Print an informational message in green</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#load_config/1">load_config(env)</a></td>
+  
+    <td class="summary_synopsis"><p>Load the current project’s configuration</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#merge/2">merge(old, new)</a></td>
+  
+    <td class="summary_synopsis"><p>Merges two sets of Elixir/Erlang terms, where the terms come
+in the form of lists of tuples. For example, such as is found
+in the relx.config file</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#mix/2">mix(command, env)</a></td>
+  
+    <td class="summary_synopsis"><p>Call the _elixir mix binary with the given arguments</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#mix/3">mix(command, env, atom3)</a></td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#notice/1">notice(message)</a></td>
+  
+    <td class="summary_synopsis"><p>Print a notice in yellow</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#priv_path/0">priv_path()</a></td>
+  
+    <td class="summary_synopsis"><p>Get the priv path of the exrm dependency</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#read_terms/1">read_terms(path)</a></td>
+  
+    <td class="summary_synopsis"><p>Reads a file as Erlang terms</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#rel_dest_path/0">rel_dest_path()</a></td>
+  
+    <td class="summary_synopsis"><p>Get the rel path of the current project</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#rel_dest_path/1">rel_dest_path(files)</a></td>
+  
+    <td class="summary_synopsis"><p>Get the path to a file located in the rel directory of the current project.
+You can pass either a file name, or a list of directories to a file, like:</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#rel_file_dest_path/0">rel_file_dest_path()</a></td>
+  
+    <td class="summary_synopsis"><p>Get the rel/files path of the current project</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#rel_file_dest_path/1">rel_file_dest_path(files)</a></td>
+  
+    <td class="summary_synopsis"><p>Get the path to a file located in the rel/files directory of the current project.
+You can pass either a file name, or a list of directories to a file, like:</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#rel_file_source_path/0">rel_file_source_path()</a></td>
+  
+    <td class="summary_synopsis"><p>Get the priv/rel/files path of the exrm dependency</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#rel_file_source_path/1">rel_file_source_path(file)</a></td>
+  
+    <td class="summary_synopsis"><p>Get the path to a file located in priv/rel/files of the exrm dependency</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#rel_source_path/0">rel_source_path()</a></td>
+  
+    <td class="summary_synopsis"><p>Get the priv/rel path of the exrm dependency</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#rel_source_path/1">rel_source_path(file)</a></td>
+  
+    <td class="summary_synopsis"><p>Get the path to a file located in priv/rel of the exrm dependency</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#relx/5">relx(name, version, verbosity, upgrade?, dev)</a></td>
+  
+    <td class="summary_synopsis"><p>Execute <code class="inline">relx</code></p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#string_to_terms/1">string_to_terms(str)</a></td>
+  
+    <td class="summary_synopsis"><p>Convert a string to Erlang terms</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#warn/1">warn(message)</a></td>
+  
+    <td class="summary_synopsis"><p>Print a warning message in yellow</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#with_env/2">with_env(env, fun)</a></td>
+  
+    <td class="summary_synopsis"><p>Perform some actions within the context of a specific mix environment</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#write_term/2">write_term(path, term)</a></td>
+  
+    <td class="summary_synopsis"><p>Writes an Elixir/Erlang term to the provided path</p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#write_terms/2">write_terms(path, terms)</a></td>
+  
+    <td class="summary_synopsis"><p>Writes a collection of Elixir/Erlang terms to the provided path</p>
+</td>
+  
+</tr>
+
+        </table>
+      
+
+      
+
+      
+        <section id="functions_details" class="details_list">
+          <h2>Functions</h2>
+          <section class="detail">
+  <div class="detail_header" id="abort!/0">
+    <span class="signature"><strong>abort!()</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#abort!/0" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Exits with exit status 1</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="chmod/2">
+    <span class="signature"><strong>chmod(target, flags)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#chmod/2" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Change user permissions for a target file or directory</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="debug/1">
+    <span class="signature"><strong>debug(message)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#debug/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Print an informational message without color</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="error/1">
+    <span class="signature"><strong>error(message)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#error/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Print an error message in red</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="get_elixir_path/0">
+    <span class="signature"><strong>get_elixir_path()</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#get_elixir_path/0" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Get the local path of the current elixir executable</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="get_last_release/1">
+    <span class="signature"><strong>get_last_release(project)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#get_last_release/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Get the most recent release prior to the current one</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="get_releases/1">
+    <span class="signature"><strong>get_releases(project)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#get_releases/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Get a list of tuples representing the previous releases:</p>
+<h2>Examples</h2>
+<pre><code class="elixir">get_releases #=&gt; [{&quot;test&quot;, &quot;0.0.1&quot;}, {&quot;test&quot;, &quot;0.0.2&quot;}]</code></pre>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="info/1">
+    <span class="signature"><strong>info(message)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#info/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Print an informational message in green</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="load_config/1">
+    <span class="signature"><strong>load_config(env)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#load_config/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Load the current project’s configuration</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="merge/2">
+    <span class="signature"><strong>merge(old, new)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#merge/2" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Merges two sets of Elixir/Erlang terms, where the terms come
+in the form of lists of tuples. For example, such as is found
+in the relx.config file</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="mix/2">
+    <span class="signature"><strong>mix(command, env)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#mix/2" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Call the _elixir mix binary with the given arguments</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="mix/3">
+    <span class="signature"><strong>mix(command, env, atom3)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#mix/3" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="notice/1">
+    <span class="signature"><strong>notice(message)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#notice/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Print a notice in yellow</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="priv_path/0">
+    <span class="signature"><strong>priv_path()</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#priv_path/0" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Get the priv path of the exrm dependency</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="read_terms/1">
+    <span class="signature"><strong>read_terms(path)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#read_terms/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Reads a file as Erlang terms</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="rel_dest_path/0">
+    <span class="signature"><strong>rel_dest_path()</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#rel_dest_path/0" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Get the rel path of the current project.</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="rel_dest_path/1">
+    <span class="signature"><strong>rel_dest_path(files)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#rel_dest_path/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Get the path to a file located in the rel directory of the current project.
+You can pass either a file name, or a list of directories to a file, like:</p>
+<pre><code class="iex elixir">iex&gt; ReleaseManager.Utils.rel_dest_path &quot;relx.config&quot;
+&quot;path/to/project/rel/relx.config&quot;
+
+iex&gt; ReleaseManager.Utils.rel_dest_path [&quot;&lt;project&gt;&quot;, &quot;lib&quot;, &quot;&lt;project&gt;.appup&quot;]
+&quot;path/to/project/rel/&lt;project&gt;/lib/&lt;project&gt;.appup&quot;</code></pre>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="rel_file_dest_path/0">
+    <span class="signature"><strong>rel_file_dest_path()</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#rel_file_dest_path/0" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Get the rel/files path of the current project.</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="rel_file_dest_path/1">
+    <span class="signature"><strong>rel_file_dest_path(files)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#rel_file_dest_path/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Get the path to a file located in the rel/files directory of the current project.
+You can pass either a file name, or a list of directories to a file, like:</p>
+<pre><code class="iex elixir">iex&gt; ReleaseManager.Utils.rel_file_dest_path &quot;sys.config&quot;
+&quot;path/to/project/rel/files/sys.config&quot;
+
+iex&gt; ReleaseManager.Utils.rel_dest_path [&quot;some&quot;, &quot;path&quot;, &quot;file.txt&quot;]
+&quot;path/to/project/rel/files/some/path/file.txt&quot;</code></pre>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="rel_file_source_path/0">
+    <span class="signature"><strong>rel_file_source_path()</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#rel_file_source_path/0" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Get the priv/rel/files path of the exrm dependency</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="rel_file_source_path/1">
+    <span class="signature"><strong>rel_file_source_path(file)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#rel_file_source_path/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Get the path to a file located in priv/rel/files of the exrm dependency</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="rel_source_path/0">
+    <span class="signature"><strong>rel_source_path()</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#rel_source_path/0" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Get the priv/rel path of the exrm dependency</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="rel_source_path/1">
+    <span class="signature"><strong>rel_source_path(file)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#rel_source_path/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Get the path to a file located in priv/rel of the exrm dependency</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="relx/5">
+    <span class="signature"><strong>relx(name, version, verbosity, upgrade?, dev)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#relx/5" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Execute <code class="inline">relx</code></p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="string_to_terms/1">
+    <span class="signature"><strong>string_to_terms(str)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#string_to_terms/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Convert a string to Erlang terms</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="warn/1">
+    <span class="signature"><strong>warn(message)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#warn/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Print a warning message in yellow</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="with_env/2">
+    <span class="signature"><strong>with_env(env, fun)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#with_env/2" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Perform some actions within the context of a specific mix environment</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="write_term/2">
+    <span class="signature"><strong>write_term(path, term)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#write_term/2" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Writes an Elixir/Erlang term to the provided path</p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="write_terms/2">
+    <span class="signature"><strong>write_terms(path, terms)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#write_terms/2" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Writes a collection of Elixir/Erlang terms to the provided path</p>
+
+  </section>
+  
+</section>
+
+        </section>
+      
+
+      
+
+      
+    </section>
+  </body>
+</html>
