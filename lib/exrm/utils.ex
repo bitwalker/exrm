@@ -121,16 +121,32 @@ defmodule ReleaseManager.Utils do
   Get the most recent release prior to the current one
   """
   def get_last_release(project) do
-    [{_,version} | _] = project |> get_releases |> Enum.sort(
-      fn {_, v1}, {_, v2} ->
-        {:ok, v1} = Version.parse(v1)
-        {:ok, v2} = Version.parse(v2)
-        case Version.compare(v1, v2) do
-          :gt -> true
-          _ -> false
+    hd(project |> get_releases |> Enum.map(fn {_, v} -> v end) |> sort_versions)
+  end
+
+  @doc """
+  Sort a list of versions, latest one first. Tries to use semver version 
+  compare, but can fall back to regular string compare.
+  """
+  def sort_versions(versions) do
+    versions |> Enum.sort(
+      fn v1, v2 ->
+        case is_semver?(v1) and is_semver?(v2) do
+          true ->
+            {:ok, v1} = Version.parse(v1)
+            {:ok, v2} = Version.parse(v2)
+            case Version.compare(v1, v2) do
+              :gt -> true
+              _ -> false
+            end;
+          false ->
+            v1 > v2
         end
       end)
-    version
+  end
+
+  defp is_semver?(vsn) do
+    Regex.match?(~r/^\d+\.\d+\.\d+/, vsn)
   end
 
   @doc """
@@ -171,7 +187,6 @@ defmodule ReleaseManager.Utils do
     end
     result
   end
-
 
   @doc """
   Convert a string to Erlang terms
