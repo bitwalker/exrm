@@ -146,7 +146,7 @@ defmodule ReleaseManager.Utils do
   end
 
   defp is_semver?(vsn) do
-    Regex.match?(~r/^\d+\.\d+\.\d+/, vsn)
+    Version.parse(vsn) !== :error
   end
 
   @doc """
