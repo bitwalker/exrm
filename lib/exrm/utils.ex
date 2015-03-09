@@ -121,7 +121,15 @@ defmodule ReleaseManager.Utils do
   Get the most recent release prior to the current one
   """
   def get_last_release(project) do
-    [{_,version} | _] = project |> get_releases |> Enum.sort(fn {_, v1}, {_, v2} -> v1 > v2 end)
+    [{_,version} | _] = project |> get_releases |> Enum.sort(
+      fn {_, v1}, {_, v2} ->
+        {:ok, v1} = Version.parse(v1)
+        {:ok, v2} = Version.parse(v2)
+        case Version.compare(v1, v2) do
+          :gt -> true
+          _ -> false
+        end
+      end)
     version
   end
 
