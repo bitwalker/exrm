@@ -131,7 +131,7 @@ defmodule ReleaseManager.Utils do
   def sort_versions(versions) do
     versions |> Enum.sort(
       fn v1, v2 ->
-        case { parse_semver(v1), parse_semver(v2) } do
+        case { parse_version(v1), parse_version(v2) } do
           {{:semantic, v1}, {:semantic, v2}} ->
             case Version.compare(v1, v2) do
               :gt -> true
