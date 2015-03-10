@@ -1,13 +1,14 @@
 defmodule UtilsTest do
   use ExUnit.Case, async: true
 
+  import PathHelpers
+
   alias ReleaseManager.Utils
 
-  @example_app_path Path.join([File.cwd!, "test", "example_app"])
-  @old_path         Path.join([File.cwd!, "test", "configs", "old_relx.config"])
-  @new_path         Path.join([File.cwd!, "test", "configs", "new_relx.config"])
-  @expected_path    Path.join([File.cwd!, "test", "configs", "merged_relx.config"])
-
+  @example_app_path fixture_path("example_app")
+  @old_path         fixture_path("configs/old_relx.config")
+  @new_path         fixture_path("configs/new_relx.config")
+  @expected_path    fixture_path("configs/merged_relx.config")
 
   defmacrop with_app(body) do
     quote do

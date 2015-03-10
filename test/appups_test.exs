@@ -1,12 +1,13 @@
 defmodule AppupsTest do
   use ExUnit.Case, async: true
 
+  import PathHelpers
   import ReleaseManager.Utils, only: [write_term: 2]
 
-  @v1_path     Path.join([File.cwd!, "test", "beams", "v1"])
-  @v2_path     Path.join([File.cwd!, "test", "beams", "v2"])
-  @v1_app_path Path.join([File.cwd!, "test", "beams", "v1", "ebin", "test.app"])
-  @v2_app_path Path.join([File.cwd!, "test", "beams", "v2", "ebin", "test.app"])
+  @v1_path     fixture_path("beams/v1")
+  @v2_path     fixture_path("beams/v2")
+  @v1_app_path Path.join(@v1_path, "ebin/test.app")
+  @v2_app_path Path.join(@v2_path, "ebin/test.app")
 
   setup do
     @v1_app_path |> write_term(v1_app)
