@@ -318,7 +318,7 @@ defmodule ReleaseManager.Utils do
             symlink = sym |> IO.iodata_to_binary
             path |> Path.dirname |> Path.join(symlink) |> Path.expand
         end
-    end |> String.replace("/bin/elixir", "")
+    end |> String.replace(~r(/bin/elixir$), "")
   end
 
 end
