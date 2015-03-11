@@ -25,7 +25,7 @@
     </script>
 
     <section id="content">
-      <div class="breadcrumbs">exrm v0.15.2 &rarr; <a href="overview.html">Overview</a> &rarr; ReleaseManager &rarr; <a href="ReleaseManager.Utils.html">Utils</a></div>
+      <div class="breadcrumbs">exrm v0.15.3 &rarr; <a href="overview.html">Overview</a> &rarr; ReleaseManager &rarr; <a href="ReleaseManager.Utils.html">Utils</a></div>
       <h1>
         ReleaseManager.Utils
         
@@ -222,6 +222,14 @@ You can pass either a file name, or a list of directories to a file, like:</p>
   <td class="summary_signature"><a href="#relx/5">relx(name, version, verbosity, upgrade?, dev)</a></td>
   
     <td class="summary_synopsis"><p>Execute <code class="inline">relx</code></p>
+</td>
+  
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#sort_versions/1">sort_versions(versions)</a></td>
+  
+    <td class="summary_synopsis"><p>Sort a list of versions, latest one first. Tries to use semver version 
+compare, but can fall back to regular string compare</p>
 </td>
   
 </tr>
@@ -664,6 +672,23 @@ iex&gt; ReleaseManager.Utils.rel_dest_path [&quot;some&quot;, &quot;path&quot;, 
   
   <section class="docstring">
     <p>Execute <code class="inline">relx</code></p>
+
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="sort_versions/1">
+    <span class="signature"><strong>sort_versions(versions)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#sort_versions/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+  <section class="docstring">
+    <p>Sort a list of versions, latest one first. Tries to use semver version 
+compare, but can fall back to regular string compare.</p>
 
   </section>
   
