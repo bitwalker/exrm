@@ -1,9 +1,9 @@
 {"0.0.2",
  [{"0.0.1",
-   [{load_module,'Elixir.Test'},
+   [{add_module,'Elixir.Asd'},
     {update,'Elixir.Test.Server',{advanced,[]}},
-    {update,'Elixir.Test.Supervisor',supervisor}]}],
+    {load_module,'Elixir.Test'}]}],
  [{"0.0.1",
-   [{update,'Elixir.Test.Supervisor',supervisor},
+   [{delete_module,'Elixir.Asd'},
     {update,'Elixir.Test.Server',{advanced,[]}},
     {load_module,'Elixir.Test'}]}]}.

@@ -54,13 +54,14 @@ defmodule AppupsTest do
 
   defp expected_appup do
     {'0.0.2',
-       [{'0.0.1',
-         [{:load_module,Test},
-          {:update,Test.Server, {:advanced,[]}},
-          {:update,Test.Supervisor,:supervisor}]}],
-       [{'0.0.1',
-         [{:update,Test.Supervisor,:supervisor},
-          {:update,Test.Server,{:advanced,[]}},
-          {:load_module,:"Elixir.Test"}]}]}
+     [{'0.0.1',
+       [{:add_module, Asd},
+        {:update, Test.Server, {:advanced, []}},
+        {:load_module, Test}]}],
+     [{'0.0.1',
+       [{:delete_module, Asd},
+        {:update, Test.Server, {:advanced, []}},
+        {:load_module, Test}]}]}
+
   end
 end

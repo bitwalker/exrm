@@ -35,7 +35,7 @@ defmodule ReleaseManager.Appups do
               { :ok, [ { :application, ^application, v2_props } ] } ->
                 case vsn(v2_props) === v2 do
                   true ->
-                    make_appup(application, v1, v1_props, v2, v2_path, v2_props)
+                    make_appup(application, v1, v1_path, v1_props, v2, v2_path, v2_props)
                   false ->
                     { :error, :bad_new_appvsn }
                 end
@@ -50,51 +50,22 @@ defmodule ReleaseManager.Appups do
     end
   end
 
-  defp make_appup(application, v1, v1_props, v2, v2_path, v2_props) do
-    add_mods = modules(v2_props) -- modules(v1_props)
-    del_mods = modules(v1_props) -- modules(v2_props)
-
-    { up_version_change, down_version_change } =
-      case start_module(v2_props) do
-        { :ok, start_mod, start_args } ->
-          start_mod_beam_file =
-            v2_path
-            |> Path.join("/ebin/")
-            |> Path.join(Atom.to_string(start_mod) <> ".beam")
-          { start_mod_beam_file |> File.read! |> version_change(v1, start_mod, start_args),
-            start_mod_beam_file |> File.read! |> version_change({:down, v1}, start_mod, start_args) }
-        :undefined ->
-          { [], [] }
-      end
-
-    up_directives =
-      (modules(v2_props) -- add_mods) |> Enum.map(fn module ->
-        (v2_path <> "/ebin/" <> Atom.to_string(module) <> ".beam")
-        |> File.read!
-        |> upgrade_directives(v1, v2, module)
-      end) |> List.flatten
-
-    down_directives =
-      Enum.reverse(modules(v2_props) -- add_mods) |> Enum.map(fn module ->
-        (v2_path <> "/ebin/" <> Atom.to_string(module) <> ".beam")
-        |> File.read!
-        |> downgrade_directives(v1, v2, module)
-      end) |> List.flatten
+  defp make_appup(application, v1, v1_path, v1_props, v2, v2_path, v2_props) do
+    {only_v1, only_v2, different} =
+      :beam_lib.cmp_dirs(to_char_list(Path.join(v1_path, "ebin")), to_char_list(Path.join(v2_path, "ebin")))
 
     appup =
       { v2 |> String.to_char_list,
         [ { v1 |> String.to_char_list,
-            (for m <- add_mods, do: { :add_module, m })
-            ++ up_directives
-            ++ up_version_change
-            ++ (for m <- del_mods, do: { :delete_module, m })
+            (for file <- only_v2, do: generate_instruction(:added, file)) ++
+            (for {file, _} <- different, do: generate_instruction(:changed, file)) ++
+            (for file <- only_v1, do: generate_instruction(:deleted, file))
           }
         ],
         [ { v1 |> String.to_char_list,
-            (for m <- :lists.reverse(del_mods), do: { :add_module, m })
-            ++ down_version_change
-            ++ down_directives
-            ++ (for m <- :lists.reverse(add_mods), do: { :delete_module, m })
+            (for file <- only_v2, do: generate_instruction(:deleted, file)) ++
+            (for {file, _} <- different, do: generate_instruction(:changed, file)) ++
+            (for file <- only_v1, do: generate_instruction(:added, file))
           }
         ]
       }
@@ -108,17 +79,36 @@ defmodule ReleaseManager.Appups do
     { :ok, appup }
   end
 
-  defp version_change(beam, from, start_mod, start_args) do
-    case has_version_change(beam) do
-      true ->
-        [ { :apply, { start_mod, :version_change, [ from, start_args ] } } ]
-      false ->
-        []
-    end
+  defp generate_instruction(:added, file) do
+    {:add_module, module_name(file)}
   end
 
-  defp has_version_change(beam) do
-    beam_exports(beam, :version_change, 2)
+  defp generate_instruction(:deleted, file) do
+    {:delete_module, module_name(file)}
+  end
+
+  defp generate_instruction(:changed, file) do
+    {:ok, {module_name, list}} = :beam_lib.chunks(file, [:attributes, :exports])
+    behaviour = get_in(list, [:attributes, :behavior]) || get_in(list, [:attributes, :behaviour])
+    is_code_change = get_in(list, [:exports, :code_change]) != nil
+    generate_instruction_advanced(module_name, behaviour, is_code_change)
+  end
+
+  defp generate_instruction_advanced(module_name, [:supervisor], _) do
+    # supervisor
+    {:update, module_name, :supervisor}
+  end
+  defp generate_instruction_advanced(module_name, _behaviour, true) do
+    # exports code_change
+    {:update, module_name, {:advanced, []}}
+  end
+  defp generate_instruction_advanced(module_name, _behaviour, false) do
+    # code_change not exported
+    {:load_module, module_name}
+  end
+
+  defp module_name(file) do
+    :beam_lib.info(file) |> Keyword.fetch!(:module)
   end
 
   defp beam_exports(beam, func, arity) do
@@ -127,68 +117,6 @@ defmodule ReleaseManager.Appups do
         exports |> Enum.member?({ func, arity })
       _ ->
         false
-    end
-  end
-
-  defp start_module(props) do
-    case :lists.keysearch(:mod, 1, props) do
-      { :value, { :mod, { start_mod, start_args } } } ->
-        { :ok, start_mod, start_args }
-      false ->
-        :undefined
-    end
-  end
-
-  defp modules(props) do
-    { :value, { :modules, modules } } = :lists.keysearch(:modules, 1, props)
-    modules
-  end
-
-  defp upgrade_directives(beam, v1, v2, m) do
-    case is_supervisor(beam) do
-      true ->
-        upgrade_directives_supervisor(beam, v1, v2, m)
-      false ->
-        case has_code_change(beam) do
-          true  -> [ { :update, m, { :advanced, [] } } ]
-          false -> [ { :load_module, m } ]
-        end
-    end
-  end
-
-  defp upgrade_directives_supervisor(beam, v1, v2, m) do
-    case beam_exports(beam, :sup_upgrade_notify, 2) do
-      true ->
-        [ { :update, m, :supervisor },
-          { :apply, { m, :sup_upgrade_notify, [ v1, v2 ] } } ]
-      false ->
-        [ { :update, m, :supervisor } ]
-    end
-  end
-
-  defp downgrade_directives(beam, v1, v2, m) do
-    case is_supervisor(beam) do
-      true ->
-        downgrade_directives_supervisor(beam, v1, v2, m)
-      false ->
-        case has_code_change(beam) do
-          true  -> [ { :update, m, { :advanced, [] } } ]
-          false -> [ { :load_module, m } ]
-        end
-    end
-  end
-
-  defp downgrade_directives_supervisor(beam, v1, v2, m) do
-    case beam_exports(beam, :sup_downgrade_notify, 2) do
-      true ->
-        [ {
-            :apply, { m, :sup_downgrade_notify, [ v1, v2 ] }
-          },
-          {
-            :update, m, :supervisor
-          } ]
-      false ->
-        [ { :update, m, :supervisor } ]
     end
   end
 
