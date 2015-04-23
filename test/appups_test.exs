@@ -56,15 +56,11 @@ defmodule AppupsTest do
     {'0.0.2',
        [{'0.0.1',
          [{:load_module,Test},
-          {:update,Test.Server,:infinity,
-                  {:advanced,[]},
-                  :brutal_purge,:brutal_purge,[]},
+          {:update,Test.Server, {:advanced,[]}},
           {:update,Test.Supervisor,:supervisor}]}],
        [{'0.0.1',
          [{:update,Test.Supervisor,:supervisor},
-          {:update,Test.Server,:infinity,
-                  {:advanced,[]},
-                  :brutal_purge,:brutal_purge,[]},
+          {:update,Test.Server,{:advanced,[]}},
           {:load_module,:"Elixir.Test"}]}]}
   end
 end

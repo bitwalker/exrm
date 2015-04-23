@@ -150,7 +150,7 @@ defmodule ReleaseManager.Appups do
         upgrade_directives_supervisor(beam, v1, v2, m)
       false ->
         case has_code_change(beam) do
-          true  -> [ { :update, m, :infinity, { :advanced, [] }, :brutal_purge, :brutal_purge, [] } ]
+          true  -> [ { :update, m, { :advanced, [] } } ]
           false -> [ { :load_module, m } ]
         end
     end
@@ -172,7 +172,7 @@ defmodule ReleaseManager.Appups do
         downgrade_directives_supervisor(beam, v1, v2, m)
       false ->
         case has_code_change(beam) do
-          true  -> [ { :update, m, :infinity, { :advanced, [] }, :brutal_purge, :brutal_purge, [] } ]
+          true  -> [ { :update, m, { :advanced, [] } } ]
           false -> [ { :load_module, m } ]
         end
     end
