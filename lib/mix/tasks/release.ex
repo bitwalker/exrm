@@ -71,6 +71,7 @@ defmodule Mix.Tasks.Release do
     |> generate_nodetool
     |> execute_after_hooks
     |> update_release_package
+    |> execute_package_hooks
 
     info "The release for #{config.name}-#{config.version} is ready!"
   end
@@ -255,7 +256,25 @@ defmodule Mix.Tasks.Release do
       end
     end
   end
-
+  
+  defp execute_package_hooks(%Config{} = config) do
+    plugins = ReleaseManager.Plugin.load_all
+    Enum.reduce plugins, config, fn plugin, conf ->
+      try do
+        # Handle the case where a child plugin does not return the configuration
+        case plugin.after_package(conf) do
+          %Config{} = result -> result
+          _                  -> conf
+        end
+      rescue
+        exception ->
+          stacktrace = System.stacktrace
+          error "Failed to execute after_package hook for #{plugin}!"
+          reraise exception, stacktrace
+      end
+    end
+  end
+  
   defp do_release(%Config{name: name, version: version, verbosity: verbosity, upgrade?: upgrade?, dev: dev_mode?, env: env} = config) do
     debug "Generating release..."
     # If this is an upgrade release, generate an appup
@@ -342,7 +361,7 @@ defmodule Mix.Tasks.Release do
       [:compressed]
     )
     # Continue..
-    config
+    %{config | package: tarball}
   end
 
   defp parse_args(argv) do

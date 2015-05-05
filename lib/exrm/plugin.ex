@@ -17,6 +17,10 @@ defmodule ReleaseManager.Plugin do
           info "This is executed just after compiling the release"
         end
 
+        def after_package(%Config{} = config) do
+          info "This is executed just after packaging the release"
+        end
+
         def after_cleanup(_args) do
           info "This is executed just after running cleanup"
         end
@@ -48,6 +52,7 @@ defmodule ReleaseManager.Plugin do
   """
   defcallback before_release(ReleaseManager.Config.t) :: any
   defcallback after_release(ReleaseManager.Config.t) :: any
+  defcallback after_package(ReleaseManager.Config.t) :: any
   defcallback after_cleanup([String.t]) :: any
 
   @doc false

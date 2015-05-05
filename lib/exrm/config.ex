@@ -11,6 +11,7 @@ defmodule ReleaseManager.Config do
       erl:       The binary containing all options to pass to erl
       upgrade?:  Is this release an upgrade?
       verbosity: The verbosity level, one of [silent|quiet|normal|verbose]
+      package:   Path to the generated release package.
 
   """
   defstruct name:      "",
@@ -20,5 +21,6 @@ defmodule ReleaseManager.Config do
             erl:       "",
             upgrade?:  false,
             verbosity: :quiet,
-            relx_config: []
+            relx_config: [],
+            package:   nil
 end
