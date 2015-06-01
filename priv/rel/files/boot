@@ -80,27 +80,37 @@ relx_start_command() {
 
 # Convert .conf to sys.config using conform escript
 generate_config() {
-    local conf_file="$REL_DIR/$REL_NAME.conf"
+    local conf_file="$RELEASE_CONFIG_DIR/$REL_NAME.conf"
     local schema_file="$REL_DIR/$REL_NAME.schema.exs"
-    local sys_config="$REL_DIR/sys.config"
     if [ -f "$schema_file" ]; then
-        result="$("$BINDIR/escript" "$ROOTDIR"/bin/conform --conf "$conf_file" --schema "$schema_file" --config "$sys_config" --output-dir "$REL_DIR")"
-        exit_status="$?"
-        if [ "$exit_status" -ne 0 ]; then
-            exit "$exit_status"
+        if [ -f "$conf_file" ]; then
+            result="$("$BINDIR/escript" "$ROOTDIR"/bin/conform --conf "$conf_file" --schema "$schema_file" --config "$SYS_CONFIG" --output-dir "$RELEASE_CONFIG_DIR")"
+            exit_status="$?"
+            if [ "$exit_status" -ne 0 ]; then
+                exit "$exit_status"
+            fi
+        else
+            echo "$conf_file not found in $RELEASE_CONFIG_DIR"
+            exit 1
         fi
     fi
 }
 
-# Use $CWD/vm.args if exists, otherwise releases/VSN/vm.args
-if [ -z "$VMARGS_PATH" ]; then
+# Use configs from environment if defined, then try from $CWD if exists, otherwise releases/VSN
+eval "RELEASE_CONFIG_DIR=\$$(echo "$REL_NAME" | awk '{print toupper($1)}')_CONFIG_DIR"
+if [ -z "$RELEASE_CONFIG_DIR" ]; then
     if [ -f "$RELEASE_ROOT_DIR/vm.args" ]; then
+        RELEASE_CONFIG_DIR=$RELEASE_ROOT_DIR
         VMARGS_PATH="$RELEASE_ROOT_DIR/vm.args"
-        USE_DIR="$RELEASE_ROOT_DIR"
+        SYS_CONFIG="$RELEASE_ROOT_DIR/sys.config"
     else
-        USE_DIR="$REL_DIR"
+        RELEASE_CONFIG_DIR=$REL_DIR
         VMARGS_PATH="$REL_DIR/vm.args"
+        SYS_CONFIG="$REL_DIR/sys.config"
     fi
+else
+    VMARGS_PATH="$RELEASE_CONFIG_DIR/vm.args"
+    SYS_CONFIG="$RELEASE_CONFIG_DIR/sys.config"
 fi
 
 if [ $RELX_REPLACE_OS_VARS ]; then
@@ -117,17 +127,9 @@ if ! [ -w $RUNNER_LOG_DIR ] ; then
     exit 1
 fi
 
-if [ -z "$CONFIG_PATH" ]; then
-    if [ -f "$USE_DIR/sys.config" ]; then
-        CONFIG_PATH="$USE_DIR/sys.config"
-    else
-        CONFIG_PATH="$REL_DIR/sys.config"
-    fi
-fi
-
 if [ $RELX_REPLACE_OS_VARS ]; then
-    awk '{while(match($0,"[$]{[^}]*}")) {var=substr($0,RSTART+2,RLENGTH -3);gsub("[$]{"var"}",ENVIRON[var])}}1' < $CONFIG_PATH > $CONFIG_PATH.2.config
-    CONFIG_PATH=$CONFIG_PATH.2.config
+    awk '{while(match($0,"[$]{[^}]*}")) {var=substr($0,RSTART+2,RLENGTH -3);gsub("[$]{"var"}",ENVIRON[var])}}1' < $SYS_CONFIG > SYS_CONFIG.2.config
+    SYS_CONFIG=$SYS_CONFIG.2.config
 fi
 
 # Extract the target node name from node.args
@@ -422,7 +424,7 @@ case "$1" in
         # Build it here because this command will be used for logging.
         set -- "$BINDIR/erlexec" -boot "$BOOTFILE" \
             -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
-            -env ERL_LIBS "$REL_LIB_DIR" -config "$CONFIG_PATH" \
+            -env ERL_LIBS "$REL_LIB_DIR" -config "$SYS_CONFIG" \
             -pa "$REL_LIB_DIR/consolidated" \
             -args_file "$VMARGS_PATH" \
             -user Elixir.IEx.CLI -extra --no-halt +iex
@@ -461,7 +463,7 @@ case "$1" in
         # Build an array of arguments to pass to exec later on
         # Build it here because this command will be used for logging.
         set -- "$BINDIR/erlexec" $FOREGROUNDOPTIONS \
-            -boot "$REL_DIR/$BOOTFILE" -mode embedded -config "$CONFIG_PATH" \
+            -boot "$REL_DIR/$BOOTFILE" -mode embedded -config "$SYS_CONFIG" \
             -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
             -args_file "$VMARGS_PATH"
 

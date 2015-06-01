@@ -133,6 +133,15 @@ definitions for them from your schema file. The `sys.config` is merged
 with the configuration which is defined in the .conf, so your settings
 will still be applied, they just won't be exposed for end users.
 
+You can also change the directory of your configuration files `sys.config`, 
+`vm.args` and `yourapp.conf` for your `$YOUR_RELEASE_NAME` using `$YOUR_RELEASE_NAME_CONFIG_DIR` 
+system environment like this (in this exmple you release is `MY_RELEASE_NAME`):
+
+`MY_RELEASE_NAME_CONFIG_DIR=/some_path_to_configs bin/test start`
+
+So you can have persistent configuration for your application.
+
+
 ## Deployment
 
 Now that you've generated your first release, it's time to deploy it! Let's walk through a simulated deployment to the `/tmp` directory on your machine, using the example app from the Appendix.
