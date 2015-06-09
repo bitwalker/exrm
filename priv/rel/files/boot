@@ -84,7 +84,7 @@ generate_config() {
     local schema_file="$REL_DIR/$REL_NAME.schema.exs"
     if [ -f "$schema_file" ]; then
         if [ -f "$conf_file" ]; then
-            result="$("$BINDIR/escript" "$ROOTDIR"/bin/conform --conf "$conf_file" --schema "$schema_file" --config "$SYS_CONFIG" --output-dir "$RELEASE_CONFIG_DIR")"
+            result="$("$BINDIR/escript" "$ROOTDIR"/bin/conform --conf "$conf_file" --schema "$schema_file" --config "$SYS_CONFIG" --output-dir "$CONFORM_OUT_DIR")"
             exit_status="$?"
             if [ "$exit_status" -ne 0 ]; then
                 exit "$exit_status"
@@ -99,6 +99,7 @@ generate_config() {
 # Use configs from environment if defined, then try from $CWD if exists, otherwise releases/VSN
 eval "RELEASE_CONFIG_DIR=\$$(echo "$REL_NAME" | awk '{print toupper($1)}')_CONFIG_DIR"
 if [ -z "$RELEASE_CONFIG_DIR" ]; then
+    CONFORM_OUT_DIR=$REL_DIR
     if [ -f "$RELEASE_ROOT_DIR/vm.args" ]; then
         RELEASE_CONFIG_DIR=$RELEASE_ROOT_DIR
         VMARGS_PATH="$RELEASE_ROOT_DIR/vm.args"
@@ -109,8 +110,18 @@ if [ -z "$RELEASE_CONFIG_DIR" ]; then
         SYS_CONFIG="$REL_DIR/sys.config"
     fi
 else
-    VMARGS_PATH="$RELEASE_CONFIG_DIR/vm.args"
-    SYS_CONFIG="$RELEASE_CONFIG_DIR/sys.config"
+    if [ -f "$RELEASE_CONFIG_DIR/vm.args" ]; then
+        VMARGS_PATH="$RELEASE_CONFIG_DIR/vm.args"
+    else
+        VMARGS_PATH="$REL_DIR/vm.args"
+    fi
+    if [ -f "$RELEASE_CONFIG_DIR/sys.config" ]; then
+        SYS_CONFIG="$RELEASE_CONFIG_DIR/sys.config"
+        CONFORM_OUT_DIR=$RELEASE_CONFIG_DIR
+    else
+        SYS_CONFIG="$REL_DIR/sys.config"
+        CONFORM_OUT_DIR=$REL_DIR
+    fi
 fi
 
 if [ $RELX_REPLACE_OS_VARS ]; then
