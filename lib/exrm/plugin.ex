@@ -17,6 +17,10 @@ defmodule ReleaseManager.Plugin do
           info "This is executed just after compiling the release"
         end
 
+        def after_package(%Config{} = config) do
+          info "This is executed just after packaging the release"
+        end
+
         def after_cleanup(_args) do
           info "This is executed just after running cleanup"
         end
@@ -43,10 +47,13 @@ defmodule ReleaseManager.Plugin do
 
   @doc """
   A plugin needs to implement `before_release/1`, and `after_release/1`
-  both of which receive a %ReleaseManager.Config struct
+  both of which receive a %ReleaseManager.Config struct, as well as `after_cleanup/1`, which
+  receives the arguments given for the command as a list of strings.
   """
   defcallback before_release(ReleaseManager.Config.t) :: any
   defcallback after_release(ReleaseManager.Config.t) :: any
+  defcallback after_package(ReleaseManager.Config.t) :: any
+  defcallback after_cleanup([String.t]) :: any
 
   @doc false
   defmacro __using__(_opts) do

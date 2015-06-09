@@ -67,6 +67,7 @@ defmodule ReleaseManager.Plugin.Conform do
   end
 
   def after_release(_), do: nil
+  def after_package(_), do: nil
   def after_cleanup(_), do: nil
 
 end
