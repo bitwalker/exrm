@@ -25,7 +25,7 @@
     </script>
 
     <section id="content">
-      <div class="breadcrumbs">exrm v0.16.0 &rarr; <a href="overview.html">Overview</a> &rarr; ReleaseManager &rarr; <a href="ReleaseManager.Plugin.html">Plugin</a></div>
+      <div class="breadcrumbs">exrm v0.17.0 &rarr; <a href="overview.html">Overview</a> &rarr; ReleaseManager &rarr; <a href="ReleaseManager.Plugin.html">Plugin</a></div>
       <h1>
         ReleaseManager.Plugin
         
@@ -64,6 +64,10 @@ the module namespace must be nested under <code class="inline">ReleaseManager.Pl
     info &quot;This is executed just after compiling the release&quot;
   end
 
+  def after_package(%Config{} = config) do
+    info &quot;This is executed just after packaging the release&quot;
+  end
+
   def after_cleanup(_args) do
     info &quot;This is executed just after running cleanup&quot;
   end
@@ -80,7 +84,7 @@ These should be used to do any output for the user.
 <code class="inline">Config</code> struct, containing the configuration for the release task. You can choose
 to return the config struct modified or unmodified, or not at all. In the former case,
 any modifications you made will be passed on to the remaining plugins and the final
-release task. The required callback <code class="inline">after_cleanup/1</code> is passed the command line arguments.
+release task. The required callback <a href="#after_cleanup/1"><code class="inline">after_cleanup/1</code></a> is passed the command line arguments.
 The return value is not used.</p>
 <p>All plugins are executed just prior, and just after compiling the release, as the name of
 the callbacks reflect. The <a href="#before_release/1"><code class="inline">before_release/1</code></a> callback is called after some internal tasks,
@@ -173,6 +177,50 @@ such as generating the sys.config and others.</p>
         <section id="callbacks_details" class="details_list">
           <h2>Callbacks</h2>
           <section class="detail">
+  <div class="detail_header" id="c:after_cleanup/1">
+    <span class="signature"><strong>after_cleanup/1</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(callback)</span>
+      <a href="#c:after_cleanup/1" class="detail_link" title="Link to this callback">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+    <p>Specs:</p>
+    <ul class="spec">
+      
+        <li>after_cleanup([<a href="http://elixir-lang.org/docs/stable/elixir/String.html#t:t/0">String.t</a>]) :: any</li>
+      
+    </ul>
+  
+  <section class="docstring">
+    
+  </section>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="c:after_package/1">
+    <span class="signature"><strong>after_package/1</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(callback)</span>
+      <a href="#c:after_package/1" class="detail_link" title="Link to this callback">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+    <p>Specs:</p>
+    <ul class="spec">
+      
+        <li>after_package(<a href="ReleaseManager.Config.html#t:t/0">ReleaseManager.Config.t</a>) :: any</li>
+      
+    </ul>
+  
+  <section class="docstring">
+    
+  </section>
+  
+</section>
+<section class="detail">
   <div class="detail_header" id="c:after_release/1">
     <span class="signature"><strong>after_release/1</strong></span>
     <div class="detail_header_links">
@@ -213,7 +261,8 @@ such as generating the sys.config and others.</p>
   
   <section class="docstring">
     <p>A plugin needs to implement <a href="#before_release/1"><code class="inline">before_release/1</code></a>, and <a href="#after_release/1"><code class="inline">after_release/1</code></a>
-both of which receive a %ReleaseManager.Config struct</p>
+both of which receive a %ReleaseManager.Config struct, as well as <a href="#after_cleanup/1"><code class="inline">after_cleanup/1</code></a>, which
+receives the arguments given for the command as a list of strings.</p>
 
   </section>
   
