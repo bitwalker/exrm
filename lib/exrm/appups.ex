@@ -50,7 +50,7 @@ defmodule ReleaseManager.Appups do
     end
   end
 
-  defp make_appup(application, v1, v1_path, v1_props, v2, v2_path, v2_props) do
+  defp make_appup(application, v1, v1_path, _v1_props, v2, v2_path, _v2_props) do
     {only_v1, only_v2, different} =
       :beam_lib.cmp_dirs(to_char_list(Path.join(v1_path, "ebin")), to_char_list(Path.join(v2_path, "ebin")))
 
@@ -111,39 +111,9 @@ defmodule ReleaseManager.Appups do
     :beam_lib.info(file) |> Keyword.fetch!(:module)
   end
 
-  defp beam_exports(beam, func, arity) do
-    case :beam_lib.chunks(beam, [ :exports ]) do
-      { :ok, { _, [ { :exports, exports } ] } } ->
-        exports |> Enum.member?({ func, arity })
-      _ ->
-        false
-    end
-  end
-
-  defp has_code_change(beam) do
-    beam_exports(beam, :code_change, 3)
-  end
-
-  defp is_supervisor(beam) do
-    case :beam_lib.chunks(beam, [ :attributes ]) do
-      { :ok, { _, [ { :attributes, attr } ] } } ->
-        has_element(attr, :behaviour, :supervisor) or has_element(attr, :behavior, :supervisor)
-      _ ->
-        false
-    end
-  end
-
   defp vsn(props) do
     { :value, { :vsn, vsn } } = :lists.keysearch(:vsn, 1, props)
     vsn |> List.to_string
   end
 
-  defp has_element(attr, key, elem) do
-    case :lists.keysearch(key, 1, attr) do
-      { :value, { ^key, value } } ->
-        :lists.member(elem, value)
-      _ ->
-        false
-    end
-  end
 end
