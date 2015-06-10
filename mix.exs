@@ -13,7 +13,8 @@ defmodule ReleaseManager.Mixfile do
   def application, do: []
 
   def deps do
-    [{:conform, "~> 0.13.0"},
+    [{:conform, "~> 0.14.4"},
+     {:relx, github: "erlware/relx" },
      {:earmark, "~> 0.1", only: :dev},
      {:ex_doc, "~> 0.5", only: :dev}]
   end

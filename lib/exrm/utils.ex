@@ -51,15 +51,10 @@ defmodule ReleaseManager.Utils do
   @doc """
   Execute `relx`
   """
-  def relx(name, version, verbosity, upgrade?, dev) do
+  def relx(name, version, verbosity, upgrade?, dev_mode?) do
     # Setup paths
     config     = rel_file_dest_path "relx.config"
     output_dir = @relx_output_path |> Path.expand
-    # Determine whether to pass --dev-mode or not
-    dev_mode?  = case dev do
-      true  -> "--dev-mode"
-      false -> ""
-    end
     # Convert friendly verbosity names to relx values
     v = case verbosity do
       :silent  -> 0
@@ -69,17 +64,24 @@ defmodule ReleaseManager.Utils do
       _        -> 2 # Normal if we get an odd value
     end
     # Let relx do the heavy lifting
-    relx_path = Path.join([priv_path, "bin", "relx"])
-    command = case upgrade? do
-      false -> "#{relx_path} release tar -V #{v} --root #{File.cwd!} --config #{config} --relname #{name} --relvsn #{version} --output-dir #{output_dir} #{dev_mode?}"
+    relx_args = [
+        log_level: v,
+        root_dir: '#{File.cwd!}',
+        config: '#{config}',
+        relname: '#{name}',
+        relvsn: '#{version}',
+        output_dir: '#{output_dir}',
+        dev_mode: dev_mode?
+      ]
+    result = case upgrade? do
+      false -> :relx.do relx_args, ['release', 'tar']
       true  ->
         last_release = get_last_release(name)
-        "#{relx_path} release relup tar -V #{v} --root #{File.cwd!} --config #{config} --relname #{name} --relvsn #{version} --output-dir #{output_dir} --upfrom \"#{last_release}\" #{dev_mode?}"
+        :relx.do [{:upfrom, '#{last_release}'} | relx_args], ['release', 'relup', 'tar']
     end
-    case do_cmd command do
-      :ok         -> :ok
-      {:error, _} ->
-        {:error, "Failed to build release. Please fix any errors and try again."}
+    case result do
+      {:ok, _state} -> :ok
+      {:error, _e}  -> {:error, "Failed to build release. Please fix any errors and try again."}
     end
   end
 
@@ -297,7 +299,6 @@ defmodule ReleaseManager.Utils do
   # Ignore a message when used as the callback for Mix.Shell.cmd
   defp ignore(_), do: nil
 
-  defp do_cmd(command), do: do_cmd(command, &IO.write/1)
   defp do_cmd(command, callback) do
     case cmd(command, callback) do
       0 -> :ok
