@@ -67,7 +67,7 @@ defmodule UtilsTest do
   test "can build a release and boot it up" do
     with_app do
       # Build release
-      assert :ok = Utils.mix("compile", :dev)
+      assert :ok = Utils.mix("do deps.get, compile", :dev, :verbose)
       assert :ok = Utils.mix("release", :dev)
       assert [{"test", "0.0.1"}] == Utils.get_releases("test")
       # Boot it, ping it, and shut it down
