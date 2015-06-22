@@ -25,7 +25,7 @@ find_erts_dir() {
         local erl="$(which erl)"
         local code="io:format(\"~s\", [code:root_dir()])."
         local erl_root="$("$erl" -noshell -eval "$code" -s init stop)"
-        ERTS_DIR="$erl_root/erts-$ERTS_VSN"
+        ERTS_DIR=$(ls -d $erl_root/erts-* | sort -t '.' -k 1,1 -k 2,2 -k 3,3 -k 4,4 -k 5,5 -g | tail -n 1)
         ROOTDIR="$erl_root"
     fi
 }

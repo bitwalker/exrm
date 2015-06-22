@@ -63,7 +63,7 @@ defmodule UtilsTest do
   end
 
   @tag :expensive
-  @tag timeout: 60000 # 60s
+  @tag timeout: 120000 # 120s
   test "can build a release and boot it up" do
     with_app do
       # Build release
