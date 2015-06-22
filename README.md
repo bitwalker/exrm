@@ -219,6 +219,12 @@ edge cases, I'll formalize this in a better format perhaps as a
   issue a pull request in order to resolve this issue. Alternatively, if
   you know what the dependency is, you can put it in your own `mix.exs`, and
   the release process will ensure that it is loaded with everything else.
+- Due to the way `config.exs` is converted to the `sys.config` file used by
+  Erlang releases, it is important to make sure all of your config values are
+  namespaced by application, i.e. `config :myapp, foo: bar` instead of `config foo: bar`,
+  and access your config via `Application.get_env(:myapp, :foo)`. If you do not
+  do this, you will likely run into issues at runtime complaining that you are attempting
+  to access configuration for an application that is not loaded.
 
 If you run into problems, please create an issue, and I'll address ASAP.
 
