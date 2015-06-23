@@ -1,20 +1,12 @@
-language: erlang
+sudo: false
+language: elixir
+elixir:
+  - 1.0.0
 otp_release:
   - 17.0
   - 17.1
 env:
-  - ELIXIR_VERSION=1.0.0
-before_install:
-  - wget https://github.com/elixir-lang/elixir/releases/download/v$ELIXIR_VERSION/Precompiled.zip
-  - unzip -d elixir Precompiled.zip
-    #- git clone https://github.com/elixir-lang/elixir
-    #- cd elixir
-    #- make
-    #- cd ..
-before_script:
-  - export PATH=`pwd`/elixir/bin:$PATH
-  - mix local.hex --force
-  - mix deps.get
+  - MIX_ENV=all
 script:
   - MIX_ENV=all mix test --exclude expensive
   - MIX_ENV=all mix test --only expensive
