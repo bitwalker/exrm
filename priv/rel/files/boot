@@ -364,7 +364,25 @@ case "$1" in
         fi
 
         exec "$BINDIR/escript" "$ROOTDIR/bin/install_upgrade.escript" \
-             "$REL_NAME" "$NAME" "$COOKIE" "$2"
+             "install" "$REL_NAME" "$NAME" "$COOKIE" "$2"
+        ;;
+
+    unpack)
+        if [ -z "$2" ]; then
+            echo "Missing package argument"
+            echo "Usage: $REL_NAME $1 {package base name}"
+            echo "NOTE {package base name} MUST NOT include the .tar.gz suffix"
+            exit 1
+        fi
+
+        # Make sure a node IS running
+        if ! relx_nodetool "ping" > /dev/null; then
+            echo "Node is not running!"
+            exit 1
+        fi
+
+        exec "$BINDIR/escript" "$ROOTDIR/bin/install_upgrade.escript" \
+             "unpack" "$REL_NAME" "$NAME" "$COOKIE" "$2"
         ;;
 
     console|console_clean|console_boot)
