@@ -1,5 +1,5 @@
 %{"bbmustache": {:hex, :bbmustache, "1.0.1"},
-  "conform": {:hex, :conform, "0.14.4"},
+  "conform": {:hex, :conform, "0.14.5"},
   "earmark": {:hex, :earmark, "0.1.13"},
   "edown": {:git, "git://github.com/dwango/edown.git", "dd1239c1d8669b247ceac83b1654fa55c675d8f3", [branch: "master"]},
   "erlware_commons": {:hex, :erlware_commons, "0.13.0"},
