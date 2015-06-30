@@ -5,3 +5,5 @@
 erl_crash.dump
 *.ez
 .exenv-version
+/doc
+/docs
