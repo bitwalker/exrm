@@ -12,9 +12,18 @@ REL_DIR="$RELEASES_DIR/$REL_VSN"
 REL_LIB_DIR="$RELEASE_ROOT_DIR/lib"
 ERL_OPTS="{{{ERL_OPTS}}}"
 PIPE_DIR="$RELEASE_ROOT_DIR/tmp/erl_pipes/{{{PROJECT_NAME}}}/"
-RUNNER_LOG_DIR="${RUNNER_LOG_DIR:-$RELEASE_ROOT_DIR/log}"
 ERTS_DIR=""
 ROOTDIR=""
+
+GENERATED_CONFIG_DIR="${RELEASE_ROOT_DIR}/running-config"
+# Check for $RELEASE_MUTABLE_DIR
+if [ -n "${RELEASE_MUTABLE_DIR}" ]; then
+    PIPE_DIR="${RELEASE_MUTABLE_DIR}/erl_pipes/"
+    RUNNER_LOG_DIR="${RUNNER_LOG_DIR:-${RELEASE_MUTABLE_DIR}/log}"
+    GENERATED_CONFIG_DIR="${RELEASE_MUTABLE_DIR}/running-config"
+fi
+
+RUNNER_LOG_DIR="${RUNNER_LOG_DIR:-$RELEASE_ROOT_DIR/log}"
 
 find_erts_dir() {
     local erts_dir="$RELEASE_ROOT_DIR/erts-$ERTS_VSN"
@@ -80,48 +89,53 @@ relx_start_command() {
 
 # Convert .conf to sys.config using conform escript
 generate_config() {
-    local conf_file="$RELEASE_CONFIG_DIR/$REL_NAME.conf"
     local schema_file="$REL_DIR/$REL_NAME.schema.exs"
+    if [ -z "$RELEASE_CONFIG_FILE" ]; then
+        local conform_file="$RELEASE_CONFIG_DIR/$REL_NAME.conf"
+    else
+        if [ -r "$RELEASE_CONFIG_FILE" ]; then
+            local conform_file="$RELEASE_CONFIG_FILE"
+        else
+            echo "$RELEASE_CONFIG_FILE not found"
+            exit 1
+        fi
+    fi
     if [ -f "$schema_file" ]; then
-        if [ -f "$conf_file" ]; then
-            result="$("$BINDIR/escript" "$ROOTDIR"/bin/conform --conf "$conf_file" --schema "$schema_file" --config "$SYS_CONFIG" --output-dir "$CONFORM_OUT_DIR")"
+        if [ -f "$conform_file" ]; then
+            echo "using $conform_file to populate \"$GENERATED_CONFIG_DIR\"."            
+            result="$("$BINDIR/escript" "$ROOTDIR"/bin/conform --conf "$conform_file" --schema "$schema_file" --config "$SYS_CONFIG" --output-dir "$GENERATED_CONFIG_DIR")"
             exit_status="$?"
             if [ "$exit_status" -ne 0 ]; then
                 exit "$exit_status"
             fi
+            if [ ! -r "${GENERATED_CONFIG_DIR}/sys.config" ]; then
+                echo "conform succeeded, but not sys.config generated at \"${GENERATED_CONFIG_DIR}/sys.config\"."
+                exit 1
+            fi
         else
-            echo "$conf_file not found in $RELEASE_CONFIG_DIR"
+            echo "$conform_file not found in $RELEASE_CONFIG_DIR"
             exit 1
         fi
     fi
 }
 
-# Use configs from environment if defined, then try from $CWD if exists, otherwise releases/VSN
-eval "RELEASE_CONFIG_DIR=\$$(echo "$REL_NAME" | awk '{print toupper($1)}')_CONFIG_DIR"
+# Make directory for mutable configs exists
+mkdir -pv "$GENERATED_CONFIG_DIR"
+
+# Use configs from environment if defined, otherwise releases/VSN
 if [ -z "$RELEASE_CONFIG_DIR" ]; then
-    CONFORM_OUT_DIR=$REL_DIR
-    if [ -f "$RELEASE_ROOT_DIR/vm.args" ]; then
-        RELEASE_CONFIG_DIR=$RELEASE_ROOT_DIR
-        VMARGS_PATH="$RELEASE_ROOT_DIR/vm.args"
-        SYS_CONFIG="$RELEASE_ROOT_DIR/sys.config"
-    else
-        RELEASE_CONFIG_DIR=$REL_DIR
-        VMARGS_PATH="$REL_DIR/vm.args"
-        SYS_CONFIG="$REL_DIR/sys.config"
-    fi
-else
-    if [ -f "$RELEASE_CONFIG_DIR/vm.args" ]; then
-        VMARGS_PATH="$RELEASE_CONFIG_DIR/vm.args"
-    else
-        VMARGS_PATH="$REL_DIR/vm.args"
-    fi
-    if [ -f "$RELEASE_CONFIG_DIR/sys.config" ]; then
-        SYS_CONFIG="$RELEASE_CONFIG_DIR/sys.config"
-        CONFORM_OUT_DIR=$RELEASE_CONFIG_DIR
-    else
-        SYS_CONFIG="$REL_DIR/sys.config"
-        CONFORM_OUT_DIR=$REL_DIR
-    fi
+    RELEASE_CONFIG_DIR=$REL_DIR
+fi
+
+SYS_CONFIG="$GENERATED_CONFIG_DIR/sys.config"
+VMARGS_PATH="$GENERATED_CONFIG_DIR/vm.args"
+
+# If first run, take dafault sys.config and vm.args
+if [ ! -f "$SYS_CONFIG" ]; then
+    cp "$RELEASE_CONFIG_DIR/sys.config" "$GENERATED_CONFIG_DIR/sys.config"
+fi
+if [ ! -f "$VMARGS_PATH" ]; then
+    cp "$RELEASE_CONFIG_DIR/vm.args" "$GENERATED_CONFIG_DIR/vm.args"
 fi
 
 if [ $RELX_REPLACE_OS_VARS ]; then

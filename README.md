@@ -114,8 +114,9 @@ definitions for config settings you wish to add.
 Once your schema is all set, you can generate the default .conf file for
 your app using `mix conform.configure`. This will output a .conf file to
 `config/yourapp.conf`. This will be bundled with your release, and
-located in `$DEPLOY_DIR/releases/$RELEASE_VER/myapp.conf`. Your ops
-group can then do all their configuration in production via that file.
+located in `$DEPLOY_DIR/releases/$RELEASE_VER/myapp.conf` per default 
+(also it could be moved, using `RELEASE_CONFIG_FILE` or `RELEASE_CONFIG_DIR` environments). 
+Your ops group can then do all their configuration in production via that file.
 
 If you are wondering how that .conf file is usable by the VM, it's very
 simple. When you run `bin/test start`, or any other command which boots
@@ -133,13 +134,24 @@ definitions for them from your schema file. The `sys.config` is merged
 with the configuration which is defined in the .conf, so your settings
 will still be applied, they just won't be exposed for end users.
 
-You can also change the directory of your configuration files `sys.config`, 
-`vm.args` and `yourapp.conf` for your `$YOUR_RELEASE_NAME` using `$YOUR_RELEASE_NAME_CONFIG_DIR` 
-system environment like this (in this exmple you release is `MY_RELEASE_NAME`):
+You can also change the directory of all your configuration files `sys.config`, 
+`vm.args` and `yourapp.conf` using `RELEASE_CONFIG_DIR` or only for conform 
+config `yourapp.conf` using `RELEASE_CONFIG_FILE` system environments like this:
 
-`MY_RELEASE_NAME_CONFIG_DIR=/some_path_to_configs bin/test start`
+`RELEASE_CONFIG_DIR=/some_path_to_configs bin/test start`
+
+or
+
+`RELEASE_CONFIG_FILE=/some_path_to_configs/yourapp.conf bin/test start`
 
 So you can have persistent configuration for your application.
+
+The configs placed in `$DEPLOY_DIR/releases/$RELEASE_VER` will be used 
+as persistent dafault configs. They will be used by first release start and placed in 
+`$DEPLOY_DIR/releases/$RELEASE_VER/running-config` if no
+`RELEASE_MUTABLE_DIR` defined. It is also possible to move the running-config, logs
+and erl_pipes using `RELEASE_MUTABLE_DIR` system environment. The idea is to 
+hold persistent and nonpersistent data separately.
 
 
 ## Deployment
