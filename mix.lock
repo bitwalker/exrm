@@ -12,4 +12,4 @@
   "providers": {:hex, :providers, "1.4.1"},
   "rebar_vsn_plugin": {:git, "https://github.com/erlware/rebar_vsn_plugin.git", "fd40c960c7912193631d948fe962e1162a8d1334", [branch: "master"]},
   "reloader": {:git, "git://github.com/sile/reloader.git", "ab13271c015f73a52ab5d01d989f5ea110c272d8", [branch: "master"]},
-  "relx": {:hex, :relx, "2.1.1"}}
+  "relx": {:hex, :relx, "3.1.0"}}
