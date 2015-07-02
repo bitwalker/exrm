@@ -56,7 +56,7 @@ defmodule UtilsTest do
   end
 
   test "can get the current elixir library path" do
-    path        = Path.join([Utils.get_elixir_path, "bin", "elixir"])
+    path        = Path.join(Utils.get_elixir_lib_path, "../bin/elixir")
     {result, _} = System.cmd(path, ["--version"])
     version     = result |> String.strip(?\n)
     assert "Elixir #{System.version}" == version

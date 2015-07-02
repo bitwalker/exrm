@@ -155,8 +155,11 @@ defmodule ReleaseManager.Utils do
   @doc """
   Get the local path of the current elixir executable
   """
-  def get_elixir_path() do
-    System.find_executable("elixir") |> get_real_path
+  def get_elixir_lib_path() do
+    [elixir_lib_path, _ ] = "#{:code.which(Mix)}"
+    |> String.split "mix/ebin/Elixir.Mix.beam"
+
+    elixir_lib_path
   end
 
   @doc """
@@ -304,22 +307,6 @@ defmodule ReleaseManager.Utils do
       0 -> :ok
       _ -> {:error, "Release step failed. Please fix any errors and try again."}
     end
-  end
-
-  defp get_real_path(path) do
-    case path |> String.to_char_list |> :file.read_link_info do
-      {:ok, {:file_info, _, :regular, _, _, _, _, _, _, _, _, _, _, _}} ->
-        path
-      {:ok, {:file_info, _, :symlink, _, _, _, _, _, _, _, _, _, _, _}} ->
-        {:ok, sym} = path |> String.to_char_list |> :file.read_link
-        case sym |> :filename.pathtype do
-          :absolute ->
-            sym |> IO.iodata_to_binary
-          :relative ->
-            symlink = sym |> IO.iodata_to_binary
-            path |> Path.dirname |> Path.join(symlink) |> Path.expand
-        end
-    end |> String.replace(~r(/bin/elixir$), "")
   end
 
 end

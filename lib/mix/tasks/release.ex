@@ -109,7 +109,7 @@ defmodule Mix.Tasks.Release do
       "" -> config
       _  -> %{config | :upgrade? => true}
     end
-    elixir_path = get_elixir_path() |> Path.join("lib") |> String.to_char_list
+    elixir_path = get_elixir_lib_path() |> String.to_char_list
     lib_dirs = case Mix.Project.config |> Keyword.get(:umbrella?, false) do
       true ->
         [ elixir_path,
