@@ -256,7 +256,7 @@ defmodule Mix.Tasks.Release do
       end
     end
   end
-  
+
   defp execute_package_hooks(%Config{} = config) do
     plugins = ReleaseManager.Plugin.load_all
     Enum.reduce plugins, config, fn plugin, conf ->
@@ -274,7 +274,7 @@ defmodule Mix.Tasks.Release do
       end
     end
   end
-  
+
   defp do_release(%Config{name: name, version: version, verbosity: verbosity, upgrade?: upgrade?, dev: dev_mode?, env: env} = config) do
     debug "Generating release..."
     # If this is an upgrade release, generate an appup
@@ -355,8 +355,10 @@ defmodule Mix.Tasks.Release do
     file_list = File.ls!(rel_dest_path(name))
       |> Enum.reject(fn n -> n in [erts, "tmp"] end)
       |> Enum.map(&({'#{&1}', '#{rel_dest_path([name, &1])}'}))
+
+    release_tarball = rel_dest_path([name, "releases", version, "#{name}.tar.gz"])
     :ok = :erl_tar.create(
-      '#{tarball}',
+      '#{release_tarball}',
       file_list ++ extras,
       [:compressed]
     )

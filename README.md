@@ -160,9 +160,9 @@ Now that you've generated your first release, it's time to deploy it! Let's walk
 
 1. `mix release`
 2. `mkdir -p /tmp/test`
-3. `cp rel/test/test-0.0.1.tar.gz /tmp/`
+3. `cp rel/test/releases/0.0.1/test.tar.gz /tmp/`
 4. `cd /tmp/test`
-5. `tar -xf /tmp/test-0.0.1.tar.gz`
+5. `tar -xf /tmp/test.tar.gz`
 
 Now to start your app:
 
@@ -198,7 +198,7 @@ So you've made some changes to your app, and you want to generate a new release 
 
 1. `mix release`
 2. `mkdir -p /tmp/test/releases/0.0.2`
-3. `cp rel/test/test-0.0.2.tar.gz /tmp/test/releases/0.0.2/test.tar.gz`
+3. `cp rel/test/releases/0.0.2/test.tar.gz /tmp/test/releases/0.0.2/`
 4. `cd /tmp/test`
 5. `bin/test upgrade "0.0.2"`
 
