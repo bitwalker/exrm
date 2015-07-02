@@ -155,8 +155,11 @@ defmodule ReleaseManager.Utils do
   @doc """
   Get the local path of the current elixir executable
   """
-  def get_elixir_path() do
-    System.find_executable("elixir") |> get_real_path
+  def get_elixir_lib_path() do
+    [elixir_lib_path, _ ] = "#{:code.which(Mix)}"
+    |> String.split "mix/ebin/Elixir.Mix.beam"
+
+    elixir_lib_path
   end
 
   @doc """
