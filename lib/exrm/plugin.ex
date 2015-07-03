@@ -72,28 +72,36 @@ defmodule ReleaseManager.Plugin do
   Loads all plugins in all code paths.
   """
   @spec load_all() :: [] | [atom]
-  def load_all, do: load_plugins(:code.get_path)
+  def load_all, do: get_plugins(ReleaseManager.Plugin)
 
-  @doc """
-  Loads all plugins in the given `paths`.
-  """
-  @spec load_plugins([binary]) :: [] | [atom]
-  def load_plugins(paths) do
-    Enum.reduce(paths, [], fn(path, matches) ->
-      {:ok, files} = :erl_prim_loader.list_dir(path)
-      Enum.reduce(files, matches, &match_plugins/2)
-    end)
+  # Loads all modules that extend a given module in the current code path.
+  #
+  # The convention is that it will fetch modules with the same root namespace,
+  # and that are suffixed with the name of the module they are extending.
+  @spec get_plugins(atom) :: [] | [atom]
+  defp get_plugins(plugin_type) when is_atom(plugin_type) do
+    available_modules(plugin_type) |> Enum.reduce([], &load_plugin/2)
   end
 
-  @re_pattern Regex.re_pattern(~r/Elixir\.ReleaseManager\.Plugin\..*\.beam$/)
+  defp load_plugin(module, modules) do
+    if Code.ensure_loaded?(module), do: [module | modules], else: modules
+  end
 
-  @spec match_plugins(char_list, [atom]) :: [atom]
-  defp match_plugins(filename, modules) do
-    if :re.run(filename, @re_pattern, [capture: :none]) == :match do
-      mod = :filename.rootname(filename, '.beam') |> List.to_atom
-      if Code.ensure_loaded?(mod), do: [mod | modules], else: modules
-    else
-      modules
-    end
+  defp available_modules(plugin_type) do
+    apps_path = Mix.Project.build_path |> Path.join("lib")
+    apps      = apps_path |> File.ls!
+    apps
+    |> Enum.map(&(Path.join([apps_path, &1, "ebin"])))
+    |> Enum.map(fn app_path -> app_path |> File.ls! |> Enum.map(&(Path.join(app_path, &1))) end)
+    |> Enum.flat_map(&(&1))
+    |> Enum.filter(&(String.ends_with?(&1, ".beam")))
+    |> Enum.map(fn path ->
+      {:ok, {module, chunks}} = :beam_lib.chunks('#{path}', [:attributes])
+      {module, get_in(chunks, [:attributes, :behaviour])}
+    end)
+    |> Enum.filter(fn {_module, behaviours} ->
+      is_list(behaviours) && plugin_type in behaviours
+    end)
+    |> Enum.map(fn {module, _} -> module end)
   end
 end
