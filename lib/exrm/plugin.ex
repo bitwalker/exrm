@@ -89,7 +89,10 @@ defmodule ReleaseManager.Plugin do
 
   defp available_modules(plugin_type) do
     apps_path = Mix.Project.build_path |> Path.join("lib")
-    apps      = apps_path |> File.ls!
+    apps      = case apps_path |> File.ls do
+      {:ok, apps} -> apps
+      {:error, _} -> []
+    end
     apps
     |> Enum.map(&(Path.join([apps_path, &1, "ebin"])))
     |> Enum.map(fn app_path -> app_path |> File.ls! |> Enum.map(&(Path.join(app_path, &1))) end)
