@@ -67,8 +67,8 @@ defmodule UtilsTest do
   test "can build a release and boot it up" do
     with_app do
       # Build release
-      assert :ok = Utils.mix("do deps.get, compile", :dev, :verbose)
-      assert :ok = Utils.mix("release", :dev)
+      assert :ok = Utils.mix("do deps.get, compile", Mix.env, :verbose)
+      assert :ok = Utils.mix("release", Mix.env)
       assert [{"test", "0.0.1"}] == Utils.get_releases("test")
       # Boot it, ping it, and shut it down
       bin_path = Path.join([File.cwd!, "rel", "test", "bin", "test"])
@@ -86,5 +86,5 @@ defmodule UtilsTest do
   test "can compare non-semver versions" do
     assert ["1.3", "1.2", "1.1"] = Utils.sort_versions(["1.1", "1.3", "1.2"])
   end
-  
+
 end
