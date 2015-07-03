@@ -47,7 +47,12 @@ defmodule ReleaseManager.Utils do
   @doc """
   Change user permissions for a target file or directory
   """
-  def chmod(target, flags), do: do_cmd("chmod #{flags} #{target}", &ignore/1)
+  def chmod(target, flags) do
+    case File.chmod(target, flags) do
+      :ok         -> :ok
+      {:error, _} -> :ok
+    end
+  end
   @doc """
   Execute `relx`
   """
@@ -127,7 +132,7 @@ defmodule ReleaseManager.Utils do
   end
 
   @doc """
-  Sort a list of versions, latest one first. Tries to use semver version 
+  Sort a list of versions, latest one first. Tries to use semver version
   compare, but can fall back to regular string compare.
   """
   def sort_versions(versions) do
