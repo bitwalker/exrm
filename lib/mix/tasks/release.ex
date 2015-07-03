@@ -205,18 +205,24 @@ defmodule Mix.Tasks.Release do
 
   defp generate_boot_script(%Config{name: name, version: version, erl: erl_opts} = config) do
     erts = :erlang.system_info(:version) |> IO.iodata_to_binary
-    boot = rel_file_source_path @_BOOT_FILE
-    dest = rel_file_dest_path   @_BOOT_FILE
-    # Ensure destination base path exists
+    boot    = rel_file_source_path @_BOOT_FILE
+    winboot = rel_file_source_path "#{@_BOOT_FILE}.bat"
+    dest    = rel_file_dest_path   @_BOOT_FILE
+    windest = rel_file_dest_path   "#{@_BOOT_FILE}.bat"
+
     debug "Generating boot script..."
-    contents = File.read!(boot)
-      |> String.replace(@_NAME, name)
-      |> String.replace(@_VERSION, version)
-      |> String.replace(@_ERTS_VSN, erts)
-      |> String.replace(@_ERL_OPTS, erl_opts)
-    File.write!(dest, contents)
-    # Make executable
-    dest |> chmod("+x")
+
+    [{boot, dest}, {winboot, windest}] |> Enum.each(fn {infile, outfile} ->
+      contents = File.read!(infile)
+        |> String.replace(@_NAME, name)
+        |> String.replace(@_VERSION, version)
+        |> String.replace(@_ERTS_VSN, erts)
+        |> String.replace(@_ERL_OPTS, erl_opts)
+      File.write!(outfile, contents)
+      # Make executable
+      outfile |> chmod("+x")
+    end)
+
     # Continue..
     config
   end
