@@ -220,7 +220,7 @@ defmodule Mix.Tasks.Release do
         |> String.replace(@_ERL_OPTS, erl_opts)
       File.write!(outfile, contents)
       # Make executable
-      outfile |> chmod("+x")
+      outfile |> chmod(700)
     end)
 
     # Continue..
@@ -336,7 +336,7 @@ defmodule Mix.Tasks.Release do
     # Copy
     File.cp! nodetool, dest
     # Make executable
-    dest |> chmod("+x")
+    dest |> chmod(700)
     # Continue..
     config
   end

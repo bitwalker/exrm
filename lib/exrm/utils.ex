@@ -42,13 +42,25 @@ defmodule ReleaseManager.Utils do
   def mix(command, :quiet),        do: mix(command, :dev, :quiet)
   def mix(command, :verbose),      do: mix(command, :dev, :verbose)
   def mix(command, env),           do: mix(command, env, :quiet)
-  def mix(command, env, :quiet),   do: do_cmd("MIX_ENV=#{env} mix #{command}", &ignore/1)
-  def mix(command, env, :verbose), do: do_cmd("MIX_ENV=#{env} mix #{command}", &IO.write/1)
+  def mix(command, env, :quiet) do
+    case :os.type() do
+      {:nt}            -> do_cmd("(set MIX_ENV=#{env}) & (mix #{command})", &ignore/1)
+      {:win32, :nt}    -> do_cmd("(set MIX_ENV=#{env}) & (mix #{command})", &ignore/1)
+      _                -> do_cmd("MIX_ENV=#{env} mix #{command}", &ignore/1)
+    end
+  end
+  def mix(command, env, :verbose) do
+    case :os.type() do
+      {:nt}            -> do_cmd("(set MIX_ENV=#{env}) & (mix #{command})", &IO.write/1)
+      {:win32, :nt}    -> do_cmd("(set MIX_ENV=#{env}) & (mix #{command})", &IO.write/1)
+      _                -> do_cmd("MIX_ENV=#{env} mix #{command}", &IO.write/1)
+    end
+  end
   @doc """
   Change user permissions for a target file or directory
   """
-  def chmod(target, flags) do
-    case File.chmod(target, flags) do
+  def chmod(target, mode) do
+    case File.chmod(target, mode) do
       :ok         -> :ok
       {:error, _} -> :ok
     end

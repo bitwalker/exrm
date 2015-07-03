@@ -16,7 +16,7 @@
 :: Set variables that describe the release
 @set rel_name={{{PROJECT_NAME}}}
 @set rel_vsn={{{PROJECT_VERSION}}}
-@set erts_vsn={{{ERTS_VSN}}}
+@set erts_vsn={{{ERTS_VERSION}}}
 @set erl_opts={{{ERL_OPTS}}}
 
 :: Discover the release root directory from the directory
@@ -130,7 +130,7 @@
 )
 @if exist "%conform_schema%" (
   if exist "%conform_conf%" (
-    "%escript%" "%root_dir%"\bin\conform --conf "%conform_conf%" --schema "%conform_schema%" --config "%sys_config%" --output-dir "%rel_dir%"
+    "%escript%" "%rootdir%"\bin\conform --conf "%conform_conf%" --schema "%conform_schema%" --config "%sys_config%" --output-dir "%rel_dir%"
     if 1==%ERRORLEVEL% (
       exit /b %ERRORLEVEL%
     )
