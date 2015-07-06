@@ -74,6 +74,7 @@ defmodule Mix.Tasks.Release do
     |> execute_package_hooks
 
     info "The release for #{config.name}-#{config.version} is ready!"
+    info "You can boot a console running your release with `$ rel/#{config.name}/bin/#{config.name} console`"
   end
 
   defp build_project(%Config{verbosity: verbosity, env: env} = config) do
@@ -317,14 +318,21 @@ defmodule Mix.Tasks.Release do
       end
     end
     # Do release
-    case relx name, version, verbosity, upgrade?, dev_mode? do
-      :ok ->
-        # Clean up template files
-        Mix.Tasks.Release.Clean.do_cleanup(:relfiles)
-        # Continue..
-        config
-      {:error, message} ->
-        error message
+    try do
+      case relx name, version, verbosity, upgrade?, dev_mode? do
+        :ok ->
+          # Clean up template files
+          Mix.Tasks.Release.Clean.do_cleanup(:relfiles)
+          # Continue..
+          config
+        {:error, message} ->
+          error message
+          abort!
+      end
+    catch
+      err ->
+        error "#{IO.inspect err}"
+        error "Failed to build release package! Try running with `--verbosity=verbose` to see debugging info!"
         abort!
     end
   end
