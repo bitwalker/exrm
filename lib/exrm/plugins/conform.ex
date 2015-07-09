@@ -28,6 +28,7 @@ defmodule ReleaseManager.Plugin.Conform do
     dep_schemas = Conform.Schema.coalesce
     # Merge together
     merged = Conform.Schema.merge(dep_schemas, schema)
+
     # If the merged schema is non-empty, save the schema to config/{app}.schema.exs
     continue? = cond do
       merged == empty_schema ->
@@ -42,6 +43,25 @@ defmodule ReleaseManager.Plugin.Conform do
     if continue? do
       # Define overlays for relx.config
       overlays = [{:copy, '#{schema_dest}', 'releases/#{version}/#{app}.schema.exs'}]
+      info "Conform: generating #{app}.schema.ez."
+      # generate archive
+      result = Mix.Task.run("conform.archive", ["#{schema_dest}"])
+      # add archive to the overlays
+      overlays = case result do
+                   {_, _, []} ->
+                     {:ok, cwd} = File.cwd
+                     arch = "#{cwd}/rel/releases/#{version}/#{app}.schema.ez"
+                     case File.exists?(arch) do
+                       true ->
+                         File.rm(arch)
+                       false ->
+                         :ok
+                     end
+                     overlays
+                   {_, zip_path, _} ->
+                     [{:copy, '#{zip_path}', 'releases/#{version}/#{app}.schema.ez'}|overlays]
+                 end
+
       overlays = case File.exists?(conf_src) do
         true ->
           [{:copy, '#{conf_src}', 'releases/#{version}/#{app}.conf'}|overlays]

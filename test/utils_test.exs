@@ -77,6 +77,11 @@ defmodule UtilsTest do
       :timer.sleep(1000) # Required, since starting up takes a sec
       assert {"pong\n", 0} = System.cmd(bin_path, ["ping"])
       assert {"ok\n", 0}   = System.cmd(bin_path, ["stop"])
+      sys_config_path = Path.join([File.cwd!, "rel", "test", "running-config", "sys.config"])
+      {res, sysconfig_content} = :file.consult(to_char_list(sys_config_path))
+      assert :ok = res
+      some_val = Keyword.get(List.first(sysconfig_content), :test) |> Keyword.get(:some_val)
+      assert 101 = some_val
     end
   end
 
