@@ -377,7 +377,7 @@ defmodule Mix.Tasks.Release do
       [:compressed]
     )
     # Continue..
-    %{config | package: tarball}
+    %{config | package: release_tarball}
   end
 
   defp parse_args(argv) do
