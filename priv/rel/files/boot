@@ -102,7 +102,7 @@ generate_config() {
     fi
     if [ -f "$schema_file" ]; then
         if [ -f "$conform_file" ]; then
-            echo "using $conform_file to populate \"$GENERATED_CONFIG_DIR\"."            
+            echo "using $conform_file to populate \"$GENERATED_CONFIG_DIR\"."
             result="$("$BINDIR/escript" "$ROOTDIR"/bin/conform --conf "$conform_file" --schema "$schema_file" --config "$SYS_CONFIG" --output-dir "$GENERATED_CONFIG_DIR")"
             exit_status="$?"
             if [ "$exit_status" -ne 0 ]; then
@@ -147,13 +147,13 @@ fi
 mkdir -p "$RUNNER_LOG_DIR"
 
 # Make sure the current user has write permission
-if ! [ -w $RUNNER_LOG_DIR ] ; then 
+if ! [ -w $RUNNER_LOG_DIR ] ; then
     echo "Unable to write to $RUNNER_LOG_DIR. Quitting."
     exit 1
 fi
 
 if [ $RELX_REPLACE_OS_VARS ]; then
-    awk '{while(match($0,"[$]{[^}]*}")) {var=substr($0,RSTART+2,RLENGTH -3);gsub("[$]{"var"}",ENVIRON[var])}}1' < $SYS_CONFIG > SYS_CONFIG.2.config
+    awk '{while(match($0,"[$]{[^}]*}")) {var=substr($0,RSTART+2,RLENGTH -3);gsub("[$]{"var"}",ENVIRON[var])}}1' < $SYS_CONFIG > $SYS_CONFIG.2.config
     SYS_CONFIG=$SYS_CONFIG.2.config
 fi
 
@@ -246,9 +246,9 @@ case "$1" in
         export HEART_COMMAND
 
         mkdir -p "$PIPE_DIR"
-        
+
         # Make sure the current user has write permission
-        if ! [ -w $PIPE_DIR ] ; then 
+        if ! [ -w $PIPE_DIR ] ; then
             echo "Unable to write to $PIPE_DIR. Quitting."
             exit 1
         fi
