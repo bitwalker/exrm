@@ -205,7 +205,7 @@ defmodule Mix.Tasks.Release do
   end
 
   defp generate_boot_script(%Config{name: name, version: version, erl: erl_opts} = config) do
-    erts = :erlang.system_info(:version) |> IO.iodata_to_binary
+    erts    = extract_erts_version(config)
     boot    = rel_file_source_path @_BOOT_FILE
     winboot = rel_file_source_path "#{@_BOOT_FILE}.bat"
     dest    = rel_file_dest_path   @_BOOT_FILE
@@ -401,6 +401,27 @@ defmodule Mix.Tasks.Release do
     template
     |> String.replace(@_NAME, name)
     |> String.replace(@_VERSION, version)
+  end
+
+  defp extract_erts_version(%Config{relx_config: relx_config}) do
+    include_erts = Keyword.get(relx_config, :include_erts, true)
+    case include_erts do
+      true  -> :erlang.system_info(:version) |> IO.iodata_to_binary
+      false -> ""
+      path  ->
+        case File.ls("#{path}") do
+          {:error, _}      -> ""
+          {:ok, entries} ->
+            erts = entries |> Enum.find(fn
+              <<"erts-", _version::binary>> -> true
+              _ -> false
+            end)
+            case erts do
+              <<"erts-", version::binary>> -> version
+              _ -> ""
+            end
+        end
+    end
   end
 
 end
