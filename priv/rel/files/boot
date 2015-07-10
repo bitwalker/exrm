@@ -490,6 +490,8 @@ case "$1" in
         set -- "$BINDIR/erlexec" $FOREGROUNDOPTIONS \
             -boot "$REL_DIR/$BOOTFILE" -mode embedded -config "$SYS_CONFIG" \
             -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
+            -pa "$REL_LIB_DIR/consolidated" \
+            -env ERL_LIBS "$REL_LIB_DIR" \
             -args_file "$VMARGS_PATH"
 
         # Dump environment info for logging purposes
