@@ -368,14 +368,39 @@ defmodule Mix.Tasks.Release do
     # Re-package release with modifications
     file_list = File.ls!(rel_dest_path(name))
       |> Enum.reject(fn n -> n in [erts, "tmp"] end)
+      |> Enum.map(fn
+           "releases" -> [Path.join("releases", "RELEASES"),
+                          Path.join("releases", "start_erl.data") |
+                          File.ls!(rel_dest_path([name, "releases", version]))
+                          |> Enum.reject(&(String.ends_with?(&1, ".tar.gz")))
+                          |> Enum.map(fn n -> Path.join(["releases", version, n]) end)]
+           "lib"      -> File.ls!(rel_dest_path([name, "lib"]))
+                         |> Enum.reject(fn n -> String.starts_with?(n, "#{name}-") && !String.ends_with?(n, "-#{version}") end)
+                         |> Enum.map(fn n -> Path.join("lib", n) end)
+           n          -> [n]
+         end)
+      |> List.flatten
       |> Enum.map(&({'#{&1}', '#{rel_dest_path([name, &1])}'}))
+      |> Enum.concat(extras)
 
+    # Create archive
     release_tarball = rel_dest_path([name, "releases", version, "#{name}.tar.gz"])
     :ok = :erl_tar.create(
-      '#{release_tarball}',
-      file_list ++ extras,
+      '#{tarball}.tmp',
+      file_list,
       [:compressed]
     )
+    # In order to provide upgrade/downgrade functionality, the archive needs to contain itself
+    :ok = :erl_tar.create(
+      '#{tarball}',
+      [{'#{Path.join(["releases", version, "#{name}.tar.gz"])}', '#{tarball}.tmp'} | file_list],
+      [:compressed]
+    )
+    # Clean up
+    File.rm_rf! "#{tarball}.tmp"
+    File.cp! tarball, release_tarball
+    File.rm_rf! tarball
+
     # Continue..
     %{config | package: release_tarball}
   end
