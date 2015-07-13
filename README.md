@@ -40,7 +40,7 @@ This project's goal is to make releases with Elixir projects a breeze. It is com
 
 ```elixir
   defp deps do
-    [{:exrm, "~> 0.18.4"}]
+    [{:exrm, "~> 0.18.5"}]
   end
 ```
 
