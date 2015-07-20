@@ -26,16 +26,16 @@ fi
 RUNNER_LOG_DIR="${RUNNER_LOG_DIR:-$RELEASE_ROOT_DIR/log}"
 
 find_erts_dir() {
-    local erts_dir="$RELEASE_ROOT_DIR/erts-$ERTS_VSN"
-    if [ -d "$erts_dir" ]; then
-        ERTS_DIR="$erts_dir";
+    __erts_dir="$RELEASE_ROOT_DIR/erts-$ERTS_VSN"
+    if [ -d "$__erts_dir" ]; then
+        ERTS_DIR="$__erts_dir";
         ROOTDIR="$RELEASE_ROOT_DIR"
     else
-        local erl="$(which erl)"
-        local code="io:format(\"~s\", [code:root_dir()])."
-        local erl_root="$("$erl" -noshell -eval "$code" -s init stop)"
-        ERTS_DIR=$(ls -d $erl_root/erts-* | sort -t '.' -k 1,1 -k 2,2 -k 3,3 -k 4,4 -k 5,5 -g | tail -n 1)
-        ROOTDIR="$erl_root"
+        __erl="$(which erl)"
+        __code="io:format(\"~s\", [code:root_dir()])."
+        __erl_root="$("$__erl" -noshell -eval "$__code" -s init stop)"
+        ERTS_DIR=$(ls -d $__erl_root/erts-* | sort -t '.' -k 1,1 -k 2,2 -k 3,3 -k 4,4 -k 5,5 -g | tail -n 1)
+        ROOTDIR="$__erl_root"
     fi
 }
 
@@ -76,9 +76,9 @@ relx_nodetool() {
 
 # Run an escript in the node's environment
 relx_escript() {
-    shift; local scriptpath="$1"; shift
+    shift; __scriptpath="$1"; shift
     export RELEASE_ROOT_DIR
-    "$BINDIR/escript" "$ROOTDIR/$scriptpath" $@
+    "$BINDIR/escript" "$ROOTDIR/$__scriptpath" $@
 }
 
 # Output a start command for the last argument of run_erl
@@ -89,21 +89,21 @@ relx_start_command() {
 
 # Convert .conf to sys.config using conform escript
 generate_config() {
-    local schema_file="$REL_DIR/$REL_NAME.schema.exs"
+    __schema_file="$REL_DIR/$REL_NAME.schema.exs"
     if [ -z "$RELEASE_CONFIG_FILE" ]; then
-        local conform_file="$RELEASE_CONFIG_DIR/$REL_NAME.conf"
+        __conform_file="$RELEASE_CONFIG_DIR/$REL_NAME.conf"
     else
         if [ -r "$RELEASE_CONFIG_FILE" ]; then
-            local conform_file="$RELEASE_CONFIG_FILE"
+            __conform_file="$RELEASE_CONFIG_FILE"
         else
             echo "$RELEASE_CONFIG_FILE not found"
             exit 1
         fi
     fi
-    if [ -f "$schema_file" ]; then
-        if [ -f "$conform_file" ]; then
-            echo "using $conform_file to populate \"$GENERATED_CONFIG_DIR\"."
-            result="$("$BINDIR/escript" "$ROOTDIR"/bin/conform --conf "$conform_file" --schema "$schema_file" --config "$SYS_CONFIG" --output-dir "$GENERATED_CONFIG_DIR")"
+    if [ -f "$__schema_file" ]; then
+        if [ -f "$__conform_file" ]; then
+            echo "using $__conform_file to populate \"$GENERATED_CONFIG_DIR\"."
+            result="$("$BINDIR/escript" "$ROOTDIR"/bin/conform --conf "$__conform_file" --schema "$__schema_file" --config "$SYS_CONFIG" --output-dir "$GENERATED_CONFIG_DIR")"
             exit_status="$?"
             if [ "$exit_status" -ne 0 ]; then
                 exit "$exit_status"
@@ -113,7 +113,7 @@ generate_config() {
                 exit 1
             fi
         else
-            echo "$conform_file not found in $RELEASE_CONFIG_DIR"
+            echo "$__conform_file not found in $RELEASE_CONFIG_DIR"
             exit 1
         fi
     fi
