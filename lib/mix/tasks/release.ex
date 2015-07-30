@@ -110,15 +110,13 @@ defmodule Mix.Tasks.Release do
       "" -> config
       _  -> %{config | :upgrade? => true}
     end
-    elixir_path = get_elixir_lib_path() |> String.to_char_list
+    elixir_paths = get_elixir_lib_paths |> Enum.map(&String.to_char_list/1)
     lib_dirs = case Mix.Project.config |> Keyword.get(:umbrella?, false) do
       true ->
-        [ elixir_path,
-          '#{"_build/#{env}" |> Path.expand}',
-          '#{Mix.Project.config |> Keyword.get(:deps_path) |> Path.expand}' ]
+        [ '#{"_build/#{env}" |> Path.expand}',
+          '#{Mix.Project.config |> Keyword.get(:deps_path) |> Path.expand}' | elixir_paths ]
       _ ->
-        [ elixir_path,
-          '#{"_build/#{env}" |> Path.expand}' ]
+        [ '#{"_build/#{env}" |> Path.expand}' | elixir_paths ]
     end
     # Build release configuration
     relx_config = relx_config

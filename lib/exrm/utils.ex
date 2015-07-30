@@ -170,13 +170,14 @@ defmodule ReleaseManager.Utils do
   end
 
   @doc """
-  Get the local path of the current elixir executable
+  Get the local paths of the current Elixir libraries
   """
-  def get_elixir_lib_path() do
-    [elixir_lib_path, _ ] = "#{:code.which(Mix)}"
-    |> String.split "mix/ebin/Elixir.Mix.beam"
-
+  def get_elixir_lib_paths() do
+    [elixir_lib_path, _] = String.split("#{:code.which(:elixir)}", "/elixir/ebin/elixir.beam")
     elixir_lib_path
+    |> Path.expand
+    |> File.ls!
+    |> Enum.map(&(Path.join(elixir_lib_path, &1 <> "/ebin")))
   end
 
   @doc """
