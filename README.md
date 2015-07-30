@@ -2,7 +2,7 @@
 
 [![Build
 Status](https://travis-ci.org/bitwalker/exrm.svg?branch=master)](https://travis-ci.org/bitwalker/exrm)
-[![Hex.pm Version](http://img.shields.io/hexpm/v/exrm.svg?style=flat)](https://hex.pm/packages/exrm)
+[![Hex.pm Version](http://img.shields.io/hexpm/v/exrm.svg?style=flat)](https://hex.pm/packages/exrm) [![Coverage Status](https://coveralls.io/repos/bitwalker/exrm/badge.svg?branch=master&service=github)](https://coveralls.io/github/bitwalker/exrm?branch=master)
 
 The full documentation for Exrm is located [here](https://exrm.readme.io).
 

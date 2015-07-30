@@ -7,7 +7,8 @@ defmodule ReleaseManager.Mixfile do
       elixir: ">= 0.15.1 and ~> 1.0.0",
       description: description,
       package: package,
-      deps: deps ]
+      deps: deps,
+      test_coverage: [tool: Coverex.Task, coveralls: true]]
   end
 
   def application, do: []
@@ -16,7 +17,8 @@ defmodule ReleaseManager.Mixfile do
     [{:conform, "~> 0.14.5"},
      {:relx, "~> 3.1.0" },
      {:earmark, "~> 0.1", only: :dev},
-     {:ex_doc, "~> 0.5", only: :dev}]
+     {:ex_doc, "~> 0.5", only: :dev},
+     {:coverex, "~> 1.4.1", only: :test}]
   end
 
   defp description do

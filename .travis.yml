@@ -6,10 +6,10 @@ otp_release:
   - 17.0
   - 17.1
 env:
-  - MIX_ENV=all
+  - MIX_ENV=test
 script:
-  - mix test --exclude expensive
-  - mix test --only expensive
+  - mix test --exclude expensive --cover
+  - mix test --only expensive --cover
 notifications:
   email:
     - paulschoenfelder@gmail.com
