@@ -94,15 +94,16 @@ defmodule ReleaseManager.Plugin do
       {:error, _} -> []
     end
     apps
-    |> Enum.map(&(Path.join([apps_path, &1, "ebin"])))
-    |> Enum.map(fn app_path -> app_path |> File.ls! |> Enum.map(&(Path.join(app_path, &1))) end)
-    |> Enum.flat_map(&(&1))
-    |> Enum.filter(&(String.ends_with?(&1, ".beam")))
-    |> Enum.map(fn path ->
+    |> Stream.map(&(Path.join([apps_path, &1, "ebin"])))
+    |> Stream.filter(&File.exists?/1)
+    |> Stream.map(fn app_path -> app_path |> File.ls! |> Enum.map(&(Path.join(app_path, &1))) end)
+    |> Stream.flat_map(&(&1))
+    |> Stream.filter(&(String.ends_with?(&1, ".beam")))
+    |> Stream.map(fn path ->
       {:ok, {module, chunks}} = :beam_lib.chunks('#{path}', [:attributes])
       {module, get_in(chunks, [:attributes, :behaviour])}
     end)
-    |> Enum.filter(fn {_module, behaviours} ->
+    |> Stream.filter(fn {_module, behaviours} ->
       is_list(behaviours) && plugin_type in behaviours
     end)
     |> Enum.map(fn {module, _} -> module end)
