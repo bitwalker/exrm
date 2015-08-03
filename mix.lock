@@ -1,5 +1,5 @@
 %{"bbmustache": {:hex, :bbmustache, "1.0.1"},
-  "conform": {:git, "https://github.com/bitwalker/conform.git", "5974661bceaaf580ed178e1a1adfe8b86220df6b", []},
+  "conform": {:hex, :conform, "0.15.0"},
   "coverex": {:hex, :coverex, "1.4.1"},
   "earmark": {:hex, :earmark, "0.1.17"},
   "erlware_commons": {:hex, :erlware_commons, "0.13.0"},
