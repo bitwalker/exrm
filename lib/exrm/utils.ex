@@ -192,7 +192,7 @@ defmodule ReleaseManager.Utils do
   """
   def write_terms(path, terms) when is_list(terms) do
     format_str = String.duplicate("~p.\n\n", Enum.count(terms)) |> String.to_char_list
-    :file.write_file('#{path}', :io_lib.fwrite(format_str, terms |> Enum.reverse))
+    :file.write_file('#{path}', :io_lib.fwrite(format_str, terms |> Enum.reverse), [encoding: :utf8])
   end
 
   @doc """
