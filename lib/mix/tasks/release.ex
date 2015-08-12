@@ -69,6 +69,7 @@ defmodule Mix.Tasks.Release do
     |> execute_before_hooks
     |> do_release
     |> generate_nodetool
+    |> generate_install_escript
     |> execute_after_hooks
     |> update_release_package
     |> execute_package_hooks
@@ -349,6 +350,13 @@ defmodule Mix.Tasks.Release do
     # Make executable
     dest |> chmod(0o700)
     # Continue..
+    config
+  end
+
+  defp generate_install_escript(%Config{name: name} = config) do
+    escript = rel_file_source_path "install_upgrade.escript"
+    dest    = rel_dest_path [name, "bin", "install_upgrade.escript"]
+    File.cp! escript, dest
     config
   end
 

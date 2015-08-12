@@ -403,7 +403,7 @@ case "$1" in
         # We have to unpack the release first in order to make sure the configuration
         # is properly updated
         "$BINDIR/escript" "$ROOTDIR/bin/install_upgrade.escript" \
-             "unpack" "$REL_NAME" "$NAME" "$COOKIE" "$2"
+             "unpack" "$REL_NAME" "$NAME_TYPE" "$NAME" "$COOKIE" "$2"
 
         echo "Generating vm.args/sys.config for upgrade..."
         __release_conf="$RELEASES_DIR/$2/$REL_NAME.conf"
@@ -459,7 +459,7 @@ case "$1" in
         echo "vm.args ready!"
 
         exec "$BINDIR/escript" "$ROOTDIR/bin/install_upgrade.escript" \
-             "install" "$REL_NAME" "$NAME" "$COOKIE" "$2"
+             "install" "$REL_NAME" "$NAME_TYPE" "$NAME" "$COOKIE" "$2"
         ;;
 
     unpack)
@@ -477,7 +477,7 @@ case "$1" in
         fi
 
         exec "$BINDIR/escript" "$ROOTDIR/bin/install_upgrade.escript" \
-             "unpack" "$REL_NAME" "$NAME" "$COOKIE" "$2"
+             "unpack" "$REL_NAME" "$NAME_TYPE" "$NAME" "$COOKIE" "$2"
         ;;
 
     console|console_clean|console_boot)
