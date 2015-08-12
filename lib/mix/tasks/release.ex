@@ -208,10 +208,15 @@ defmodule Mix.Tasks.Release do
     winboot = rel_file_source_path "#{@_BOOT_FILE}.bat"
     dest    = rel_file_dest_path   @_BOOT_FILE
     windest = rel_file_dest_path   "#{@_BOOT_FILE}.bat"
+    shim    = rel_file_source_path "boot_shim"
+    winshim = rel_file_source_path "boot_shim.bat"
+    shim_dest    = rel_file_dest_path "boot_shim"
+    winshim_dest = rel_file_dest_path "boot_shim.bat"
 
     debug "Generating boot script..."
 
-    [{boot, dest}, {winboot, windest}] |> Enum.each(fn {infile, outfile} ->
+    [{boot, dest}, {winboot, windest}, {shim, shim_dest}, {winshim, winshim_dest}]
+    |> Enum.each(fn {infile, outfile} ->
       contents = File.read!(infile)
         |> String.replace(@_NAME, name)
         |> String.replace(@_VERSION, version)

@@ -10,7 +10,7 @@ defmodule ReleaseManager.Plugin.Conform do
   for sysadmins and other deployment staff for easily configuring
   your release in production.
   """
-  
+
   use   ReleaseManager.Plugin
   alias ReleaseManager.Config
   alias ReleaseManager.Utils
@@ -72,11 +72,11 @@ defmodule ReleaseManager.Plugin.Conform do
       # Generate escript for release
       debug "Conform: Generating escript.."
       escript_path = Mix.Task.run("conform.release")
-      overlays = [{:copy, escript_path |> String.to_char_list, 'bin/conform'}|overlays]
+      overlays = [{:copy, escript_path |> String.to_char_list, 'releases/#{version}/conform'}|overlays]
 
       # Add .conf, .schema.exs, and escript to relx.config as overlays
       debug "Conform: Adding overlays to relx.config..."
-      relx_config = relx_conf_path |> Utils.read_terms 
+      relx_config = relx_conf_path |> Utils.read_terms
       updated = Utils.merge(relx_config, [overlay: overlays])
 
       # Persist relx.config

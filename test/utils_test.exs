@@ -1,5 +1,6 @@
 defmodule UtilsTest do
   use ExUnit.Case, async: true
+  import ExUnit.CaptureIO
 
   import PathHelpers
 
@@ -67,21 +68,25 @@ defmodule UtilsTest do
   @tag timeout: 120000 # 120s
   test "can build a release and boot it up" do
     with_app do
-      # Build release
-      assert :ok = Utils.mix("do deps.get, compile", Mix.env, :verbose)
-      assert :ok = Utils.mix("release", Mix.env)
-      assert [{"test", "0.0.1"}] == Utils.get_releases("test")
-      # Boot it, ping it, and shut it down
-      bin_path = Path.join([File.cwd!, "rel", "test", "bin", "test"])
-      assert {_, 0}        = System.cmd(bin_path, ["start"])
-      :timer.sleep(1000) # Required, since starting up takes a sec
-      assert {"pong\n", 0} = System.cmd(bin_path, ["ping"])
-      assert {"ok\n", 0}   = System.cmd(bin_path, ["stop"])
-      sys_config_path = Path.join([File.cwd!, "rel", "test", "running-config", "sys.config"])
-      {res, sysconfig_content} = :file.consult(to_char_list(sys_config_path))
-      assert :ok = res
-      some_val = Keyword.get(List.first(sysconfig_content), :test) |> Keyword.get(:some_val)
-      assert 101 = some_val
+      capture_io(fn ->
+        # Build release
+        assert :ok = Utils.mix("do deps.get, compile", Mix.env, :verbose)
+        assert :ok = Utils.mix("release", Mix.env)
+        assert [{"test", "0.0.1"}] == Utils.get_releases("test")
+        # Boot it, ping it, and shut it down
+        bin_path = Path.join([File.cwd!, "rel", "test", "bin", "test"])
+        assert {_, 0}      = System.cmd(bin_path, ["start"])
+        :timer.sleep(1000) # Required, since starting up takes a sec
+        assert {result, 0} = System.cmd(bin_path, ["ping"])
+        assert String.contains?(result, "pong")
+        assert {result, 0} = System.cmd(bin_path, ["stop"])
+        assert String.contains?(result, "ok")
+        sys_config_path = Path.join([File.cwd!, "rel", "test", "running-config", "sys.config"])
+        {res, sysconfig_content} = :file.consult(to_char_list(sys_config_path))
+        assert :ok = res
+        some_val = Keyword.get(List.first(sysconfig_content), :test) |> Keyword.get(:some_val)
+        assert 101 = some_val
+      end)
     end
   end
 

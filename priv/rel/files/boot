@@ -3,7 +3,7 @@
 set -e
 
 SCRIPT_DIR="$(dirname "$0")"
-RELEASE_ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+RELEASE_ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 REL_NAME="{{{PROJECT_NAME}}}"
 RELEASES_DIR="$RELEASE_ROOT_DIR/releases"
 REL_VSN=$(cat $RELEASES_DIR/start_erl.data | cut -d' ' -f2)
@@ -110,7 +110,12 @@ generate_config() {
                 __conform_file="$__running_conf"
             fi
             echo "using $__conform_file to populate \"$GENERATED_CONFIG_DIR\"."
-            result="$("$BINDIR/escript" "$ROOTDIR"/bin/conform --conf "$__conform_file" --schema "$__schema_file" --config "$SYS_CONFIG" --output-dir "$GENERATED_CONFIG_DIR")"
+            __conform="$REL_DIR/conform"
+            # Handle the case where the current version did not bundle conform in the release
+            if [ ! -f "$__conform" ]; then
+                __conform="$ROOTDIR/bin/conform"
+            fi
+            result="$("$BINDIR/escript" "$__conform" --conf "$__conform_file" --schema "$__schema_file" --config "$SYS_CONFIG" --output-dir "$GENERATED_CONFIG_DIR")"
             exit_status="$?"
             if [ "$exit_status" -ne 0 ]; then
                 exit "$exit_status"
@@ -414,6 +419,11 @@ case "$1" in
                 cp "$__release_conf" "$__running_conf"
             fi
         fi
+        __conform="$RELEASES_DIR/$2/conform"
+        # Handle the case where the target version did not bundle conform in the release
+        if [ ! -f "$__conform" ]; then
+            __conform="$ROOTDIR/bin/conform"
+        fi
         # Either generate the sys.config for the release, or copy the current sys.config,
         # from running-config to the release directory.
         # NOTE: When using only sys.config, this may present issues if the config is missing settings,
@@ -421,7 +431,7 @@ case "$1" in
         # to contain the settings used by the new version.
         if [ -f "$__running_conf" ]; then
             if [ -f "$__release_schema" ]; then
-                result="$("$BINDIR/escript" "$ROOTDIR"/bin/conform --conf "$__running_conf" --schema "$__release_schema" --config "$__release_config" --output-dir "$RELEASES_DIR/$2")"
+                result="$("$BINDIR/escript" "$__conform" --conf "$__running_conf" --schema "$__release_schema" --config "$__release_config" --output-dir "$RELEASES_DIR/$2")"
                 exit_status="$?"
                 if [ "$exit_status" -ne 0 ]; then
                     echo "Could not generate the sys.config for the new release. Please review the following files:"

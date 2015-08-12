@@ -15,16 +15,21 @@
 
 :: Set variables that describe the release
 @set rel_name={{{PROJECT_NAME}}}
-@set rel_vsn={{{PROJECT_VERSION}}}
-@set erts_vsn={{{ERTS_VERSION}}}
 @set erl_opts={{{ERL_OPTS}}}
 
-:: Discover the release root directory from the directory
-:: of this script
+:: Discover the release root directory from the directory of this script
 @set script_dir=%~dp0
-@for %%A in ("%script_dir%\..") do @(
+@for %%A in ("%script_dir%\..\..") do @(
   set release_root_dir=%%~fA
 )
+@set start_erl=%release_root_dir%\releases\start_erl.data
+@for /f "delims=" %%i in ('type %start_erl%') do @(
+  set start_erl_data=%%i
+)
+@for /f "tokens=1,* delims=\ " %%a in ("%start_erl_data%") do @(
+  set erts_vsn=%%a
+  set rel_vsn=%%b
+))
 @set rel_dir=%release_root_dir%\releases\%rel_vsn%
 
 @call :find_erts_dir
@@ -41,6 +46,7 @@
 @set escript="%bindir%\escript.exe"
 @set werl="%bindir%\werl.exe"
 @set nodetool="%release_root_dir%\bin\nodetool"
+@set conform="%rel_dir%\conform"
 
 :: Extract node type and name from vm.args
 @for /f "usebackq tokens=1-2" %%I in (`findstr /b "\-name \-sname" "%vm_args%"`) do @(
@@ -130,7 +136,7 @@
 )
 @if exist "%conform_schema%" (
   if exist "%conform_conf%" (
-    "%escript%" "%rootdir%"\bin\conform --conf "%conform_conf%" --schema "%conform_schema%" --config "%sys_config%" --output-dir "%rel_dir%"
+    "%escript%" "%conform%" --conf "%conform_conf%" --schema "%conform_schema%" --config "%sys_config%" --output-dir "%rel_dir%"
     if 1==%ERRORLEVEL% (
       exit /b %ERRORLEVEL%
     )
