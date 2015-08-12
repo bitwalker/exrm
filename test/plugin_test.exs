@@ -4,6 +4,7 @@ defmodule PluginTest do
 
   test "can fetch a list of plugins" do
     active = [
+      ReleaseManager.Plugin.Appups,
       ReleaseManager.Plugin.Consolidation,
       ReleaseManager.Plugin.Conform
     ] |> Enum.sort
