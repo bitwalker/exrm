@@ -5,9 +5,10 @@ set -e
 SCRIPT_DIR="$(dirname "$0")"
 RELEASE_ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REL_NAME="{{{PROJECT_NAME}}}"
-REL_VSN="{{{PROJECT_VERSION}}}"
-ERTS_VSN="{{{ERTS_VERSION}}}"
 RELEASES_DIR="$RELEASE_ROOT_DIR/releases"
+START_ERL_DATA=($(cat "$RELEASES_DIR/start_erl.data"))
+REL_VSN="${START_ERL_DATA[1]}"
+ERTS_VSN="${START_ERL_DATA[0]}"
 REL_DIR="$RELEASES_DIR/$REL_VSN"
 REL_LIB_DIR="$RELEASE_ROOT_DIR/lib"
 ERL_OPTS="{{{ERL_OPTS}}}"
@@ -102,6 +103,13 @@ generate_config() {
     fi
     if [ -f "$__schema_file" ]; then
         if [ -f "$__conform_file" ]; then
+            __running_conf="$GENERATED_CONFIG_DIR/$REL_NAME.conf"
+            if [ ! -f "$__running_conf" ]; then
+                cp "$__conform_file" "$__running_conf"
+                __conform_file="$__running_conf"
+            else
+                __conform_file="$__running_conf"
+            fi
             echo "using $__conform_file to populate \"$GENERATED_CONFIG_DIR\"."
             result="$("$BINDIR/escript" "$ROOTDIR"/bin/conform --conf "$__conform_file" --schema "$__schema_file" --config "$SYS_CONFIG" --output-dir "$GENERATED_CONFIG_DIR")"
             exit_status="$?"
@@ -373,8 +381,6 @@ case "$1" in
         ;;
 
     upgrade|downgrade|install)
-        # Make sure the config is generated first
-        generate_config
         if [ -z "$2" ]; then
             echo "Missing package argument"
             echo "Usage: $REL_NAME $1 {package base name}"
@@ -389,6 +395,59 @@ case "$1" in
             echo "Node is not running!"
             exit $exit_status
         fi
+
+        # We have to unpack the release first in order to make sure the configuration
+        # is properly updated
+        "$BINDIR/escript" "$ROOTDIR/bin/install_upgrade.escript" \
+             "unpack" "$REL_NAME" "$NAME" "$COOKIE" "$2"
+
+        echo "Generating vm.args/sys.config for upgrade..."
+        __release_conf="$RELEASES_DIR/$2/$REL_NAME.conf"
+        __release_schema="$RELEASES_DIR/$2/$REL_NAME.schema.exs"
+        __release_config="$RELEASES_DIR/$2/sys.config"
+        __release_args="$RELEASES_DIR/$2/vm.args"
+        __running_conf="$GENERATED_CONFIG_DIR/$REL_NAME.conf"
+        __running_config="$GENERATED_CONFIG_DIR/sys.config"
+        __running_args="$GENERATED_CONFIG_DIR/vm.args"
+        # Make sure the .conf is copied to the running-config directory
+        if [ ! -f "$__running_conf" ]; then
+            if [ -f "$__release_conf"]; then
+                cp "$__release_conf" "$__running_conf"
+            fi
+        fi
+        # Either generate the sys.config for the release, or copy the current sys.config,
+        # from running-config to the release directory.
+        # NOTE: When using only sys.config, this may present issues if the config is missing settings,
+        # required by the release, it will be up to the user to ensure they update the running-config/sys.config,
+        # to contain the settings used by the new version.
+        if [ -f "$__running_conf" ]; then
+            if [ -f "$__release_schema" ]; then
+                result="$("$BINDIR/escript" "$ROOTDIR"/bin/conform --conf "$__running_conf" --schema "$__release_schema" --config "$__release_config" --output-dir "$RELEASES_DIR/$2")"
+                exit_status="$?"
+                if [ "$exit_status" -ne 0 ]; then
+                    echo "Could not generate the sys.config for the new release. Please review the following files:"
+                    echo "$REL_NAME.conf: $__running_conf"
+                    echo "$REL_NAME.schema.exs: $__release_schema"
+                    echo "sys.config: $__release_config"
+                    exit "$exit_status"
+                else
+                  cp "$__release_config" "$__running_config"
+                fi
+            fi
+        else
+            if [ -f "$__running_config" ]; then
+                cp "$__release_config" "$__release_config.orig"
+                cp "$__running_config" "$__release_config"
+            fi
+        fi
+        echo "sys.config ready!"
+        if [ -f "$__running_args" ]; then
+          cp "$__release_args" "$__release_args.orig"
+          cp "$__running_args" "$__release_args"
+        else
+          cp "$__release_args" "$__running_args"
+        fi
+        echo "vm.args ready!"
 
         exec "$BINDIR/escript" "$ROOTDIR/bin/install_upgrade.escript" \
              "install" "$REL_NAME" "$NAME" "$COOKIE" "$2"
