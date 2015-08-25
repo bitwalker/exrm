@@ -415,7 +415,7 @@ case "$1" in
         __running_args="$GENERATED_CONFIG_DIR/vm.args"
         # Make sure the .conf is copied to the running-config directory
         if [ ! -f "$__running_conf" ]; then
-            if [ -f "$__release_conf"]; then
+            if [ -f "$__release_conf" ]; then
                 cp "$__release_conf" "$__running_conf"
             fi
         fi
