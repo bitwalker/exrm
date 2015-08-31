@@ -292,6 +292,10 @@ case "$1" in
         if [ "$exit_status" -ne 0 ]; then
             exit $exit_status
         fi
+        # ensuring PID is not empty
+        if [ -z "$PID" ]; then
+            exit 0
+        fi
         while $(kill -0 "$PID" 2>/dev/null);
         do
             sleep 1
