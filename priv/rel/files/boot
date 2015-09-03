@@ -414,21 +414,21 @@ case "$1" in
         __running_config="$GENERATED_CONFIG_DIR/sys.config"
         __running_args="$GENERATED_CONFIG_DIR/vm.args"
         # Make sure the .conf is copied to the running-config directory
-        if [ ! -f "$__running_conf" ]; then
-            if [ -f "$__release_conf" ]; then
-                cp "$__release_conf" "$__running_conf"
+        if [ -f "$__release_conf" ]; then
+            # Preserve previous conf for reference
+            if [ -f "$__running_conf" ]; then
+                cp "$__running_conf" "$__running_conf.last"
             fi
+            cp "$__release_conf" "$__running_conf"
         fi
         __conform="$RELEASES_DIR/$2/conform"
         # Handle the case where the target version did not bundle conform in the release
         if [ ! -f "$__conform" ]; then
             __conform="$ROOTDIR/bin/conform"
         fi
-        # Either generate the sys.config for the release, or copy the current sys.config,
-        # from running-config to the release directory.
-        # NOTE: When using only sys.config, this may present issues if the config is missing settings,
-        # required by the release, it will be up to the user to ensure they update the running-config/sys.config,
-        # to contain the settings used by the new version.
+        # Generate the sys.config for the release
+        # If a .conf is not provided, then preserve the last sys.config for reference, and copy the new sys.config
+        # to running-config.
         if [ -f "$__running_conf" ]; then
             if [ -f "$__release_schema" ]; then
                 result="$("$BINDIR/escript" "$__conform" --conf "$__running_conf" --schema "$__release_schema" --config "$__release_config" --output-dir "$RELEASES_DIR/$2")"
@@ -445,8 +445,8 @@ case "$1" in
             fi
         else
             if [ -f "$__running_config" ]; then
-                cp "$__release_config" "$__release_config.orig"
-                cp "$__running_config" "$__release_config"
+                cp "$__running_config" "$__running_config.last"
+                cp "$__release_config" "$__running_config"
             fi
         fi
         echo "sys.config ready!"
