@@ -90,11 +90,17 @@ defmodule ReleaseManager.Utils do
         output_dir: '#{output_dir}',
         dev_mode: dev_mode?
       ]
-    result = case upgrade? do
-      false -> :relx.do relx_args, ['release', 'tar']
-      true  ->
+    result = cond do
+      upgrade? && dev_mode? ->
+        last_release = get_last_release(name)
+        :relx.do [{:upfrom, '#{last_release}'} | relx_args], ['release', 'relup']
+      upgrade? ->
         last_release = get_last_release(name)
         :relx.do [{:upfrom, '#{last_release}'} | relx_args], ['release', 'relup', 'tar']
+      dev_mode? ->
+        :relx.do relx_args, ['release']
+      true ->
+        :relx.do relx_args, ['release', 'tar']
     end
     case result do
       {:ok, _state} -> :ok

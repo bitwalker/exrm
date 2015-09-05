@@ -360,6 +360,7 @@ defmodule Mix.Tasks.Release do
     config
   end
 
+  defp update_release_package(%Config{dev: true} = config), do: config
   defp update_release_package(%Config{name: name, version: version, relx_config: relx_config} = config) do
     debug "Packaging release..."
     erts = "erts-#{:erlang.system_info(:version) |> IO.iodata_to_binary}"
