@@ -65,7 +65,7 @@ defmodule Mix.Tasks.Release.Clean do
     if File.exists?(start_erl), do: File.rm_rf!(start_erl)
     if File.exists?(lib),       do: File.rm_rf!(lib)
     if File.exists?(relup),     do: File.rm_rf!(relup)
-    if File.exists?(build) do
+    if Mix.env != :prod && File.exists?(build) do
       build
       |> File.ls!
       |> Enum.map(fn dir -> build |> Path.join(dir) end)
