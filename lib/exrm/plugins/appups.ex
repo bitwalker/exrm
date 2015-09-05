@@ -10,9 +10,10 @@ defmodule ReleaseManager.Plugin.Appups do
   alias ReleaseManager.Utils
   alias ReleaseManager.Appups
 
-  def before_release(%Config{upgrade?: true} = config) do
-    debug "Generating appups for dependencies..."
-    deps = Mix.Dep.children([])
+  def before_release(%Config{upgrade?: true, env: env} = config) do
+    debug "Generating appups for dependencies in the #{env} environment..."
+    deps = Mix.Dep.loaded(env: env)
+
     do_appup(config, deps)
   end
   def before_release(_), do: nil
