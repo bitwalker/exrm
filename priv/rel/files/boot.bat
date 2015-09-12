@@ -29,7 +29,7 @@
 @for /f "tokens=1,* delims=\ " %%a in ("%start_erl_data%") do @(
   set erts_vsn=%%a
   set rel_vsn=%%b
-))
+)
 @set rel_dir=%release_root_dir%\releases\%rel_vsn%
 
 @call :find_erts_dir
