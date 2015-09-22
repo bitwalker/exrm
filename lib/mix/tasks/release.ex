@@ -363,7 +363,6 @@ defmodule Mix.Tasks.Release do
   defp update_release_package(%Config{dev: true} = config), do: config
   defp update_release_package(%Config{name: name, version: version, relx_config: relx_config} = config) do
     debug "Packaging release..."
-    erts = "erts-#{:erlang.system_info(:version) |> IO.iodata_to_binary}"
     # Delete original release package
     tarball = rel_dest_path [name, "#{name}-#{version}.tar.gz"]
     File.rm! tarball
@@ -373,9 +372,10 @@ defmodule Mix.Tasks.Release do
     File.cp! source_boot, dest_boot
     # Get include_erts value from relx_config
     include_erts = Keyword.get(relx_config, :include_erts, true)
+    erts         = "erts-#{extract_erts_version(config)}"
     extras = case include_erts do
-      true  -> [{'#{erts}', '#{rel_dest_path([name, erts])}'}]
-      _     -> []
+      false -> []
+      _     -> [{'#{erts}', '#{rel_dest_path([name, erts])}'}]
     end
     # Re-package release with modifications
     file_list = File.ls!(rel_dest_path(name))
