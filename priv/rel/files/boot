@@ -520,6 +520,7 @@ case "$1" in
             -env ERL_LIBS "$REL_LIB_DIR" -config "$SYS_CONFIG" \
             -pa "$REL_LIB_DIR/consolidated" \
             -args_file "$VMARGS_PATH" \
+            ${ERL_OPTS} \
             -user Elixir.IEx.CLI -extra --no-halt +iex
 
         # Dump environment info for logging purposes
@@ -560,6 +561,7 @@ case "$1" in
             -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
             -pa "$REL_LIB_DIR/consolidated" \
             -env ERL_LIBS "$REL_LIB_DIR" \
+            ${ERL_OPTS} \
             -args_file "$VMARGS_PATH"
 
         # Dump environment info for logging purposes
