@@ -103,12 +103,12 @@ generate_config() {
     if [ -f "$__schema_file" ]; then
         if [ -f "$__conform_file" ]; then
             __running_conf="$GENERATED_CONFIG_DIR/$REL_NAME.conf"
-            if [ ! -f "$__running_conf" ]; then
-                cp "$__conform_file" "$__running_conf"
-                __conform_file="$__running_conf"
-            else
-                __conform_file="$__running_conf"
-            fi
+
+            # always copy release-config to running-config
+            echo "copying $__conform_file to $__running_conf ..."
+            cp "$__conform_file" "$__running_conf"
+            __conform_file="$__running_conf"
+
             echo "using $__conform_file to populate \"$GENERATED_CONFIG_DIR\"."
             __conform="$REL_DIR/conform"
             # Handle the case where the current version did not bundle conform in the release
