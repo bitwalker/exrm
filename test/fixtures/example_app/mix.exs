@@ -4,7 +4,6 @@ defmodule Test.Mixfile do
   def project do
     [ app: :test,
       version: "0.0.1",
-      elixir: "~> 1.0.5",
       deps: deps ]
   end
 
