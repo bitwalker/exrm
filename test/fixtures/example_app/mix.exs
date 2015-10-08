@@ -20,7 +20,7 @@ defmodule Test.Mixfile do
   # { :barbat, "~> 0.1", github: "elixir-lang/barbat" }
   defp deps do
     [{:exrm, path: "../../../"},
-     {:conform, path: "../../../deps/conform", override: true},
+     {:conform, "~> 1.0.0-pre", override: true},
      {:fake_project, path: "../fake_project"}]
   end
 end

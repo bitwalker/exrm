@@ -46,21 +46,25 @@
       default:  10
     ]
   ],
-  translations: [
-    "test.debug.level": fn _mapping, val ->
-      case(val) do
-        :active ->
+  transforms: [
+    "test.debug_level": fn conf ->
+      case Conform.Conf.get(conf, "test.debug_level") do
+        [{_, :active}] ->
           {:on, []}
-        :"active-debug" ->
+        [{_, :"active-debug"}] ->
           {:on, [:debug]}
-        :passive ->
+        [{_, :passive}] ->
           {:on, [:passive]}
-        :off ->
+        [{_, :off}] ->
           {:off, []}
+        [] ->
       end
     end,
-    "test.some_val": fn _mapping, val ->
-      FakeProject.inc_some_val(val)
+    "test.some_val": fn conf ->
+      case Conform.Conf.get(conf, "test.some_val") do
+        [{_, x}] when is_integer(x) -> FakeProject.inc_some_val(x)
+        [{_, x}] -> x
+      end
     end
   ]
 ]

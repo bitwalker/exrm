@@ -2,7 +2,7 @@ defmodule Test.Server do
   use GenServer
 
   def start_link() do
-    :gen_server.start_link({:local, :test}, __MODULE__, [], [])
+    GenServer.start_link(__MODULE__, [], [name: __MODULE__])
   end
 
   def init([]) do
