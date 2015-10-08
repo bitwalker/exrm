@@ -11,7 +11,9 @@ defmodule ReleaseManager.Mixfile do
       test_coverage: [tool: Coverex.Task, coveralls: true]]
   end
 
-  def application, do: []
+  def application, do: [
+    applications: [:logger]
+  ]
 
   def deps do
     [{:relx, "~> 3.5.0" },
@@ -22,7 +24,7 @@ defmodule ReleaseManager.Mixfile do
 
   defp description do
     """
-    Exrm, or Elixir Release Manager, provides mix tasks for building, 
+    Exrm, or Elixir Release Manager, provides mix tasks for building,
     upgrading, and controlling release packages for your application.
     """
   end

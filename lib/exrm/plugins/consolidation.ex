@@ -1,14 +1,14 @@
 defmodule ReleaseManager.Plugin.Consolidation do
   @name "protocol.consolidation"
   @shortdoc "Performs protocol consolidation for your release."
-  
+
   use    ReleaseManager.Plugin
   alias  ReleaseManager.Config
   alias  ReleaseManager.Utils
   import ReleaseManager.Utils
 
   def before_release(%Config{verbosity: verbosity, env: env}) do
-    debug "Performing protocol consolidation..."
+    Logger.debug "Performing protocol consolidation..."
     with_env env, fn ->
       cond do
         verbosity == :verbose ->

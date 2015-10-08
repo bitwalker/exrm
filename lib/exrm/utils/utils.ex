@@ -4,6 +4,7 @@ defmodule ReleaseManager.Utils do
   `mix release.clean` tasks.
   """
   import Mix.Shell,    only: [cmd: 2]
+  alias ReleaseManager.Utils.Logger
 
   # Relx constants
   @relx_output_path      "rel"
@@ -108,17 +109,6 @@ defmodule ReleaseManager.Utils do
     end
   end
 
-  @doc "Print an informational message without color"
-  def debug(message), do: IO.puts "==> #{message}"
-  @doc "Print an informational message in green"
-  def info(message),  do: IO.puts "==> #{IO.ANSI.green}#{message}#{IO.ANSI.reset}"
-  @doc "Print a warning message in yellow"
-  def warn(message),  do: IO.puts "==> #{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}"
-  @doc "Print a notice in yellow"
-  def notice(message), do: IO.puts "#{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}"
-  @doc "Print an error message in red"
-  def error(message), do: IO.puts "==> #{IO.ANSI.red}#{message}#{IO.ANSI.reset}"
-
   @doc "Exits with exit status 1"
   def abort!, do: exit({:shutdown, 1})
 
@@ -209,10 +199,10 @@ defmodule ReleaseManager.Utils do
       {:ok, terms} ->
         terms
       {:error, {line, type, msg}} ->
-        error "Unable to parse #{path}: Line #{line}, #{type}, - #{msg}"
+        Logger.error "Unable to parse #{path}: Line #{line}, #{type}, - #{msg}"
         abort!
       {:error, reason} ->
-        error "Unable to access #{path}: #{reason}"
+        Logger.error "Unable to access #{path}: #{reason}"
         abort!
     end
     result

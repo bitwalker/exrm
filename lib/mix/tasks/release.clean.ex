@@ -17,9 +17,11 @@ defmodule Mix.Tasks.Release.Clean do
   @shortdoc "Clean up any release-related files."
 
   use     Mix.Task
+  alias   ReleaseManager.Utils.Logger
   import  ReleaseManager.Utils
 
   def run(args) do
+    {:ok, _} = Logger.start_link
     if Mix.Project.umbrella? do
       config = [build_path: Mix.Project.build_path]
       for %Mix.Dep{app: app, opts: opts} <- Mix.Dep.Umbrella.loaded do
@@ -33,18 +35,18 @@ defmodule Mix.Tasks.Release.Clean do
   def do_run(args) do
     app     = Mix.Project.config |> Keyword.get(:app)
     version = Mix.Project.config |> Keyword.get(:version)
-    debug "Removing release files for #{app}-#{version}..."
+    Logger.debug "Removing release files for #{app}-#{version}..."
     cond do
       "--implode" in args ->
         if "--no-confirm" in args or confirm_implode?(app) do
           do_cleanup :all
           execute_after_hooks(args)
-          info "All release files for #{app}-#{version} were removed successfully!"
+          Logger.info "All release files for #{app}-#{version} were removed successfully!"
         end
       true ->
         do_cleanup :build
         execute_after_hooks(args)
-        info "The release for #{app}-#{version} has been removed."
+        Logger.info "The release for #{app}-#{version} has been removed."
     end
   end
 
@@ -95,7 +97,7 @@ defmodule Mix.Tasks.Release.Clean do
       rescue
         exception ->
           stacktrace = System.stacktrace
-          error "Failed to execute after_cleanup hook for #{plugin}!"
+          Logger.error "Failed to execute after_cleanup hook for #{plugin}!"
           reraise exception, stacktrace
       end
     end

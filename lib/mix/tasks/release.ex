@@ -27,6 +27,7 @@ defmodule Mix.Tasks.Release do
   use    Mix.Task
   import ReleaseManager.Utils
   alias  ReleaseManager.Utils
+  alias  ReleaseManager.Utils.Logger
   alias  ReleaseManager.Config
 
   @_RELXCONF    "relx.config"
@@ -43,6 +44,7 @@ defmodule Mix.Tasks.Release do
   @_LIB_DIRS    "{{{LIB_DIRS}}}"
 
   def run(args) do
+    {:ok, _} = Logger.start_link
     if Mix.Project.umbrella? do
       config = [umbrella?: true]
       for %Mix.Dep{app: app, opts: opts} <- Mix.Dep.Umbrella.loaded do
@@ -58,7 +60,7 @@ defmodule Mix.Tasks.Release do
     Mix.Tasks.Release.Clean.do_cleanup(:build)
     # Collect release configuration
     config = parse_args(args)
-    info "Building release with MIX_ENV=#{config.env}."
+    Logger.notice "Building release with MIX_ENV=#{config.env}."
     # Begin release pipeline
     config
     |> build_project
@@ -74,8 +76,8 @@ defmodule Mix.Tasks.Release do
     |> update_release_package
     |> execute_package_hooks
 
-    info "The release for #{config.name}-#{config.version} is ready!"
-    info "You can boot a console running your release with `$ rel/#{config.name}/bin/#{config.name} console`"
+    Logger.info "The release for #{config.name}-#{config.version} is ready!"
+    Logger.info "You can boot a console running your release with `$ rel/#{config.name}/bin/#{config.name} console`"
   end
 
   defp build_project(%Config{verbosity: verbosity, env: env} = config) do
@@ -93,7 +95,7 @@ defmodule Mix.Tasks.Release do
   end
 
   defp generate_relx_config(%Config{name: name, version: version, env: env} = config) do
-    debug "Generating relx configuration..."
+    Logger.debug "Generating relx configuration..."
     # Get paths
     rel_def  = rel_file_source_path @_RELEASE_DEF
     source   = rel_source_path @_RELXCONF
@@ -131,7 +133,7 @@ defmodule Mix.Tasks.Release do
     user_config_path = rel_dest_path @_RELXCONF
     merged = case user_config_path |> File.exists? do
       true  ->
-        debug "Merging custom relx configuration from #{user_config_path |> Path.relative_to_cwd}..."
+        Logger.debug "Merging custom relx configuration from #{user_config_path |> Path.relative_to_cwd}..."
         case Utils.read_terms(user_config_path) do
           []                                      -> relx_config
           [{_, _}|_] = user_config                -> Utils.merge(relx_config, user_config)
@@ -156,7 +158,7 @@ defmodule Mix.Tasks.Release do
     user_sysconfig    = rel_dest_path @_SYSCONFIG
     dest              = rel_file_dest_path   @_SYSCONFIG
 
-    debug "Generating sys.config..."
+    Logger.debug "Generating sys.config..."
     # Read in current project config
     project_conf = load_config(env)
     # Merge project config with either the user-provided config, or the default sys.config we provide.
@@ -164,7 +166,7 @@ defmodule Mix.Tasks.Release do
     # default sys.config is used, the project config will take precedence instead.
     merged = case user_sysconfig |> File.exists? do
       true ->
-        debug "Merging custom sys.config from #{user_sysconfig |> Path.relative_to_cwd}..."
+        Logger.debug "Merging custom sys.config from #{user_sysconfig |> Path.relative_to_cwd}..."
         # User-provided
         case user_sysconfig |> Utils.read_terms do
           []                                  -> project_conf
@@ -187,7 +189,7 @@ defmodule Mix.Tasks.Release do
   defp generate_vm_args(%Config{version: version} = config) do
     vmargs_path = Utils.rel_dest_path("vm.args")
     if vmargs_path |> File.exists? do
-      debug "Generating vm.args..."
+      Logger.debug "Generating vm.args..."
       relx_config_path = Utils.rel_file_dest_path("relx.config")
       # Read in relx.config
       relx_config = relx_config_path |> Utils.read_terms
@@ -214,7 +216,7 @@ defmodule Mix.Tasks.Release do
     shim_dest    = rel_file_dest_path "boot_shim"
     winshim_dest = rel_file_dest_path "boot_shim.bat"
 
-    debug "Generating boot script..."
+    Logger.debug "Generating boot script..."
 
     [{boot, dest}, {winboot, windest}, {shim, shim_dest}, {winshim, winshim_dest}]
     |> Enum.each(fn {infile, outfile} ->
@@ -244,7 +246,7 @@ defmodule Mix.Tasks.Release do
       rescue
         exception ->
           stacktrace = System.stacktrace
-          error "Failed to execute before_release hook for #{plugin}!"
+          Logger.error "Failed to execute before_release hook for #{plugin}!"
           reraise exception, stacktrace
       end
     end
@@ -262,7 +264,7 @@ defmodule Mix.Tasks.Release do
       rescue
         exception ->
           stacktrace = System.stacktrace
-          error "Failed to execute after_release hook for #{plugin}!"
+          Logger.error "Failed to execute after_release hook for #{plugin}!"
           reraise exception, stacktrace
       end
     end
@@ -280,14 +282,14 @@ defmodule Mix.Tasks.Release do
       rescue
         exception ->
           stacktrace = System.stacktrace
-          error "Failed to execute after_package hook for #{plugin}!"
+          Logger.error "Failed to execute after_package hook for #{plugin}!"
           reraise exception, stacktrace
       end
     end
   end
 
   defp do_release(%Config{name: name, version: version, verbosity: verbosity, upgrade?: upgrade?, dev: dev_mode?, env: env} = config) do
-    debug "Generating release..."
+    Logger.debug "Generating release..."
     # If this is an upgrade release, generate an appup
     if upgrade? do
       # Change mix env for appup generation
@@ -304,18 +306,18 @@ defmodule Mix.Tasks.Release do
             # Copy it to ebin
             case File.cp(own_path, Path.join([v2_path, "/ebin", "#{name}.appup"])) do
               :ok ->
-                info "Using custom .appup located in rel/#{name}.appup"
+                Logger.info "Using custom .appup located in rel/#{name}.appup"
               {:error, reason} ->
-                error "Unable to copy custom .appup file: #{reason}"
+                Logger.error "Unable to copy custom .appup file: #{reason}"
                 abort!
             end
           _ ->
             # No custom .appup found, proceed with autogeneration
             case ReleaseManager.Appups.make(app, v1, version, v1_path, v2_path) do
               {:ok, _}         ->
-                info "Generated .appup for #{name} #{v1} -> #{version}"
+                Logger.info "Generated .appup for #{name} #{v1} -> #{version}"
               {:error, reason} ->
-                error "Appup generation failed with #{reason}"
+                Logger.error "Appup generation failed with #{reason}"
                 abort!
             end
         end
@@ -330,19 +332,19 @@ defmodule Mix.Tasks.Release do
           # Continue..
           config
         {:error, message} ->
-          error message
+          Logger.error message
           abort!
       end
     catch
       err ->
-        error "#{IO.inspect err}"
-        error "Failed to build release package! Try running with `--verbosity=verbose` to see debugging info!"
+        Logger.error "#{IO.inspect err}"
+        Logger.error "Failed to build release package! Try running with `--verbosity=verbose` to see debugging info!"
         abort!
     end
   end
 
   defp generate_nodetool(%Config{name: name} = config) do
-    debug "Generating nodetool..."
+    Logger.debug "Generating nodetool..."
     nodetool = rel_file_source_path @_NODETOOL
     dest     = rel_dest_path [name, "bin", @_NODETOOL]
     # Copy
@@ -362,7 +364,7 @@ defmodule Mix.Tasks.Release do
 
   defp update_release_package(%Config{dev: true} = config), do: config
   defp update_release_package(%Config{name: name, version: version, relx_config: relx_config} = config) do
-    debug "Packaging release..."
+    Logger.debug "Packaging release..."
     # Delete original release package
     tarball = rel_dest_path [name, "#{name}-#{version}.tar.gz"]
     File.rm! tarball
@@ -427,7 +429,9 @@ defmodule Mix.Tasks.Release do
     Enum.reduce args, defaults, fn arg, config ->
       case arg do
         {:verbosity, verbosity} ->
-          %{config | :verbosity => String.to_atom(verbosity)}
+          verbosity = String.to_atom(verbosity)
+          Logger.configure(verbosity)
+          %{config | :verbosity => verbosity}
         {key, value} ->
           Map.put(config, key, value)
       end
