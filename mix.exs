@@ -8,6 +8,7 @@ defmodule ReleaseManager.Mixfile do
       description: description,
       package: package,
       deps: deps,
+      docs: docs,
       test_coverage: [tool: Coverex.Task, coveralls: true]]
   end
 
@@ -33,6 +34,18 @@ defmodule ReleaseManager.Mixfile do
       contributors: ["Paul Schoenfelder"],
       licenses: ["MIT"],
       links: %{ "GitHub": "https://github.com/bitwalker/exrm" } ]
+  end
+
+  defp docs do
+    [main: "getting_started",
+     extras: [
+        "docs/getting_started.md",
+        "docs/release_configuration.md",
+        "docs/deployment.md",
+        "docs/upgrades_and_downgrades.md",
+        "docs/common_issues.md",
+        "docs/examples.md"
+    ]]
   end
 
 end
