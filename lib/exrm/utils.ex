@@ -154,18 +154,29 @@ defmodule ReleaseManager.Utils do
   compare, but can fall back to regular string compare.
   """
   def sort_versions(versions) do
-    versions |> Enum.sort(
-      fn v1, v2 ->
+    versions
+    |> Enum.map(fn ver ->
+        # Special handling for git-describe versions
+        compared = case Regex.named_captures(~r/(?<ver>\d+\.\d+\.\d+)-(?<commits>\d+)-(?<sha>[A-Ga-g0-9]+)/, ver) do
+          nil -> ver
+          %{"ver" => version, "commits" => n, "sha" => sha} -> <<version::binary, ?+, n::binary, ?-, sha::binary>>
+        end
+        {ver, compared}
+      end)
+    |> Enum.sort(
+      fn {_, v1}, {_, v2} ->
         case { parse_version(v1), parse_version(v2) } do
           {{:semantic, v1}, {:semantic, v2}} ->
             case Version.compare(v1, v2) do
               :gt -> true
-              _   -> false
+              :eq -> v1 > v2
+              :lt -> false
             end;
           {{_, v1}, {_, v2}} ->
             v1 >  v2
         end
       end)
+    |> Enum.map(fn {v, _} -> v end)
   end
 
   defp parse_version(ver) do
