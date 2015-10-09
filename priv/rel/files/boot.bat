@@ -141,7 +141,6 @@
       exit /b %ERRORLEVEL%
     )
   ) else (
-    echo "Conform configuration file not found!"
     goto :eof
   )
 )
