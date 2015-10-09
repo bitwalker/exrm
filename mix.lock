@@ -1,5 +1,5 @@
 %{"bbmustache": {:hex, :bbmustache, "1.0.3"},
-  "conform": {:hex, :conform, "0.16.0"},
+  "conform": {:hex, :conform, "0.17.0"},
   "coverex": {:hex, :coverex, "1.4.2"},
   "earmark": {:hex, :earmark, "0.1.17"},
   "erlware_commons": {:hex, :erlware_commons, "0.15.0"},
