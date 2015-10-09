@@ -31,7 +31,7 @@ defmodule ReleaseManager.Mixfile do
 
   defp package do
     [ files: ["lib", "priv", "mix.exs", "README.md", "LICENSE"],
-      contributors: ["Paul Schoenfelder"],
+      maintainers: ["Paul Schoenfelder"],
       licenses: ["MIT"],
       links: %{ "GitHub": "https://github.com/bitwalker/exrm" } ]
   end
