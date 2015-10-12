@@ -88,24 +88,18 @@ defmodule ReleaseManager.Plugin do
   end
 
   defp available_modules(plugin_type) do
-    apps_path = Mix.Project.build_path |> Path.join("lib")
-    apps      = case apps_path |> File.ls do
-      {:ok, apps} -> apps
-      {:error, _} -> []
-    end
-    apps
-    |> Stream.map(&(Path.join([apps_path, &1, "ebin"])))
-    |> Stream.filter(&File.exists?/1)
-    |> Stream.map(fn app_path -> app_path |> File.ls! |> Enum.map(&(Path.join(app_path, &1))) end)
-    |> Stream.flat_map(&(&1))
-    |> Stream.filter(&(String.ends_with?(&1, ".beam")))
+    # Ensure the current projects code path is loaded
+    Mix.Task.run("loadpaths", [])
+    # Fetch all .beam files
+    Path.wildcard("**/*/ebin/**/*.{beam}")
+    # Parse the BEAM for behaviour implementations
     |> Stream.map(fn path ->
-      {:ok, {module, chunks}} = :beam_lib.chunks('#{path}', [:attributes])
-      {module, get_in(chunks, [:attributes, :behaviour])}
+      {:ok, {mod, chunks}} = :beam_lib.chunks('#{path}', [:attributes])
+      {mod, get_in(chunks, [:attributes, :behaviour])}
     end)
-    |> Stream.filter(fn {_module, behaviours} ->
-      is_list(behaviours) && plugin_type in behaviours
-    end)
+    # Filter out behaviours we don't care about and duplicates
+    |> Stream.filter(fn {_mod, behaviours} -> is_list(behaviours) && plugin_type in behaviours end)
+    |> Enum.uniq
     |> Enum.map(fn {module, _} -> module end)
   end
 end
