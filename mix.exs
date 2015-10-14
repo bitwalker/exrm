@@ -37,14 +37,14 @@ defmodule ReleaseManager.Mixfile do
   end
 
   defp docs do
-    [main: "getting_started",
+    [main: "extra-getting-started",
      extras: [
-        "docs/getting_started.md",
-        "docs/release_configuration.md",
-        "docs/deployment.md",
-        "docs/upgrades_and_downgrades.md",
-        "docs/common_issues.md",
-        "docs/examples.md"
+        "docs/Getting Started.md",
+        "docs/Release Configuration.md",
+        "docs/Deployment.md",
+        "docs/Upgrades and Downgrades.md",
+        "docs/Common Issues.md",
+        "docs/Examples.md"
     ]]
   end
 
