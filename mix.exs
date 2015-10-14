@@ -18,7 +18,7 @@ defmodule ReleaseManager.Mixfile do
     [{:conform, "~> 0.17"},
      {:relx, "~> 3.5.0" },
      {:earmark, "~> 0.1", only: :dev},
-     {:ex_doc, "~> 0.9", only: :dev},
+     {:ex_doc, "~> 0.10", only: :dev},
      {:coverex, "~> 1.4.1", only: :test}]
   end
 
