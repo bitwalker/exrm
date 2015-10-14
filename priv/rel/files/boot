@@ -11,6 +11,7 @@ ERTS_VSN=$(cat $RELEASES_DIR/start_erl.data | cut -d' ' -f1)
 REL_DIR="$RELEASES_DIR/$REL_VSN"
 REL_LIB_DIR="$RELEASE_ROOT_DIR/lib"
 ERL_OPTS="{{{ERL_OPTS}}}"
+CONFORM_OPTS=""
 PIPE_DIR="$RELEASE_ROOT_DIR/tmp/erl_pipes/{{{PROJECT_NAME}}}/"
 ERTS_DIR=""
 ROOTDIR=""
@@ -115,6 +116,7 @@ generate_config() {
             if [ ! -f "$__conform" ]; then
                 __conform="$ROOTDIR/bin/conform"
             fi
+            CONFORM_OPTS="-conform_schema ${__schema_file} -conform_config ${__conform_file}"
             result="$("$BINDIR/escript" "$__conform" --conf "$__conform_file" --schema "$__schema_file" --config "$SYS_CONFIG" --output-dir "$GENERATED_CONFIG_DIR")"
             exit_status="$?"
             if [ "$exit_status" -ne 0 ]; then
@@ -530,6 +532,7 @@ case "$1" in
             -pa "$REL_LIB_DIR/consolidated" \
             -args_file "$VMARGS_PATH" \
             ${ERL_OPTS} \
+            ${CONFORM_OPTS} \
             -user Elixir.IEx.CLI -extra --no-halt +iex
 
         # Dump environment info for logging purposes
@@ -571,6 +574,7 @@ case "$1" in
             -pa "$REL_LIB_DIR/consolidated" \
             -env ERL_LIBS "$REL_LIB_DIR" \
             ${ERL_OPTS} \
+            ${CONFORM_OPTS} \
             -args_file "$VMARGS_PATH"
 
         # Dump environment info for logging purposes
