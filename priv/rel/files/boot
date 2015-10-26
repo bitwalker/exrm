@@ -147,9 +147,7 @@ if [ -z "$RELEASE_CONFIG_DIR" ]; then
 fi
 
 SYS_CONFIG="$GENERATED_CONFIG_DIR/sys.config"
-if [ -r "$VMARGS_PATH" ]; then
-  VMARGS_PATH="$VMARGS_PATH"
-else
+if [ -z "$VMARGS_PATH" ]; then
   VMARGS_PATH="$GENERATED_CONFIG_DIR/vm.args"
 fi
 
