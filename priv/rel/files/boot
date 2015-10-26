@@ -130,10 +130,9 @@ generate_config() {
         fi
     else
         cp "$RELEASE_CONFIG_DIR/sys.config" "$GENERATED_CONFIG_DIR/sys.config"
-        if [ -f "$VMARGS_PATH" ]; then
-            cp "$VMARGS_PATH" "$GENERATED_CONFIG_DIR/vm.args"
-        else
+        if [ ! -f "$VMARGS_PATH" ]; then
             cp "$RELEASE_CONFIG_DIR/vm.args" "$GENERATED_CONFIG_DIR/vm.args"
+            VMARGS_PATH="$GENERATED_CONFIG_DIR/vm.args"
         fi
     fi
 }
