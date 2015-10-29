@@ -22,7 +22,7 @@ defmodule Mix.Tasks.Release do
   otherwise.
 
   """
-  @shortdoc "Build a release for the current mix application."
+  @shortdoc "Build a release for the current mix application"
 
   use    Mix.Task
   import ReleaseManager.Utils

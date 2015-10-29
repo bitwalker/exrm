@@ -14,7 +14,7 @@ defmodule Mix.Tasks.Release.Clean do
       mix release.clean --implode --no-confirm
 
   """
-  @shortdoc "Clean up any release-related files."
+  @shortdoc "Clean up any release-related files"
 
   use     Mix.Task
   import  ReleaseManager.Utils
