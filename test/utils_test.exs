@@ -99,8 +99,26 @@ defmodule UtilsTest do
   end
 
   test "can compare complex versions" do
-    expected = ["0.0.2", "0.0.1-2-a1d2g3f", "0.0.1-1-deadbeef", "0.0.1"]
-    result = Utils.sort_versions(["0.0.2", "0.0.1-1-deadbeef", "0.0.1-2-a1d2g3f", "0.0.1"])
+    expected = [
+      "0.0.3-142-deadbeef",
+      "0.0.3-43-aaaabbbb",
+      "0.0.3-5-ccccdddd",
+      "0.0.3",
+      "0.0.2",
+      "0.0.1-2-a1d2g3f",
+      "0.0.1-1-deadbeef",
+      "0.0.1"
+    ]
+    result = Utils.sort_versions([
+      "0.0.3",
+      "0.0.2",
+      "0.0.3-43-aaaabbbb",
+      "0.0.1-1-deadbeef",
+      "0.0.1-2-a1d2g3f",
+      "0.0.3-142-deadbeef",
+      "0.0.3-5-ccccdddd",
+      "0.0.1"
+    ])
     assert expected == result
   end
 

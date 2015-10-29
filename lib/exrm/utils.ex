@@ -158,18 +158,27 @@ defmodule ReleaseManager.Utils do
     |> Enum.map(fn ver ->
         # Special handling for git-describe versions
         compared = case Regex.named_captures(~r/(?<ver>\d+\.\d+\.\d+)-(?<commits>\d+)-(?<sha>[A-Ga-g0-9]+)/, ver) do
-          nil -> ver
-          %{"ver" => version, "commits" => n, "sha" => sha} -> <<version::binary, ?+, n::binary, ?-, sha::binary>>
+          nil ->
+            {:standard, ver, nil}
+          %{"ver" => version, "commits" => n, "sha" => sha} ->
+            {:describe, <<version::binary, ?+, n::binary, ?-, sha::binary>>, String.to_integer(n)}
         end
         {ver, compared}
       end)
     |> Enum.sort(
-      fn {_, v1}, {_, v2} ->
-        case { parse_version(v1), parse_version(v2) } do
+      fn {_, {v1type, v1str, v1_commits_since}}, {_, {v2type, v2str, v2_commits_since}} ->
+        case { parse_version(v1str), parse_version(v2str) } do
           {{:semantic, v1}, {:semantic, v2}} ->
             case Version.compare(v1, v2) do
               :gt -> true
-              :eq -> v1 > v2
+              :eq ->
+                case {v1type, v2type} do
+                  {:standard, :standard} -> v1 > v2 # probably always false
+                  {:standard, :describe} -> false   # v2 is an incremental version over v1
+                  {:describe, :standard} -> true    # v1 is an incremental version over v2
+                  {:describe, :describe} ->         # need to parse out the bits
+                    v1_commits_since > v2_commits_since
+                end
               :lt -> false
             end;
           {{_, v1}, {_, v2}} ->
