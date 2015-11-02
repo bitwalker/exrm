@@ -1,7 +1,7 @@
 defmodule ReleaseManager.Plugin.Consolidation do
   @name "protocol.consolidation"
   @shortdoc "Performs protocol consolidation for your release."
-  
+
   use    ReleaseManager.Plugin
   alias  ReleaseManager.Config
   alias  ReleaseManager.Utils
@@ -23,7 +23,7 @@ defmodule ReleaseManager.Plugin.Consolidation do
     # Add overlay to relx.config which copies consolidated dir to release
     consolidated_path = Path.join([File.cwd!, "_build", "#{env}", "consolidated"])
     overlays = [overlay: [
-      {:copy, '#{consolidated_path}', 'lib/consolidated'}
+      {:copy, '#{consolidated_path}', 'lib'}
     ]]
     updated = Utils.merge(relx_config, overlays)
     # Persist relx.config
