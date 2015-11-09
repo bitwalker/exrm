@@ -9,7 +9,7 @@ defmodule ReleaseManager.Plugin.Consolidation do
 
   def before_release(%Config{verbosity: verbosity, env: env}) do
     build_embedded = Keyword.get(Mix.Project.config, :build_embedded, false)
-    should_compile = env == :prod && !build_embedded
+    should_compile = env != :test && !build_embedded
     if should_compile do
       debug "Performing protocol consolidation..."
       with_env env, fn ->
