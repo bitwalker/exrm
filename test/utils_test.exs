@@ -68,7 +68,7 @@ defmodule UtilsTest do
   @tag timeout: 120000 # 120s
   test "can build a release and boot it up" do
     with_app do
-      capture_io(fn ->
+      #capture_io(fn ->
         # Build release
         assert :ok = Utils.mix("do deps.get, compile", Mix.env, :verbose)
         assert :ok = Utils.mix("release", Mix.env)
@@ -86,7 +86,7 @@ defmodule UtilsTest do
         assert :ok = res
         some_val = Keyword.get(List.first(sysconfig_content), :test) |> Keyword.get(:some_val)
         assert 101 = some_val
-      end)
+      #end)
     end
   end
 
