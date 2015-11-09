@@ -22,18 +22,20 @@ defmodule ReleaseManager.Plugin.Consolidation do
       end
     end
 
-    debug "Packaging consolidated protocols..."
-
     # Load relx.config
-    relx_config = Utils.rel_file_dest_path("relx.config") |> Utils.read_terms
-    # Add overlay to relx.config which copies consolidated dir to release
-    consolidated_path = Path.join([File.cwd!, "_build", "#{env}", "consolidated"])
-    overlays = [overlay: [
-      {:copy, '#{consolidated_path}', 'lib'}
-    ]]
-    updated = Utils.merge(relx_config, overlays)
-    # Persist relx.config
-    Utils.write_terms(Utils.rel_file_dest_path("relx.config"), updated)
+    if env != :test do
+      debug "Packaging consolidated protocols..."
+
+      relx_config = Utils.rel_file_dest_path("relx.config") |> Utils.read_terms
+      # Add overlay to relx.config which copies consolidated dir to release
+      consolidated_path = Path.join([File.cwd!, "_build", "#{env}", "consolidated"])
+      overlays = [overlay: [
+        {:copy, '#{consolidated_path}', 'lib'}
+      ]]
+      updated = Utils.merge(relx_config, overlays)
+      # Persist relx.config
+      Utils.write_terms(Utils.rel_file_dest_path("relx.config"), updated)
+    end
   end
 
   def after_release(_), do: nil
