@@ -8,15 +8,21 @@ defmodule ReleaseManager.Plugin.Consolidation do
   import ReleaseManager.Utils
 
   def before_release(%Config{verbosity: verbosity, env: env}) do
-    debug "Performing protocol consolidation..."
-    with_env env, fn ->
-      cond do
-        verbosity == :verbose ->
-          mix "compile.protocols", env, :verbose
-        true ->
-          mix "compile.protocols", env
+    build_embedded = Keyword.get(Mix.Project.config, :build_embedded, false)
+    should_compile = env == :prod && !build_embedded
+    if should_compile do
+      debug "Performing protocol consolidation..."
+      with_env env, fn ->
+        cond do
+          verbosity == :verbose ->
+            mix "compile.protocols", env, :verbose
+          true ->
+            mix "compile.protocols", env
+        end
       end
     end
+
+    debug "Packaging consolidated protocols..."
 
     # Load relx.config
     relx_config = Utils.rel_file_dest_path("relx.config") |> Utils.read_terms
