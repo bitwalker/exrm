@@ -53,7 +53,7 @@ relx_rem_sh() {
 
     # Setup Elixir remote shell command to control node
     exec "$BINDIR/erl" \
-        -pa "$ROOTDIR"/lib/*/ebin "$ROOTDIR"/lib/consolidated \
+        -pa "$ROOTDIR"/lib/*/ebin \
         -hidden -noshell \
         -boot start_clean -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
         -kernel net_ticktime "$TICKTIME" \
@@ -413,7 +413,7 @@ case "$1" in
         fi
 
         # We have to unpack the release first in order to make sure the configuration
-        # is properly updated
+        # is properly updated. This also destroys the .tar.gz package (release_handler does)
         "$BINDIR/escript" "$ROOTDIR/bin/install_upgrade.escript" \
              "unpack" "$REL_NAME" "$NAME_TYPE" "$NAME" "$COOKIE" "$2"
 
@@ -530,7 +530,6 @@ case "$1" in
         set -- "$BINDIR/erlexec" -boot "$BOOTFILE" \
             -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
             -env ERL_LIBS "$REL_LIB_DIR" -config "$SYS_CONFIG" \
-            -pa "$REL_LIB_DIR/consolidated" \
             -args_file "$VMARGS_PATH" \
             ${ERL_OPTS} \
             ${CONFORM_OPTS} \
@@ -572,7 +571,6 @@ case "$1" in
         set -- "$BINDIR/erlexec" $FOREGROUNDOPTIONS \
             -boot "$REL_DIR/$BOOTFILE" -mode embedded -config "$SYS_CONFIG" \
             -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
-            -pa "$REL_LIB_DIR/consolidated" \
             -env ERL_LIBS "$REL_LIB_DIR" \
             ${ERL_OPTS} \
             ${CONFORM_OPTS} \
