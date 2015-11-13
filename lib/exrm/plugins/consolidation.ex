@@ -5,7 +5,7 @@ defmodule ReleaseManager.Plugin.Consolidation do
   use    ReleaseManager.Plugin
   alias  ReleaseManager.Config
   alias  ReleaseManager.Utils
-  import ReleaseManager.Utils
+  import ReleaseManager.Utils, except: [debug: 1, info: 1, warn: 1, error: 1]
 
   def before_release(%Config{verbosity: verbosity, env: env} = config) do
     build_embedded = Keyword.get(Mix.Project.config, :build_embedded, false)
