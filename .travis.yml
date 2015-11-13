@@ -9,8 +9,8 @@ otp_release:
 env:
   - MIX_ENV=test
 script:
-  - mix test --exclude expensive --cover
-  - mix test --only expensive --cover
+  - mix test --exclude expensive
+  - mix test --only expensive
 notifications:
   email:
     - paulschoenfelder@gmail.com

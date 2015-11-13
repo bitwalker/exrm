@@ -23,11 +23,14 @@ defmodule Mix.Tasks.Release.Plugins do
   end
 
   defp do_run([action: :list]) do
-    plugins = get_plugins
-    for plugin <- plugins do
-      name     = get_name(plugin)
-      shortdoc = get_shortdoc(plugin)
-      IO.puts String.ljust(name, 30) <> " # " <> shortdoc
+    case get_plugins do
+      []      -> IO.puts "No plugins found!"
+      plugins ->
+        for plugin <- plugins do
+          name     = get_name(plugin)
+          shortdoc = get_shortdoc(plugin)
+          IO.puts String.ljust(name, 30) <> " # " <> shortdoc
+        end
     end
   end
   defp do_run([action: :details, plugin: plugin]) do

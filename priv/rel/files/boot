@@ -1,7 +1,5 @@
 #!/bin/sh
 
-set -e
-
 SCRIPT_DIR="$(dirname "$0")"
 RELEASE_ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 REL_NAME="{{{PROJECT_NAME}}}"
@@ -11,6 +9,7 @@ ERTS_VSN=$(cat $RELEASES_DIR/start_erl.data | cut -d' ' -f1)
 REL_DIR="$RELEASES_DIR/$REL_VSN"
 REL_LIB_DIR="$RELEASE_ROOT_DIR/lib"
 ERL_OPTS="{{{ERL_OPTS}}}"
+CONFORM_OPTS=""
 PIPE_DIR="$RELEASE_ROOT_DIR/tmp/erl_pipes/{{{PROJECT_NAME}}}/"
 ERTS_DIR=""
 ROOTDIR=""
@@ -54,7 +53,7 @@ relx_rem_sh() {
 
     # Setup Elixir remote shell command to control node
     exec "$BINDIR/erl" \
-        -pa "$ROOTDIR"/lib/*/ebin "$ROOTDIR"/lib/consolidated \
+        -pa "$ROOTDIR"/lib/*/ebin \
         -hidden -noshell \
         -boot start_clean -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
         -kernel net_ticktime "$TICKTIME" \
@@ -103,6 +102,7 @@ generate_config() {
     if [ -f "$__schema_file" ]; then
         if [ -f "$__conform_file" ]; then
             __running_conf="$GENERATED_CONFIG_DIR/$REL_NAME.conf"
+            CONFORM_OPTS="-conform_schema ${__schema_file} -conform_config ${__conform_file} -running_conf ${__running_conf}"
 
             # always copy release-config to running-config
             echo "copying $__conform_file to $__running_conf ..."
@@ -413,7 +413,7 @@ case "$1" in
         fi
 
         # We have to unpack the release first in order to make sure the configuration
-        # is properly updated
+        # is properly updated. This also destroys the .tar.gz package (release_handler does)
         "$BINDIR/escript" "$ROOTDIR/bin/install_upgrade.escript" \
              "unpack" "$REL_NAME" "$NAME_TYPE" "$NAME" "$COOKIE" "$2"
 
@@ -530,9 +530,9 @@ case "$1" in
         set -- "$BINDIR/erlexec" -boot "$BOOTFILE" \
             -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
             -env ERL_LIBS "$REL_LIB_DIR" -config "$SYS_CONFIG" \
-            -pa "$REL_LIB_DIR/consolidated" \
             -args_file "$VMARGS_PATH" \
             ${ERL_OPTS} \
+            ${CONFORM_OPTS} \
             -user Elixir.IEx.CLI -extra --no-halt +iex
 
         # Dump environment info for logging purposes
@@ -571,9 +571,9 @@ case "$1" in
         set -- "$BINDIR/erlexec" $FOREGROUNDOPTIONS \
             -boot "$REL_DIR/$BOOTFILE" -mode embedded -config "$SYS_CONFIG" \
             -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
-            -pa "$REL_LIB_DIR/consolidated" \
             -env ERL_LIBS "$REL_LIB_DIR" \
             ${ERL_OPTS} \
+            ${CONFORM_OPTS} \
             -args_file "$VMARGS_PATH"
 
         # Dump environment info for logging purposes

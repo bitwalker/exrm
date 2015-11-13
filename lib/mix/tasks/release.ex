@@ -17,18 +17,22 @@ defmodule Mix.Tasks.Release do
       # Set the verbosity level
       mix release --verbosity=[silent|quiet|normal|verbose]
 
+      # Do not ask for confirmation to skip missing applications warning
+      mix release --no-confirm-missing
+
   You may pass any number of arguments as needed. Make sure you pass arguments
   using `--key=value`, not `--key value`, as the args may be interpreted incorrectly
   otherwise.
 
   """
-  @shortdoc "Build a release for the current mix application."
+  @shortdoc "Build a release for the current mix application"
 
   use    Mix.Task
   import ReleaseManager.Utils
   alias  ReleaseManager.Utils
   alias  ReleaseManager.Utils.Logger
   alias  ReleaseManager.Config
+  alias  ReleaseManager.Deps
 
   @_RELXCONF    "relx.config"
   @_BOOT_FILE   "boot"
@@ -63,7 +67,7 @@ defmodule Mix.Tasks.Release do
     Logger.notice "Building release with MIX_ENV=#{config.env}."
     # Begin release pipeline
     config
-    |> build_project
+    |> check_applications(args)
     |> generate_relx_config
     |> generate_sys_config
     |> generate_vm_args
@@ -80,18 +84,26 @@ defmodule Mix.Tasks.Release do
     Logger.info "You can boot a console running your release with `$ rel/#{config.name}/bin/#{config.name} console`"
   end
 
-  defp build_project(%Config{verbosity: verbosity, env: env} = config) do
-    # Fetch deps, and compile, using the prepared Elixir binaries
-    cond do
-      verbosity == :verbose ->
-        mix "deps.get",     env, :verbose
-        mix "compile",      env, :verbose
-      true ->
-        mix "deps.get",     env
-        mix "compile",      env
+  defp check_applications(%Config{} = config, args) do
+    case Deps.print_missing_applications(ignore: [:exrm]) do
+      ""     -> config
+      output ->
+        IO.puts IO.ANSI.yellow
+        IO.puts "You have dependencies (direct/transitive) which are not in :applications!"
+        IO.puts "The following apps should to be added to :applications in mix.exs:\n#{output}#{IO.ANSI.reset}\n"
+        case "--no-confirm-missing" in args do
+          true  ->
+            config
+          false ->
+            msg    = IO.ANSI.yellow <> "Continue anyway? Your release may not work as expected if these dependencies are required!"
+            answer = IO.gets(msg <> " [Yn]: ")
+            IO.puts IO.ANSI.reset
+            case answer =~ ~r/^(Y(es)?)?$/i do
+              true  -> config
+              false -> abort!
+            end
+        end
     end
-    # Continue...
-    config
   end
 
   defp generate_relx_config(%Config{name: name, version: version, env: env} = config) do

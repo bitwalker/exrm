@@ -68,10 +68,10 @@ defmodule UtilsTest do
   @tag timeout: 120000 # 120s
   test "can build a release and boot it up" do
     with_app do
-      capture_io(fn ->
+      #capture_io(fn ->
         # Build release
-        assert :ok = Utils.mix("do deps.get, compile", Mix.env, :verbose)
-        assert :ok = Utils.mix("release", Mix.env)
+        assert :ok = Utils.mix("do deps.get, compile", Mix.env, :quiet)
+        assert :ok = Utils.mix("release --verbosity=verbose", Mix.env, :verbose)
         assert [{"test", "0.0.1"}] == Utils.get_releases("test")
         # Boot it, ping it, and shut it down
         bin_path = Path.join([File.cwd!, "rel", "test", "bin", "test"])
@@ -86,7 +86,7 @@ defmodule UtilsTest do
         assert :ok = res
         some_val = Keyword.get(List.first(sysconfig_content), :test) |> Keyword.get(:some_val)
         assert 101 = some_val
-      end)
+      #end)
     end
   end
 
@@ -96,6 +96,30 @@ defmodule UtilsTest do
 
   test "can compare non-semver versions" do
     assert ["1.3", "1.2", "1.1"] = Utils.sort_versions(["1.1", "1.3", "1.2"])
+  end
+
+  test "can compare complex versions" do
+    expected = [
+      "0.0.3-142-deadbeef",
+      "0.0.3-43-aaaabbbb",
+      "0.0.3-5-ccccdddd",
+      "0.0.3",
+      "0.0.2",
+      "0.0.1-2-a1d2g3f",
+      "0.0.1-1-deadbeef",
+      "0.0.1"
+    ]
+    result = Utils.sort_versions([
+      "0.0.3",
+      "0.0.2",
+      "0.0.3-43-aaaabbbb",
+      "0.0.1-1-deadbeef",
+      "0.0.1-2-a1d2g3f",
+      "0.0.3-142-deadbeef",
+      "0.0.3-5-ccccdddd",
+      "0.0.1"
+    ])
+    assert expected == result
   end
 
 end

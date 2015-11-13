@@ -14,7 +14,7 @@ defmodule Mix.Tasks.Release.Clean do
       mix release.clean --implode --no-confirm
 
   """
-  @shortdoc "Clean up any release-related files."
+  @shortdoc "Clean up any release-related files"
 
   use     Mix.Task
   alias   ReleaseManager.Utils.Logger
@@ -105,12 +105,13 @@ defmodule Mix.Tasks.Release.Clean do
 
   defp confirm_implode?(app) do
     IO.puts IO.ANSI.yellow
-    confirmed? = Mix.Shell.IO.yes?("""
-      THIS WILL REMOVE ALL RELEASES AND RELATED CONFIGURATION FOR #{app |> Atom.to_string |> String.upcase}!
-      Are you absolutely sure you want to proceed?
-      """)
+    msg = """
+    THIS WILL REMOVE ALL RELEASES AND RELATED CONFIGURATION FOR #{app |> Atom.to_string |> String.upcase}!
+    Are you absolutely sure you want to proceed?
+    """
+    answer = IO.gets(msg <> " [Yn]: ")
     IO.puts IO.ANSI.reset
-    confirmed?
+    answer =~ ~r/^(Y(es)?)?$/i
   end
 
 end

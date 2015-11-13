@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 
 SCRIPT_DIR="$(dirname "$0")"
 RELEASE_ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
