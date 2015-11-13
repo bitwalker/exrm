@@ -71,7 +71,7 @@ defmodule UtilsTest do
       #capture_io(fn ->
         # Build release
         assert :ok = Utils.mix("do deps.get, compile", Mix.env, :quiet)
-        assert :ok = Utils.mix("release --verbosity=verbose", Mix.env, :verbose)
+        assert :ok = Utils.mix("release --no-confirm-missing --verbosity=verbose", Mix.env, :verbose)
         assert [{"test", "0.0.1"}] == Utils.get_releases("test")
         # Boot it, ping it, and shut it down
         bin_path = Path.join([File.cwd!, "rel", "test", "bin", "test"])
