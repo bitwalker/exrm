@@ -183,9 +183,9 @@ defmodule ReleaseManager.Deps do
   # Gets applications for a given rebar dependency
   defp get_applications(%Mix.Dep{app: app, manager: :rebar, opts: opts}) do
     project_dir = Keyword.get(opts, :dest)
-    case Path.wildcard(Path.join(project_dir, "**/*.app.src")) do
+    case Path.wildcard(Path.join(project_dir, "**/#{app}.app.src")) do
       [] -> []
-      [app_src_path] ->
+      [app_src_path|_] ->
         case ReleaseManager.Utils.read_terms(app_src_path) do
           [{:application, ^app, config}] ->
             apps     = Keyword.get(config, :applications, [])
