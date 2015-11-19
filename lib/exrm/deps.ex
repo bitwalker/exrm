@@ -117,8 +117,15 @@ defmodule ReleaseManager.Deps do
   Returns a list of explict applications found in mix.exs :applications/:included_applications
   """
   def get_explicit_applications() do
-    app_spec = Mix.Project.get!.application
-    Keyword.get(app_spec, :applications, []) ++ Keyword.get(app_spec, :included_applications, [])
+    mixfile = Mix.Project.get!
+    exports = mixfile.module_info(:exports)
+    cond do
+      {:application, 0} in exports ->
+        app_spec = mixfile.application
+        Keyword.get(app_spec, :applications, []) ++ Keyword.get(app_spec, :included_applications, [])
+      :else ->
+        []
+    end
   end
 
   @doc """
