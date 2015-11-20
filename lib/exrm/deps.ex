@@ -117,15 +117,7 @@ defmodule ReleaseManager.Deps do
   Returns a list of explict applications found in mix.exs :applications/:included_applications
   """
   def get_explicit_applications() do
-    mixfile = Mix.Project.get!
-    exports = mixfile.module_info(:exports)
-    cond do
-      {:application, 0} in exports ->
-        app_spec = mixfile.application
-        Keyword.get(app_spec, :applications, []) ++ Keyword.get(app_spec, :included_applications, [])
-      :else ->
-        []
-    end
+    get_project_apps(Mix.Project.get!)
   end
 
   @doc """
@@ -180,10 +172,8 @@ defmodule ReleaseManager.Deps do
       true  ->
         project_dir = Keyword.get(opts, :dest)
         Mix.Project.in_project(app, project_dir, [], fn _ ->
-          app_spec = Mix.Project.get.application
-          apps     = Keyword.get(app_spec, :applications, [])
-          inc_apps = Keyword.get(app_spec, :included_applications, [])
-          [{app, apps ++ inc_apps}]
+          project_apps = get_project_apps(Mix.Project.get!)
+          [{app, project_apps}]
         end)
     end
   end
@@ -263,6 +253,17 @@ defmodule ReleaseManager.Deps do
       envs when is_list(envs) -> Mix.env in envs
       nil -> true
       env -> Mix.env == env
+    end
+  end
+
+  defp get_project_apps(mixfile) when is_atom(mixfile) do
+    exports = mixfile.module_info(:exports)
+    cond do
+      {:application, 0} in exports ->
+        app_spec = mixfile.application
+        Keyword.get(app_spec, :applications, []) ++ Keyword.get(app_spec, :included_applications, [])
+      :else ->
+        []
     end
   end
 
