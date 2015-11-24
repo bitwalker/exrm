@@ -96,7 +96,7 @@ defmodule Mix.Tasks.Release do
             config
           false ->
             msg    = IO.ANSI.yellow <> "Continue anyway? Your release may not work as expected if these dependencies are required!"
-            answer = IO.gets(msg <> " [Yn]: ")
+            answer = IO.gets(msg <> " [Yn]: ") |> String.rstrip(?\n)
             IO.puts IO.ANSI.reset
             case answer =~ ~r/^(Y(es)?)?$/i do
               true  -> config
