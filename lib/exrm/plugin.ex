@@ -50,10 +50,10 @@ defmodule ReleaseManager.Plugin do
   both of which receive a %ReleaseManager.Config struct, as well as `after_cleanup/1`, which
   receives the arguments given for the command as a list of strings.
   """
-  defcallback before_release(ReleaseManager.Config.t) :: any
-  defcallback after_release(ReleaseManager.Config.t) :: any
-  defcallback after_package(ReleaseManager.Config.t) :: any
-  defcallback after_cleanup([String.t]) :: any
+  @callback before_release(ReleaseManager.Config.t) :: any
+  @callback after_release(ReleaseManager.Config.t) :: any
+  @callback after_package(ReleaseManager.Config.t) :: any
+  @callback after_cleanup([String.t]) :: any
 
   @doc false
   defmacro __using__(_opts) do
