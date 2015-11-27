@@ -178,7 +178,7 @@ defmodule ReleaseManager.Deps do
     end
   end
   # Gets applications for a given rebar dependency
-  defp get_applications(%Mix.Dep{app: app, manager: :rebar, opts: opts}) do
+  defp get_applications(%Mix.Dep{app: app, manager: manager, opts: opts}) when manager in [:rebar, :make] do
     project_dir = Keyword.get(opts, :dest)
     case Path.wildcard(Path.join(project_dir, "**/#{app}.app.src")) do
       [] -> []
@@ -193,6 +193,7 @@ defmodule ReleaseManager.Deps do
         end
     end
   end
+  defp get_applications(%Mix.Dep{}), do: []
 
   defp filter_dependency_tree(tree, fun),     do: filter_dependency_tree(tree, fun, [])
   defp filter_dependency_tree([], _fun, acc), do: acc
