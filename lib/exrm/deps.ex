@@ -11,7 +11,8 @@ defmodule ReleaseManager.Deps do
   def get_missing_applications(deps, options) when is_list(deps) and is_list(options) do
     ignore        = Keyword.get(options, :ignore, [])
     implicits     = flatten_tree(get_implicit_applications(ignore))
-    included_apps = get_included_applications(deps)
+    project_apps  = get_project_apps(Mix.Project.get!)
+    included_apps = [{Mix.Project.config[:app], project_apps} | get_included_applications(deps)]
 
     deps
     |> get_dependency_tree
