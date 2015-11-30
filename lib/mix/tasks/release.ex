@@ -49,6 +49,9 @@ defmodule Mix.Tasks.Release do
 
   def run(args) do
     {:ok, _} = Logger.start_link
+
+    Mix.Project.compile(args)
+
     if Mix.Project.umbrella? do
       config = [umbrella?: true]
       for %Mix.Dep{app: app, opts: opts} <- Mix.Dep.Umbrella.loaded do
