@@ -59,6 +59,7 @@ defmodule ReleaseManager.Deps do
                   |> Enum.uniq
                   |> Enum.map(fn app -> {app, Enum.find(deps, fn %Mix.Dep{app: a} -> a == app end)} end)
         missing_apps
+        |> Enum.uniq
         |> Enum.map(fn
           path when is_list(path) ->
             parent = List.first(Enum.drop(path, Enum.count(path) - 2))
