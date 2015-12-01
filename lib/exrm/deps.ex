@@ -233,17 +233,25 @@ defmodule ReleaseManager.Deps do
     |> Enum.map(fn dep -> get_dependency_tree(dep, deps) end)
     |> List.flatten
   end
-  defp get_dependency_tree(%Mix.Dep{app: a, deps: deps, top_level: true}, all_deps) do
-    [{a, get_dependency_tree(deps, all_deps, [])}]
+  defp get_dependency_tree(%Mix.Dep{app: a, deps: deps, top_level: true} = dep, all_deps) do
+    if {:warn_missing, false} in dep.opts do
+      []
+    else
+      [{a, get_dependency_tree(deps, all_deps, [])}]
+    end
   end
   defp get_dependency_tree(%Mix.Dep{top_level: false}, _all_deps), do: []
   defp get_dependency_tree([], _all_deps, acc), do: acc
   defp get_dependency_tree([%Mix.Dep{app: a} | rest], all_deps, acc) do
     dep = Enum.find(all_deps, fn %Mix.Dep{app: app} -> app == a end)
-    children = get_dependency_tree(dep.deps, all_deps, [])
-    case children do
-      [] -> get_dependency_tree(rest, all_deps, [dep.app | acc])
-      _  -> get_dependency_tree(rest, all_deps, [{dep.app, children} | acc])
+    if {:warn_missing, false} in dep.opts do
+      []
+    else
+      children = get_dependency_tree(dep.deps, all_deps, [])
+      case children do
+        [] -> get_dependency_tree(rest, all_deps, [dep.app | acc])
+        _  -> get_dependency_tree(rest, all_deps, [{dep.app, children} | acc])
+      end
     end
   end
 
