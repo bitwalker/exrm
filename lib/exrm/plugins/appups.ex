@@ -15,6 +15,7 @@ defmodule ReleaseManager.Plugin.Appups do
     deps = Mix.Dep.loaded(env: env)
 
     do_appup(config, deps)
+    config
   end
   def before_release(_), do: nil
 

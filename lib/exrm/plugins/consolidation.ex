@@ -29,19 +29,18 @@ defmodule ReleaseManager.Plugin.Consolidation do
       # Add overlay to relx.config which copies consolidated dir to release
       consolidated_path = Path.join([Mix.Project.build_path, "consolidated"])
       case File.ls(consolidated_path) do
-        {:error, _} -> :ok
+        {:error, _} ->
+          config
         {:ok, filenames} ->
           dest_path = "lib/#{config.name}-#{config.version}/consolidated"
           overlays = [overlay: Enum.map(filenames, fn name ->
             {:copy, '#{consolidated_path}/#{name}', '#{Path.join([dest_path, name])}'}
           end)]
-          updated = "relx.config"
-                    |> Utils.rel_file_dest_path
-                    |> Utils.read_terms
-                    |> Utils.merge(overlays)
-          # Persist relx.config
-          Utils.write_terms(Utils.rel_file_dest_path("relx.config"), updated)
+          updated = Utils.merge(config.relx_config, overlays)
+          %{config | :relx_config => updated}
       end
+    else
+      config
     end
   end
 

@@ -114,7 +114,6 @@ defmodule Mix.Tasks.Release do
     # Get paths
     rel_def  = rel_file_source_path @_RELEASE_DEF
     source   = rel_source_path @_RELXCONF
-    dest     = rel_file_dest_path @_RELXCONF
     # Get relx.config template contents
     relx_config = source |> File.read!
     # Get release definition template contents
@@ -153,13 +152,7 @@ defmodule Mix.Tasks.Release do
         relx_config
     end
     # Save relx config for use later
-    config = %{config | :relx_config => merged}
-    # Ensure destination base path exists
-    dest |> Path.dirname |> File.mkdir_p!
-    # Persist relx.config
-    Utils.write_terms(dest, merged)
-    # Return the project config after we're done
-    config
+    %{config | :relx_config => merged}
   end
 
   defp generate_sys_config(%Config{env: env} = config) do
@@ -195,23 +188,20 @@ defmodule Mix.Tasks.Release do
     config
   end
 
-  defp generate_vm_args(%Config{version: version} = config) do
+  defp generate_vm_args(%Config{version: version, relx_config: relx_config} = config) do
     vmargs_path = Utils.rel_dest_path("vm.args")
-    if vmargs_path |> File.exists? do
-      Logger.debug "Generating vm.args..."
-      relx_config_path = Utils.rel_file_dest_path("relx.config")
-      # Read in relx.config
-      relx_config = relx_config_path |> Utils.read_terms
-      # Update configuration to add new overlay for vm.args
-      overlays = [overlay: [
-        {:copy, vmargs_path |> String.to_char_list, 'releases/#{version}/vm.args'}
-      ]]
-      updated = Utils.merge(relx_config, overlays)
-      # Persist relx.config
-      Utils.write_terms(relx_config_path, updated)
+    case File.exists?(vmargs_path) do
+      false ->
+        config
+      true ->
+        Logger.debug "Generating vm.args..."
+        # Update configuration to add new overlay for vm.args
+        overlays = [overlay: [
+          {:copy, vmargs_path |> String.to_char_list, 'releases/#{version}/vm.args'}
+        ]]
+        updated = Utils.merge(relx_config, overlays)
+        %{config | :relx_config => updated}
     end
-    # Continue..
-    config
   end
 
   defp generate_boot_script(%Config{name: name, version: version, erl: erl_opts} = config) do
@@ -244,14 +234,19 @@ defmodule Mix.Tasks.Release do
   end
 
   defp execute_before_hooks(%Config{} = config) do
+    # Just in case there are plugins which expect relx.config to already
+    # be persisted, we'll persist it before any are run, and again after each plugin runs
+    Utils.write_terms(relx_config_path, config.relx_config)
     plugins = ReleaseManager.Plugin.load_all
     Enum.reduce plugins, config, fn plugin, conf ->
       try do
         # Handle the case where a child plugin does not return the configuration
-        case plugin.before_release(conf) do
+        config = case plugin.before_release(conf) do
           %Config{} = result -> result
           _                  -> conf
         end
+        Utils.write_terms(relx_config_path, config.relx_config)
+        config
       rescue
         exception ->
           stacktrace = System.stacktrace
@@ -299,6 +294,8 @@ defmodule Mix.Tasks.Release do
 
   defp do_release(%Config{name: name, version: version, verbosity: verbosity, upgrade?: upgrade?, dev: dev_mode?, env: env} = config) do
     Logger.debug "Generating release..."
+    # Persist relx.config one last time in case it was updated by a plugin
+    Utils.write_terms(relx_config_path, config.relx_config)
     # If this is an upgrade release, generate an appup
     if upgrade? do
       # Change mix env for appup generation
@@ -472,6 +469,13 @@ defmodule Mix.Tasks.Release do
             end
         end
     end
+  end
+
+  def relx_config_path do
+    path = rel_file_dest_path @_RELXCONF
+    # Ensure destination base path exists
+    path |> Path.dirname |> File.mkdir_p!
+    path
   end
 
 end
