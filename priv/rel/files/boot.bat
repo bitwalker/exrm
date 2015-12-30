@@ -13,6 +13,8 @@
 :: * list - display a listing of installed Erlang services
 :: * usage - display available commands
 
+@if defined ELIXIR_CLI_ECHO (@echo on) else (@echo off)
+
 :: Set variables that describe the release
 @set rel_name={{{PROJECT_NAME}}}
 @set erl_opts={{{ERL_OPTS}}}
@@ -42,12 +44,12 @@
 @set vm_args=%rel_dir%\vm.args
 @set progname=erl.exe
 @set clean_boot_script=%release_root_dir%\bin\start_clean
-@set erlsrv="%bindir%\erlsrv.exe"
-@set epmd="%bindir%\epmd.exe"
-@set escript="%bindir%\escript.exe"
-@set werl="%bindir%\werl.exe"
-@set nodetool="%release_root_dir%\bin\nodetool"
-@set conform="%rel_dir%\conform"
+@set erlsrv=%bindir%\erlsrv.exe
+@set epmd=%bindir%\epmd.exe
+@set escript=%bindir%\escript.exe
+@set werl=%bindir%\werl.exe
+@set nodetool=%release_root_dir%\bin\nodetool
+@set conform=%rel_dir%\conform
 
 :: Extract node type and name from vm.args
 @for /f "usebackq tokens=1-2" %%I in (`findstr /b "\-name \-sname" "%vm_args%"`) do @(
@@ -97,19 +99,22 @@
 :: Set the ERTS dir from the passed in erts_vsn
 :set_erts_dir_from_default
 @set erts_dir=%possible_erts_dir%
+@for %%e in ("%erts_dir%") do set erts_dir=%%~se
 @set rootdir=%release_root_dir%
+@for %%r in ("%rootdir%") do set rootdir=%%~sr
 @goto :eof
 
 :: Set the ERTS dir from erl
 :set_erts_dir_from_erl
 @for /f "delims=" %%i in ('where erl') do @(
-  set erl=%%i
+  set erl=%%~si
 )
 @set dir_cmd="%erl%" -noshell -eval "io:format(\"~s\", [filename:nativename(code:root_dir())])." -s init stop
-@for /f %%i in ('%%dir_cmd%%') do @(
-  set erl_root=%%i
-)
+%dir_cmd% > %TEMP%/erlroot.txt 
+@set /P erl_root=< %TEMP%/erlroot.txt
+@for %%f in ("%erl_root%") do set erl_root=%%~sf
 @set erts_dir=%erl_root%\erts-%erts_vsn%
+@for %%e in ("%erts_dir%") do set erts_dir=%%~se
 @set rootdir=%erl_root%
 @goto :eof
 
@@ -179,10 +184,10 @@
 @if "" == "%2" (
   :: Install the service
   set args=%erl_opts% %conform_opts% -setcookie %cookie% ++ -rootdir \"%rootdir%\"
-  set start_erl=%erts_dir%\bin\start_erl.exe
+  set svc_machine=%erts_dir%\bin\start_erl.exe
   set description=Erlang node %node_name% in %rootdir%
   %erlsrv% add %service_name% %node_type% "%node_name%" -c "%description%" ^
-            -w "%rootdir%" -m "%start_erl%" -args "%args%" ^
+            -w "%rootdir%" -m "%svc_machine%" -args "%args%" ^
             -stopaction "init:stop()."
 ) else (
   :: relup and reldown
@@ -223,9 +228,9 @@
 :console
 @call :generate_config
 @start "%rel_name% console" %werl% -config "%sys_config%" ^
-       -boot "%boot_script%" -boot_var ERTS_LIB_DIR "%erts_dir%"/../lib ^
+       -boot "%boot_script%" -boot_var ERTS_LIB_DIR "%erts_dir%"/lib ^
        -env ERL_LIBS "%release_root_dir%"/lib ^
-       -pa "%release_root_dir%"/lib/**/bin "%release_root_dir%"/lib/consolidated ^
+       -pa "%release_root_dir%"/lib "%release_root_dir%"/lib/consolidated ^
        -args_file "%vm_args%" ^
        -user Elixir.IEx.CLI -extra --no-halt +iex
 
@@ -243,10 +248,10 @@
 
 :: Attach to a running node
 :attach
-@start "%node_name% attach" %werl% -boot "%clean_boot_script%" -config "%sys_config%" ^
-       -pa "%release_root_dir%"/lib/**/bin "%release_root_dir%"/lib/consolidated ^
+@%escript% %nodetool% attach %werl% -boot "%clean_boot_script%" -config "%sys_config%" ^
+       -pa "%release_root_dir%"/lib "%release_root_dir%"/lib/consolidated ^
        -hidden -noshell ^
-       -boot_var ERTS_LIB_DIR "%erts_dir%"/../lib ^
+       -boot_var ERTS_LIB_DIR "%erts_dir%"/lib ^
        -user Elixir.IEx.CLI "%node_type%" "%node_name%" ^
        -setcookie "%cookie%" -args_file "%vm_args%" ^
        -extra --no-halt +iex -"%node_type%" "%node_name%" --cookie "%cookie%" --remsh "%node_name%"

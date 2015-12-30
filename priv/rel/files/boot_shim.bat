@@ -1,4 +1,10 @@
-@echo off
+@if defined ELIXIR_CLI_ECHO (@echo on) else (@echo off)
+
+:: Determine if the current user has admin permissions or not.
+@echo Administrative permissions required. Detecting permissions...
+
+@net session >nul 2>&1
+if %errorLevel% == 0 (set is_admin="true") else (set is_admin="false")
 
 :: Set variables that describe the release
 @set rel_name={{{PROJECT_NAME}}}
@@ -19,5 +25,9 @@
 )
 @set rel_dir=%release_root_dir%\releases\%rel_vsn%
 
-echo "Using %rel_dir%\%rel_name%.bat"
+if %is_admin% == "true" (
 call "%rel_dir%\%rel_name%.bat" %*
+) else (
+  @echo You do not have administrator permissions. Please login as an administrator to proceed.
+)
+  
