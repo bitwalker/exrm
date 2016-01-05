@@ -61,7 +61,7 @@ defmodule UtilsTest do
     path        = Path.join(elixir_path, "../bin/elixir")
     {result, _} = System.cmd(path, ["--version"])
     version     = result |> String.strip(?\n)
-    assert "Elixir #{System.version}" == version
+    assert String.contains?(version, "Elixir #{System.version}")
   end
 
   @tag :expensive
