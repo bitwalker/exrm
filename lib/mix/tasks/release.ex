@@ -109,7 +109,7 @@ defmodule Mix.Tasks.Release do
     end
   end
 
-  defp generate_relx_config(%Config{name: name, version: version, env: env} = config) do
+  defp generate_relx_config(%Config{name: name, version: version} = config) do
     Logger.debug "Generating relx configuration..."
     # Get paths
     rel_def  = rel_file_source_path @_RELEASE_DEF
@@ -129,12 +129,11 @@ defmodule Mix.Tasks.Release do
       _  -> %{config | :upgrade? => true}
     end
     elixir_paths = get_elixir_lib_paths |> Enum.map(&String.to_char_list/1)
-    lib_dirs = case Mix.Project.config |> Keyword.get(:umbrella?, false) do
+    lib_dirs = case Mix.Project.umbrella? do
       true ->
-        [ '#{"_build/#{env}" |> Path.expand}',
-          '#{Mix.Project.config |> Keyword.get(:deps_path) |> Path.expand}' | elixir_paths ]
+        [ '#{Mix.Project.build_path}', '#{Mix.Project.deps_path}' | elixir_paths ]
       _ ->
-        [ '#{"_build/#{env}" |> Path.expand}' | elixir_paths ]
+        [ '#{Mix.Project.build_path}' | elixir_paths ]
     end
     # Build release configuration
     relx_config = relx_config
@@ -313,7 +312,7 @@ defmodule Mix.Tasks.Release do
         app      = name |> String.to_atom
         v1       = get_last_release(name)
         v1_path  = rel_dest_path [name, "lib", "#{name}-#{v1}"]
-        v2_path  = Mix.Project.config |> Mix.Project.compile_path |> String.replace("/ebin", "")
+        v2_path  = Mix.Project.compile_path |> String.replace("/ebin", "")
         own_path = rel_dest_path "#{name}.appup"
         # Look for user's own .appup file before generating one
         case own_path |> File.exists? do
