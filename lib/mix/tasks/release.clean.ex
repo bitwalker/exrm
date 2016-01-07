@@ -52,10 +52,9 @@ defmodule Mix.Tasks.Release.Clean do
 
   # Clean release build
   def do_cleanup(:build) do
-    cwd       = File.cwd!
     project   = Mix.Project.config |> Keyword.get(:app) |> Atom.to_string
     version   = Mix.Project.config |> Keyword.get(:version)
-    build     = Path.join([cwd, "_build", "prod"])
+    build     = Path.absname("../prod", Mix.Project.build_path)
     release   = rel_dest_path [project, "releases", version]
     releases  = rel_dest_path [project, "releases", "RELEASES"]
     start_erl = rel_dest_path [project, "releases", "start_erl.data"]

@@ -50,6 +50,14 @@ defmodule UtilsTest do
     end
   end
 
+  test "can load the current project configuration from project's specified location" do
+    project_config = [config_path: "config/explicit_config.exs"]
+    with_app do
+      [test: config] = Utils.load_config(:prod, project_config)
+      assert Keyword.fetch!(config, :foo) == :explicit
+    end
+  end
+
   test "can invoke mix to perform a task for a given environment" do
     with_app do
       assert :ok = Utils.mix("clean", :prod)
