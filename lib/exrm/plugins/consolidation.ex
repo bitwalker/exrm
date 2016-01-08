@@ -31,9 +31,9 @@ defmodule ReleaseManager.Plugin.Consolidation do
       case File.ls(consolidated_path) do
         {:error, _} -> :ok
         {:ok, filenames} ->
-          dest_path = "lib/#{config.name}-#{config.version}"
+          dest_path = "lib/#{config.name}-#{config.version}/consolidated"
           overlays = [overlay: Enum.map(filenames, fn name ->
-            {:copy, '#{consolidated_path}/#{name}', '#{Path.join(dest_path, name)}'}
+            {:copy, '#{consolidated_path}/#{name}', '#{Path.join([dest_path, name])}'}
           end)]
           updated = "relx.config"
                     |> Utils.rel_file_dest_path
