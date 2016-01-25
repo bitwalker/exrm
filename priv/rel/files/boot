@@ -115,7 +115,7 @@ generate_config() {
             if [ ! -f "$__conform" ]; then
                 __conform="$ROOTDIR/bin/conform"
             fi
-            result="$("$BINDIR/escript" "$__conform" --conf "$__conform_file" --schema "$__schema_file" --config "$SYS_CONFIG" --output-dir "$GENERATED_CONFIG_DIR")"
+            result="$("$BINDIR/escript" "$__conform" --conf "$__conform_file" --schema "$__schema_file" --config "$RELEASE_SYS_CONFIG" --output-dir "$GENERATED_CONFIG_DIR")"
             exit_status="$?"
             if [ "$exit_status" -ne 0 ]; then
                 exit "$exit_status"
@@ -129,7 +129,7 @@ generate_config() {
             exit 1
         fi
     else
-        cp "$RELEASE_CONFIG_DIR/sys.config" "$GENERATED_CONFIG_DIR/sys.config"
+        cp $RELEASE_SYS_CONFIG "$GENERATED_CONFIG_DIR/sys.config"
         if [ ! -f "$VMARGS_PATH" ]; then
             cp "$RELEASE_CONFIG_DIR/vm.args" "$GENERATED_CONFIG_DIR/vm.args"
             VMARGS_PATH="$GENERATED_CONFIG_DIR/vm.args"
@@ -146,13 +146,14 @@ if [ -z "$RELEASE_CONFIG_DIR" ]; then
 fi
 
 SYS_CONFIG="$GENERATED_CONFIG_DIR/sys.config"
+RELEASE_SYS_CONFIG="$RELEASE_CONFIG_DIR/sys.config"
 if [ -z "$VMARGS_PATH" ]; then
   VMARGS_PATH="$GENERATED_CONFIG_DIR/vm.args"
 fi
 
 # If first run, take dafault sys.config and vm.args
 if [ ! -f "$SYS_CONFIG" ]; then
-    cp "$RELEASE_CONFIG_DIR/sys.config" "$GENERATED_CONFIG_DIR/sys.config"
+    cp $RELEASE_SYS_CONFIG "$GENERATED_CONFIG_DIR/sys.config"
 fi
 if [ ! -f "$VMARGS_PATH" ]; then
     cp "$RELEASE_CONFIG_DIR/vm.args" "$GENERATED_CONFIG_DIR/vm.args"
