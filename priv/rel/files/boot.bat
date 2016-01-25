@@ -18,7 +18,7 @@
 :: Set variables that describe the release
 @set rel_name={{{PROJECT_NAME}}}
 @set erl_opts={{{ERL_OPTS}}}
-@set conform_opts=""
+@set conform_opts=
 
 :: Discover the release root directory from the directory of this script
 @set script_dir=%~dp0
@@ -110,7 +110,7 @@
   set erl=%%~si
 )
 @set dir_cmd="%erl%" -noshell -eval "io:format(\"~s\", [filename:nativename(code:root_dir())])." -s init stop
-%dir_cmd% > %TEMP%/erlroot.txt 
+%dir_cmd% > %TEMP%/erlroot.txt
 @set /P erl_root=< %TEMP%/erlroot.txt
 @for %%f in ("%erl_root%") do set erl_root=%%~sf
 @set erts_dir=%erl_root%\erts-%erts_vsn%
@@ -183,7 +183,7 @@
 :install
 @if "" == "%2" (
   :: Install the service
-  set args=%erl_opts% %conform_opts% -setcookie %cookie% ++ -rootdir \"%rootdir%\"
+  set args=%erl_opts% %conform_opts% -setcookie %cookie% ++ -rootdir %rootdir%
   set svc_machine=%erts_dir%\bin\start_erl.exe
   set description=Erlang node %node_name% in %rootdir%
   %erlsrv% add %service_name% %node_type% "%node_name%" -c "%description%" ^
