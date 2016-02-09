@@ -51,11 +51,11 @@ defmodule ReleaseManager.Utils.Logger do
     {:noreply, config}
   end
 
-  defp print_debug(message),  do: IO.puts "==> #{message}"
-  defp print_info(message),   do: IO.puts "==> #{IO.ANSI.green}#{message}#{IO.ANSI.reset}"
-  defp print_warn(message),   do: IO.puts "==> #{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}"
-  defp print_notice(message), do: IO.puts "#{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}"
-  defp print_error(message),  do: IO.puts "==> #{IO.ANSI.red}#{message}#{IO.ANSI.reset}"
+  def print_debug(message),  do: IO.puts "==> #{message}"
+  def print_info(message),   do: IO.puts "==> #{IO.ANSI.green}#{message}#{IO.ANSI.reset}"
+  def print_warn(message),   do: IO.puts "==> #{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}"
+  def print_notice(message), do: IO.puts "#{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}"
+  def print_error(message),  do: IO.puts "==> #{IO.ANSI.red}#{message}#{IO.ANSI.reset}"
 
 
 end
