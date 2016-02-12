@@ -343,6 +343,8 @@ case "$1" in
         ;;
 
     escript)
+        # Make sure the config is generated first
+        generate_config
         ## Run an escript under the node's environment
         relx_escript $@
         exit_status=$?
