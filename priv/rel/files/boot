@@ -588,8 +588,34 @@ case "$1" in
         # Start the VM
         exec "$@" -- ${1+$ARGS}
         ;;
+
+    command)
+        # Make sure the config is generated first
+        generate_config
+        # Execute as command-line utility
+
+        shift
+        MODULE="$1"; shift
+        FUNCTION="$1"; shift
+
+        # Save extra arguments
+        ARGS="$@"
+
+        # Build arguments for erlexec
+        set -- "$ERL_OPTS"
+        [ "$SYS_CONFIG" ] && set -- "$@" -config "$SYS_CONFIG"
+        [ "$VMARGS_PATH" ] && set -- "$@" -args_file "$VMARGS_PATH"
+        set -- "$@" -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR"
+        set -- "$@" -noshell
+        set -- "$@" -boot $REL_DIR/start
+        set -- "$@" -s "$MODULE" "$FUNCTION"
+
+        # Boot the release
+        $BINDIR/erlexec $@ -extra $ARGS
+        ;;
+
     *)
-        echo "Usage: $REL_NAME {start|start_boot <file>|foreground|stop|restart|reboot|ping|rpc <m> <f> [<a>]|console|console_clean|console_boot <file>|attach|remote_console|upgrade|escript}"
+        echo "Usage: $REL_NAME {start|start_boot <file>|foreground|stop|restart|reboot|ping|rpc <m> <f> [<a>]|console|console_clean|console_boot <file>|attach|remote_console|upgrade|escript|command <m> <f> <args>}"
         exit 1
         ;;
 esac
