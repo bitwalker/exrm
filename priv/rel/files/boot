@@ -612,6 +612,7 @@ case "$1" in
 
         # Boot the release
         $BINDIR/erlexec $@ -extra $ARGS
+        exit "$?"
         ;;
 
     *)
