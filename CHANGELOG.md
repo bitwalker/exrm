@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added
 - Added CHANGELOG
-- Added `cli` subcommand to boot script. Use with `bin/app cli <full module name> <function> [arg1...]`
+- Added `command` subcommand to boot script. Use with `bin/app command <full module name> <function> [arg1...]`
 ### Changed
 - N/A
 ### Deprecated
