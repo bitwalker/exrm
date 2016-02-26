@@ -5,8 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
-- Added CHANGELOG
-- Added `command` subcommand to boot script. Use with `bin/app command <full module name> <function> [arg1...]`
+- N/A
 ### Changed
 - N/A
 ### Deprecated
@@ -15,3 +14,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - N/A
 ### Fixed
 - N/A
+
+## 1.0.0
+### Added
+- Added CHANGELOG
+- Added `command` subcommand to boot script. Use with `bin/app command <full module name> <function> [arg1...]`
+- Updated relx to latest release (3.18.0)
