@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SCRIPT_DIR="$(dirname $(readlink "$0"))"
+SCRIPT_DIR="$(cd $(dirname "$0") && pwd -P)"
 RELEASE_ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 RELEASES_DIR="$RELEASE_ROOT_DIR/releases"
 REL_NAME="{{{PROJECT_NAME}}}"
