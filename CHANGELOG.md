@@ -15,6 +15,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - N/A
 
+## 1.0.1
+### Fixed
+- Usage of `readlink -f` is invalid on OSX. #306
+
 ## 1.0.0
 ### Added
 - Added CHANGELOG
