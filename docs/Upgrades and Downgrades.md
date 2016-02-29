@@ -4,6 +4,10 @@
 
 Note: This documentation assumes you've done an initial deployment to `/tmp` per the Deployment docs. I would suggest starting there just to make sure you understand the prerequisites.
 
+**Important**: In order to build upgradable releases, you need to have the previous release available in `rel`. Without it, the appup script can not be generated.
+There are various approaches to storing the contents of `rel` (git, use a single build server, S3, etc.), but the important part is that you pick one. 
+When you are about to build a new release, make sure the previous release is available to the build (under `rel`), and you'll be good to go!
+
 So you've made some changes to your app, and you want to generate a new release and perform a hot upgrade. I'm here to tell you that this is going to be a breeze, so I hope you're ready (I'm using my test app as an example here again):
 
 1. `mix release`
