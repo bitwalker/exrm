@@ -334,12 +334,6 @@ defmodule ReleaseManager.Utils do
   @doc "Get the rel/files path of the current project."
   def rel_file_dest_path,                            do: Path.join([File.cwd!, "rel", "files"])
 
-  defdelegate debug(message),  to: ReleaseManager.Utils.Logger
-  defdelegate info(message),   to: ReleaseManager.Utils.Logger
-  defdelegate warn(message),   to: ReleaseManager.Utils.Logger
-  defdelegate notice(message), to: ReleaseManager.Utils.Logger
-  defdelegate error(message),  to: ReleaseManager.Utils.Logger
-
   # Ignore a message when used as the callback for Mix.Shell.cmd
   defp ignore(_), do: nil
 

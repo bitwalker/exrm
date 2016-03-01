@@ -48,8 +48,6 @@ defmodule Mix.Tasks.Release do
   @_LIB_DIRS    "{{{LIB_DIRS}}}"
 
   def run(args) do
-    {:ok, _} = Logger.start_link
-
     Mix.Project.compile(args)
 
     if Mix.Project.umbrella? do
@@ -314,7 +312,7 @@ defmodule Mix.Tasks.Release do
               :ok ->
                 Logger.info "Using custom .appup located in rel/#{name}.appup"
               {:error, reason} ->
-                Logger.print_error "Unable to copy custom .appup file: #{reason}"
+                Logger.error "Unable to copy custom .appup file: #{reason}"
                 abort!
             end
           _ ->
@@ -323,7 +321,7 @@ defmodule Mix.Tasks.Release do
               {:ok, _}         ->
                 Logger.info "Generated .appup for #{name} #{v1} -> #{version}"
               {:error, reason} ->
-                Logger.print_error "Appup generation failed with #{reason}"
+                Logger.error "Appup generation failed with #{reason}"
                 abort!
             end
         end
@@ -338,13 +336,13 @@ defmodule Mix.Tasks.Release do
           # Continue..
           config
         {:error, message} ->
-          Logger.print_error "ERROR: #{inspect message}"
+          Logger.error "ERROR: #{inspect message}"
           abort!
       end
     catch
       err ->
-        Logger.print_error "#{IO.inspect err}"
-        Logger.print_error "Failed to build release package! Try running with `--verbosity=verbose` to see debugging info!"
+        Logger.error "#{IO.inspect err}"
+        Logger.error "Failed to build release package! Try running with `--verbosity=verbose` to see debugging info!"
         abort!
     end
   end

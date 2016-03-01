@@ -1,61 +1,29 @@
 defmodule ReleaseManager.Utils.Logger do
-  use GenServer
-
-  def start_link() do
-    GenServer.start_link(__MODULE__, %{verbosity: :normal}, name: __MODULE__)
-  end
 
   def configure(verbosity) when is_atom(verbosity) do
-    GenServer.cast(__MODULE__, {:configure, verbosity})
+    Application.put_env(:exrm, :verbosity, verbosity)
   end
 
   @doc "Print an informational message without color"
-  def debug(message), do: GenServer.cast(__MODULE__, {:log, :debug, message})
+  def debug(message),  do: log :debug, "==> #{message}"
   @doc "Print an informational message in green"
-  def info(message),  do: GenServer.cast(__MODULE__, {:log, :info, message})
+  def info(message),   do: log :info, "==> #{IO.ANSI.green}#{message}#{IO.ANSI.reset}"
   @doc "Print a warning message in yellow"
-  def warn(message),  do: GenServer.cast(__MODULE__, {:log, :warn, message})
+  def warn(message),   do: log :warn, "==> #{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}"
   @doc "Print a notice in yellow"
-  def notice(message), do: GenServer.cast(__MODULE__, {:log, :notice, message})
+  def notice(message), do: log :notice, "#{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}"
   @doc "Print an error message in red"
-  def error(message), do: GenServer.cast(__MODULE__, {:log, :error, message})
+  def error(message),  do: log :error, "==> #{IO.ANSI.red}#{message}#{IO.ANSI.reset}"
 
-  def handle_cast({:configure, verbosity}, config) do
-    {:noreply, %{config | :verbosity => verbosity}}
-  end
+  defp log(level, message), do: log(level, Application.get_env(:exrm, :verbosity, :normal), message)
 
-  def handle_cast({:log, :error, message}, config) do
-    print_error(message)
-    {:noreply, config}
-  end
-  def handle_cast({:log, :warn, message}, %{verbosity: v} = config)
-    when v in [:quiet, :normal, :verbose] do
-    print_warn(message)
-    {:noreply, config}
-  end
-  def handle_cast({:log, :notice, message}, %{verbosity: v} = config)
-    when v in [:normal, :verbose] do
-    print_notice(message)
-    {:noreply, config}
-  end
-  def handle_cast({:log, :info, message}, %{verbosity: v} = config)
-    when v in [:normal, :verbose] do
-    print_info(message)
-    {:noreply, config}
-  end
-  def handle_cast({:log, :debug, message}, %{verbosity: :verbose} = config) do
-    print_debug(message)
-    {:noreply, config}
-  end
-  def handle_cast({:log, :debug, _}, config) do
-    {:noreply, config}
-  end
-
-  def print_debug(message),  do: IO.puts "==> #{message}"
-  def print_info(message),   do: IO.puts "==> #{IO.ANSI.green}#{message}#{IO.ANSI.reset}"
-  def print_warn(message),   do: IO.puts "==> #{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}"
-  def print_notice(message), do: IO.puts "#{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}"
-  def print_error(message),  do: IO.puts "==> #{IO.ANSI.red}#{message}#{IO.ANSI.reset}"
-
+  defp log(:error, :silent, message),     do: IO.puts message
+  defp log(_level, :silent, _message),    do: :ok
+  defp log(:debug, :quiet, _message),     do: :ok
+  defp log(:debug, :normal, _message),    do: :ok
+  defp log(:debug, _verbosity, message),  do: IO.puts message
+  defp log(:info, :quiet, _message),      do: :ok
+  defp log(:info, _verbosity, message),   do: IO.puts message
+  defp log(_level, _verbosity, message),  do: IO.puts message
 
 end

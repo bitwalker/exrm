@@ -18,7 +18,6 @@ defmodule Mix.Tasks.Release.Plugins do
   import ReleaseManager.Utils
 
   def run(args) do
-    {:ok, _} = Logger.start_link
     args |> parse_args |> do_run
   end
 

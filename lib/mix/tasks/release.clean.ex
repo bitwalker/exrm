@@ -21,7 +21,6 @@ defmodule Mix.Tasks.Release.Clean do
   import  ReleaseManager.Utils
 
   def run(args) do
-    {:ok, _} = Logger.start_link
     if Mix.Project.umbrella? do
       config = [build_path: Mix.Project.build_path]
       for %Mix.Dep{app: app, opts: opts} <- Mix.Dep.Umbrella.loaded do
