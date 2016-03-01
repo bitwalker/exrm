@@ -21,7 +21,7 @@ defmodule Test.Mixfile do
   defp deps do
     [{:exrm, path: "../../../", override: true},
      {:conform_exrm, github: "bitwalker/conform_exrm", override: true},
-     {:conform, "~> 1.0.0-rc8", override: true},
+     {:conform, github: "bitwalker/conform", override: true},
      {:fake_project, path: "../fake_project"}]
   end
 end
