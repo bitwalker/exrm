@@ -62,16 +62,16 @@ the release once deployed. All you have to do to get started is the following:
 
 There is a simple API to build plugins with - it allows the plugin developer to
 add additional steps to the release process. [You can read more about that
-here.][https://hexdocs.pm/exrm/ReleaseManager.Plugin.html]
+here.](https://hexdocs.pm/exrm/ReleaseManager.Plugin.html)
 
 You can find plugins others have worked on by [searching for "exrm" in
 hex.pm](https://hex.pm/packages?search=exrm).
 
 Here's a non-exhaustive list you might want to try out:
 
- - [exrm_rpm][https://hex.pm/packages/exrm_rpm]
- - [exrpm_deb][https://hex.pm/packages/exrm_deb]
- - [conform_exrm][https://hex.pm/packages/conform_exrm]
+ - [exrm_rpm](https://hex.pm/packages/exrm_rpm)
+ - [exrpm_deb](https://hex.pm/packages/exrm_deb)
+ - [conform_exrm](https://hex.pm/packages/conform_exrm)
 
 ## License
 
