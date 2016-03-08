@@ -404,18 +404,11 @@ defmodule Mix.Tasks.Release do
     # Create archive
     release_tarball = rel_dest_path([name, "releases", version, "#{name}.tar.gz"])
     :ok = :erl_tar.create(
-      '#{tarball}.tmp',
+      '#{tarball}',
       file_list,
       [:compressed]
     )
-    # In order to provide upgrade/downgrade functionality, the archive needs to contain itself
-    :ok = :erl_tar.create(
-      '#{tarball}',
-      [{'#{Path.join(["releases", version, "#{name}.tar.gz"])}', '#{tarball}.tmp'} | file_list],
-      [:compressed]
-    )
     # Clean up
-    File.rm_rf! "#{tarball}.tmp"
     File.cp! tarball, release_tarball
     File.rm_rf! tarball
 
