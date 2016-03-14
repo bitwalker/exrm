@@ -5,15 +5,15 @@ defmodule ReleaseManager.Utils.Logger do
   end
 
   @doc "Print an informational message without color"
-  def debug(message),  do: log :debug, "==> #{message}"
+  def debug(message),  do: log(:debug, "==> #{message}")
   @doc "Print an informational message in green"
-  def info(message),   do: log :info, "==> #{IO.ANSI.green}#{message}#{IO.ANSI.reset}"
+  def info(message),   do: log(:info, "==> #{IO.ANSI.green}#{message}#{IO.ANSI.reset}")
   @doc "Print a warning message in yellow"
-  def warn(message),   do: log :warn, "==> #{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}"
+  def warn(message),   do: log(:warn, "==> #{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}")
   @doc "Print a notice in yellow"
-  def notice(message), do: log :notice, "#{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}"
+  def notice(message), do: log(:notice, "#{IO.ANSI.yellow}#{message}#{IO.ANSI.reset}")
   @doc "Print an error message in red"
-  def error(message),  do: log :error, "==> #{IO.ANSI.red}#{message}#{IO.ANSI.reset}"
+  def error(message),  do: log(:error, "==> #{IO.ANSI.red}#{message}#{IO.ANSI.reset}")
 
   defp log(level, message), do: log(level, Application.get_env(:exrm, :verbosity, :normal), message)
 
