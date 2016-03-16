@@ -70,7 +70,7 @@ hex.pm](https://hex.pm/packages?search=exrm).
 Here's a non-exhaustive list you might want to try out:
 
  - [exrm_rpm](https://hex.pm/packages/exrm_rpm)
- - [exrpm_deb](https://hex.pm/packages/exrm_deb)
+ - [exrm_deb](https://hex.pm/packages/exrm_deb)
  - [conform_exrm](https://hex.pm/packages/conform_exrm)
 
 ## License
