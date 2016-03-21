@@ -530,9 +530,10 @@ case "$1" in
 
         # Build an array of arguments to pass to exec later on
         # Build it here because this command will be used for logging.
-        set -- "$BINDIR/erlexec" -boot "$BOOTFILE" \
+        set -- "$BINDIR/erlexec" \
+            -boot "$BOOTFILE" -mocde embedded -config "$SYS_CONFIG" \
             -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
-            -env ERL_LIBS "$REL_LIB_DIR" -config "$SYS_CONFIG" \
+            -env ERL_LIBS "$REL_LIB_DIR" \
             -pa "$REL_LIB_DIR"/*/consolidated \
             -args_file "$VMARGS_PATH" \
             ${ERL_OPTS} \
