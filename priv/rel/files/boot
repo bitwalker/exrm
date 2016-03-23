@@ -63,7 +63,7 @@ relx_rem_sh() {
 
 # Generate a random id
 relx_gen_id() {
-    od -X /dev/urandom | head -n1 | cut -d ' ' -f2
+    od -t x4 /dev/urandom | head -n1 | cut -d ' ' -f2
 }
 
 # Control a node
