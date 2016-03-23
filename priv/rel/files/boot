@@ -593,7 +593,14 @@ case "$1" in
     command)
         # Make sure the config is generated first
         generate_config
+
         # Execute as command-line utility
+        #
+        # Like the escript command, this does not start the OTP application. 
+        # If your command depends on a running OTP application,
+        # use 
+        #
+        #     {:ok, _} = Application.ensure_all_started(:your_app)
 
         shift
         MODULE="$1"; shift
@@ -608,7 +615,7 @@ case "$1" in
         [ "$VMARGS_PATH" ] && set -- "$@" -args_file "$VMARGS_PATH"
         set -- "$@" -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR"
         set -- "$@" -noshell
-        set -- "$@" -boot $REL_DIR/start
+        set -- "$@" -boot $REL_DIR/start_clean
         set -- "$@" -s "$MODULE" "$FUNCTION"
 
         # Boot the release
