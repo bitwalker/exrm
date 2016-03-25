@@ -332,7 +332,7 @@ defmodule ReleaseManager.Utils do
   def rel_file_dest_path(files) when is_list(files), do: Path.join([rel_file_dest_path] ++ files)
   def rel_file_dest_path(file),                      do: Path.join(rel_file_dest_path, file)
   @doc "Get the rel/files path of the current project."
-  def rel_file_dest_path,                            do: Path.join([File.cwd!, "rel", "files"])
+  def rel_file_dest_path,                            do: Path.join([File.cwd!, "rel", ".files"])
 
   # Ignore a message when used as the callback for Mix.Shell.cmd
   defp ignore(_), do: nil
