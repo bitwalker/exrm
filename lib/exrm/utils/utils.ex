@@ -319,19 +319,19 @@ defmodule ReleaseManager.Utils do
   @doc "Get the rel path of the current project."
   def rel_dest_path,                            do: Path.join(File.cwd!, "rel")
   @doc """
-  Get the path to a file located in the rel/files directory of the current project.
+  Get the path to a file located in the rel/.files directory of the current project.
   You can pass either a file name, or a list of directories to a file, like:
 
       iex> ReleaseManager.Utils.rel_file_dest_path "sys.config"
-      "path/to/project/rel/files/sys.config"
+      "path/to/project/rel/.files/sys.config"
 
       iex> ReleaseManager.Utils.rel_dest_path ["some", "path", "file.txt"]
-      "path/to/project/rel/files/some/path/file.txt"
+      "path/to/project/rel/.files/some/path/file.txt"
 
   """
   def rel_file_dest_path(files) when is_list(files), do: Path.join([rel_file_dest_path] ++ files)
   def rel_file_dest_path(file),                      do: Path.join(rel_file_dest_path, file)
-  @doc "Get the rel/files path of the current project."
+  @doc "Get the rel/.files path of the current project."
   def rel_file_dest_path,                            do: Path.join([File.cwd!, "rel", ".files"])
 
   # Ignore a message when used as the callback for Mix.Shell.cmd
