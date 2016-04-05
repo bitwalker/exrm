@@ -72,6 +72,7 @@ Here's a non-exhaustive list you might want to try out:
  - [exrm_rpm](https://hex.pm/packages/exrm_rpm)
  - [exrm_deb](https://hex.pm/packages/exrm_deb)
  - [conform_exrm](https://hex.pm/packages/conform_exrm)
+ - [exrm_docker](https://hex.pm/packages/exrm_docker)
 
 ## License
 
