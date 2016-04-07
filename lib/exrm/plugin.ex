@@ -93,13 +93,18 @@ defmodule ReleaseManager.Plugin do
     Mix.Task.run("loadpaths", [])
     # Fetch all .beam files
     Path.wildcard(Path.join([Mix.Project.build_path, "**/ebin/**/*.beam"]))
+    |> Enum.map(fn {module, _beam_path} -> :code.get_object_code(module) end)
     # Parse the BEAM for behaviour implementations
-    |> Stream.map(fn path ->
-      {:ok, {mod, chunks}} = :beam_lib.chunks('#{path}', [:attributes])
-      {mod, get_in(chunks, [:attributes, :behaviour])}
+    |> Stream.map(fn {_mod, beam_binary, _path} ->
+      case :beam_lib.chunks(beam_binary, [:attributes]) do
+        {:ok, {mod, chunks}}  ->
+          {mod, get_in(chunks, [:attributes, :behaviour])}
+        _ ->
+          :error
+      end
     end)
     # Filter out behaviours we don't care about and duplicates
-    |> Stream.filter(fn {_mod, behaviours} -> is_list(behaviours) && plugin_type in behaviours end)
+    |> Stream.filter(fn :error -> false; {_mod, behaviours} -> is_list(behaviours) && plugin_type in behaviours end)
     |> Enum.uniq
     |> Enum.map(fn {module, _} -> module end)
   end
