@@ -93,10 +93,9 @@ defmodule ReleaseManager.Plugin do
     Mix.Task.run("loadpaths", [])
     # Fetch all .beam files
     Path.wildcard(Path.join([Mix.Project.build_path, "**/ebin/**/*.beam"]))
-    |> Enum.map(fn {module, _beam_path} -> :code.get_object_code(module) end)
     # Parse the BEAM for behaviour implementations
-    |> Stream.map(fn {_mod, beam_binary, _path} ->
-      case :beam_lib.chunks(beam_binary, [:attributes]) do
+    |> Stream.map(fn path ->
+      case :beam_lib.chunks(path, [:attributes]) do
         {:ok, {mod, chunks}}  ->
           {mod, get_in(chunks, [:attributes, :behaviour])}
         _ ->
