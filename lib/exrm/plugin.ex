@@ -92,7 +92,7 @@ defmodule ReleaseManager.Plugin do
     # Ensure the current projects code path is loaded
     Mix.Task.run("loadpaths", [])
     # Fetch all .beam files
-    Path.wildcard(Path.join([Mix.Project.build_path, "*/*/ebin/**/*.beam"]))
+    Path.wildcard(Path.join([Mix.Project.build_path, "lib/**/ebin/**/*.beam"]))
     # Parse the BEAM for behaviour implementations
     |> Stream.map(fn path ->
       case :beam_lib.chunks(path, [:attributes]) do
