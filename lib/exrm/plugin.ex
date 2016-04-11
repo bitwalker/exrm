@@ -93,6 +93,7 @@ defmodule ReleaseManager.Plugin do
     Mix.Task.run("loadpaths", [])
     # Fetch all .beam files
     Path.wildcard(Path.join([Mix.Project.build_path, "lib/**/ebin/**/*.beam"]))
+    |> Stream.map(&String.to_char_list/1)
     # Parse the BEAM for behaviour implementations
     |> Stream.map(fn path ->
       case :beam_lib.chunks(path, [:attributes]) do
