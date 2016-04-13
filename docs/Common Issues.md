@@ -68,4 +68,22 @@ Building release with MIX_ENV=dev.
 ==> ERROR: "Failed to build release. Please fix any errors and try again."
 ```
 
+## Release not starting correctly due to Joken version < 1.2.0
+
+Joken < 1.2.0 causes a deadlock during application load, this affects `start`, `console`
+and other commands.
+
+## Release not starting on Vagrant's `/vagrant` mountpoint
+
+When running in Vagrant with source and release dirs under the `/vagrant` directory, you might eed to set RELEASE_MUTABLE_DIR envar to a local path that is not under `/vagrant`
+
+## Release not starting for other reasons - diagnosis
+
+exrm 1.0.4 and later - set `ERL_OPTS="-init_debug"` envvar when running your app.
+You can tweak the `myapp.sh` script found inside the versioned directory.
+
+For older versions, edit the startup script (`rel/myapp/releases/1.0.0/myapp.sh`) and edit the ERL_OPTS line to say `ERL_OPTS="-init_debug"`.
+
+## Others
+
 If you run into problems, please create an issue, and I'll address ASAP.
