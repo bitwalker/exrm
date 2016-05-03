@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if [ -n "${EXRM_INIT_TRACE}" ]; then
+    set -x
+fi
+
 SCRIPT_DIR="$(dirname "$0")"
 RELEASE_ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 REL_NAME="{{{PROJECT_NAME}}}"
