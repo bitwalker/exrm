@@ -14,6 +14,6 @@
   "neotoma": {:hex, :neotoma, "1.7.3"},
   "poison": {:hex, :poison, "2.1.0"},
   "providers": {:hex, :providers, "1.6.0"},
-  "relx": {:hex, :relx, "3.18.0"},
+  "relx": {:hex, :relx, "3.19.0"},
   "ssl_verify_fun": {:hex, :ssl_verify_fun, "1.1.0"},
   "ssl_verify_hostname": {:hex, :ssl_verify_hostname, "1.0.5"}}
