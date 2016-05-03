@@ -18,8 +18,8 @@ defmodule ReleaseManager.Mixfile do
 
   def deps do
     [{:relx, "~> 3.5" },
-     {:earmark, "~> 0.1", only: :dev},
-     {:ex_doc, "~> 0.10", only: :dev},
+     {:earmark, "~> 0.2", only: :dev},
+     {:ex_doc, "~> 0.11", only: :dev},
      {:coverex, "~> 1.4", only: :test}]
   end
 
