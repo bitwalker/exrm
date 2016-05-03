@@ -91,7 +91,7 @@ defmodule Mix.Tasks.Release do
       output ->
         IO.puts IO.ANSI.yellow
         IO.puts "You have dependencies (direct/transitive) which are not in :applications!"
-        IO.puts "The following apps should to be added to :applications in mix.exs:\n#{output}#{IO.ANSI.reset}\n"
+        IO.puts "The following apps should be added to :applications in mix.exs:\n#{output}#{IO.ANSI.reset}\n"
         case "--no-confirm-missing" in args do
           true  ->
             config
