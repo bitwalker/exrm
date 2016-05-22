@@ -57,7 +57,7 @@ relx_rem_sh() {
 
     # Setup Elixir remote shell command to control node
     exec "$BINDIR/erl" \
-        -pa "$ROOTDIR"/lib/*/ebin -pa "$ROOTDIR"/lib/*/consolidated \
+        -pa "$ROOTDIR"/lib/*/ebin -pa "$CONSOLIDATED_DIR" \
         -hidden -noshell \
         -boot start_clean -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
         -kernel net_ticktime "$TICKTIME" \
@@ -232,6 +232,7 @@ export EMU="beam"
 export PROGNAME="erl"
 export LD_LIBRARY_PATH="$ERTS_DIR/lib:$LD_LIBRARY_PATH"
 ERTS_LIB_DIR="$ERTS_DIR/../lib"
+CONSOLIDATED_DIR="$ROOTDIR/lib/${REL_NAME}-${REL_VSN}/consolidated"
 
 cd "$ROOTDIR"
 
@@ -538,7 +539,7 @@ case "$1" in
             -boot "$BOOTFILE" -mode embedded -config "$SYS_CONFIG" \
             -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
             -env ERL_LIBS "$REL_LIB_DIR" \
-            -pa "$REL_LIB_DIR"/*/consolidated \
+            -pa "$CONSOLIDATED_DIR" \
             -args_file "$VMARGS_PATH" \
             ${ERL_OPTS} \
             ${CONFORM_OPTS} \
@@ -581,7 +582,7 @@ case "$1" in
             -boot "$REL_DIR/$BOOTFILE" -mode embedded -config "$SYS_CONFIG" \
             -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
             -env ERL_LIBS "$REL_LIB_DIR" \
-            -pa "$REL_LIB_DIR"/*/consolidated \
+            -pa "$CONSOLIDATED_DIR" \
             ${ERL_OPTS} \
             ${CONFORM_OPTS} \
             -args_file "$VMARGS_PATH"
