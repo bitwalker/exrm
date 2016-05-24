@@ -506,8 +506,10 @@ case "$1" in
         # .boot file typically just $REL_NAME (ie, the app name)
         # however, for debugging, sometimes start_clean.boot is useful.
         # For e.g. 'setup', one may even want to name another boot script.
+        __console_flags=""
         case "$1" in
             console)
+                __console_flags="-mode embedded"
                 if [ -f "$REL_DIR/$REL_NAME.boot" ]; then
                     BOOTFILE="$REL_DIR/$REL_NAME"
                 else
@@ -536,11 +538,12 @@ case "$1" in
         # Build an array of arguments to pass to exec later on
         # Build it here because this command will be used for logging.
         set -- "$BINDIR/erlexec" \
-            -boot "$BOOTFILE" -mode embedded -config "$SYS_CONFIG" \
+            -boot "$BOOTFILE" -config "$SYS_CONFIG" \
             -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR" \
             -env ERL_LIBS "$REL_LIB_DIR" \
             -pa "$CONSOLIDATED_DIR" \
             -args_file "$VMARGS_PATH" \
+            ${__console_flags} \
             ${ERL_OPTS} \
             ${CONFORM_OPTS} \
             -user Elixir.IEx.CLI -extra --no-halt +iex
