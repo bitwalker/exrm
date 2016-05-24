@@ -28,6 +28,7 @@ defmodule Mix.Tasks.Release do
   @shortdoc "Build a release for the current mix application"
 
   use    Mix.Task
+  import ExUnit.CaptureIO
   import ReleaseManager.Utils
   alias  ReleaseManager.Utils
   alias  ReleaseManager.Utils.Logger
@@ -334,13 +335,21 @@ defmodule Mix.Tasks.Release do
     end
     # Do release
     try do
-      case relx name, version, verbosity, upgrade?, dev_mode? do
+      logs = capture_io(:stdio, fn ->
+        result = relx(name, version, :verbose, upgrade?, dev_mode?)
+        send(self(), result)
+      end)
+      receive do
         :ok ->
+          if verbosity == :verbose do
+            IO.puts(logs)
+          end
           # Clean up template files
           Mix.Tasks.Release.Clean.do_cleanup(:relfiles)
           # Continue..
           config
         {:error, message} ->
+          IO.puts(logs)
           Logger.error "ERROR: #{inspect message}"
           abort!
       end
