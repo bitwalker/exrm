@@ -106,7 +106,49 @@ defmodule ReleaseManager.Utils do
     end
     case result do
       {:ok, _state} -> :ok
-      {:error, _e}  -> {:error, "Failed to build release. Please fix any errors and try again."}
+      {:error, e} ->
+        case e do
+          {:rlx_prv_release, :no_goals_specified} ->
+            {:error, "No goals have been specified for this release!"}
+          {:rlx_prv_release, {:release_erts_error, dir}} ->
+            {:error, "ERTS could not be found in #{dir}"}
+          {:rlx_prv_release, {:no_release_name, vsn}} ->
+            {:error, "A target release version was specified (#{vsn}) but no name."}
+          {:rlx_prv_release, {:invalid_release_info, info}} ->
+            {:error, "Target release information is in an invalid format:\n#{inspect info}"}
+          {:rlx_prv_release, {:multiple_release_names, a, b}} ->
+            {:error, "Multiple releasees are defined, but no default was specified: #{a}, #{b}"}
+          {:rlx_prv_release, :no_releases_in_system} ->
+            {:error, "No releases have been defined! See the debug output for more information."}
+          {:rlx_prv_release, {:no_releases_for, name}} ->
+            {:error, "No releaases exist for #{name}. See the debug output for more information."}
+          {:rlx_prv_release, {:release_not_found, {name, vsn}}} ->
+            {:error, "No such releaase: #{name}-#{vsn}. See the debug output for more information."}
+          {:rlx_prv_release, {:failed_solve, {:unreachable_package, missing_app}}} ->
+            {:error, "Unable to find application #{missing_app}. See the debug output for more information."}
+          {:rlx_prv_relup, {:relup_generation_error, current_name, upfrom_name}}->
+            {:error, "Unknown internal release error generating the relup from #{upfrom_name} to #{current_name}. See debug output."}
+          {:rlx_prv_relup, {:relup_generation_warning, module, warnings}}->
+            {:error, "Warnings generating relup:\n#{:rlx_util.indent(2)}#{module.format_warning(warnings)}"}
+          {:rlx_prv_relup, {:no_upfrom_release_found, :undefined}} ->
+            {:error, "Could not find any previous versions of the release to upgrade!"}
+          {:rlx_prv_relup, {:no_upfrom_release_found, vsn}} ->
+            {:error, "Could not find find release version #{vsn} for relup!"}
+          {:rlx_prv_relup, {:relup_script_generation_error, {:relup_script_generator_error, :systools_relup, {:missing_sasl, _}}}} ->
+            {:error, "Unfortunately, due to requirements in systools, you need to have the sasl application \n  in both current release and the release to upgrade from."}
+          {:rlx_prv_relup, {:relup_script_generation_error, module, errors}}->
+            {:error, "Failed to generate relup: #{:rlx_util.indent(2)}#{module.format_error(errors)}"}
+          {:rlx_prv_archive, {:tar_unknown_generation_error, module, vsn}}->
+            {:error, "Unknown error occurred when generating tarball for #{module}-#{vsn}\n  Do you have any file names longer than 100 characters? That is a known issue with systools."}
+          {:rlx_prv_archive, {:tar_generation_warn, module, warnings}}->
+            {:error, "Warnings were reported when generating the release tarball:\n#{:rlx_util.indent(2)}#{module}: #{inspect warnings}"}
+          {:rlx_prv_archive, {:tar_generation_error, module, errors}}->
+            {:error, "Errors occurred when generating the release tarball:\n#{:rlx_util.indent(2)}#{module}: #{inspect errors}"}
+          {:rlx_app_info, {:vsn_parse, app}}->
+            {:error, "Could not parse version for #{app}"}
+          {_relx_module, _unhandled_err} ->
+            {:error, "Failed to build release. See the debug output for specifics."}
+        end
     end
   end
 
