@@ -187,19 +187,24 @@ defmodule Mix.Tasks.Release do
   end
 
   defp generate_vm_args(%Config{version: version, relx_config: relx_config} = config) do
-    vmargs_path = Utils.rel_dest_path("vm.args")
-    case File.exists?(vmargs_path) do
+    Logger.debug "Generating vm.args..."
+    vmargs_path = rel_dest_path(@_VMARGS)
+    vmargs_path = case File.exists?(vmargs_path) do
       false ->
-        config
+        src_path  = rel_file_source_path(@_VMARGS)
+        dest_path = rel_file_dest_path(@_VMARGS)
+        contents  = File.read!(src_path) |> String.replace(@_NAME, config.name)
+        File.write!(dest_path, contents)
+        dest_path
       true ->
-        Logger.debug "Generating vm.args..."
-        # Update configuration to add new overlay for vm.args
-        overlays = [overlay: [
-          {:copy, vmargs_path |> String.to_char_list, 'releases/#{version}/vm.args'}
-        ]]
-        updated = Utils.merge(relx_config, overlays)
-        %{config | :relx_config => updated}
+        vmargs_path
     end
+    overlays = [overlay: [
+      {:copy, String.to_char_list(vmargs_path), 'releases/#{version}/vm.args'}
+    ]]
+    # Update configuration to add new overlay for vm.args
+    updated = Utils.merge(relx_config, overlays)
+    %{config | :relx_config => updated}
   end
 
   defp generate_boot_script(%Config{name: name, version: version, erl: erl_opts} = config) do
