@@ -379,7 +379,8 @@ case "$1" in
         if [ -z "$4" ]; then
             relx_nodetool "rpcterms" "$2" "$3"
         else
-            relx_nodetool "rpcterms" "$2" "$3" "$4"
+            args="${@:4}"
+            relx_nodetool "rpcterms" "$2" "$3" "$args"
         fi
         exit_status="$?"
         if [ "$exit_status" -ne 0 ]; then
