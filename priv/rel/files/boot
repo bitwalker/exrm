@@ -70,10 +70,11 @@ relx_gen_id() {
     od -t x4 /dev/urandom | head -n1 | cut -d ' ' -f2
 }
 
-# Control a node
+# Control a node - set PEERNAME to control a peer node
 relx_nodetool() {
     command="$1"; shift
-    "$BINDIR/escript" "$ROOTDIR/bin/nodetool" "$NAME_TYPE" "$NAME" \
+    name=${PEERNAME:-$NAME}
+    "$BINDIR/escript" "$ROOTDIR/bin/nodetool" "$NAME_TYPE" "$name" \
                                  -setcookie "$COOKIE" "$command" "$@"
 }
 
@@ -341,6 +342,14 @@ case "$1" in
     ping)
         ## See if the VM is alive
         relx_nodetool "ping"
+        exit_status=$?
+        if [ "$exit_status" -ne 0 ]; then
+            exit $exit_status
+        fi
+        ;;
+
+    pingpeer)
+        PEERNAME=$2 relx_nodetool "ping"
         exit_status=$?
         if [ "$exit_status" -ne 0 ]; then
             exit $exit_status
