@@ -253,7 +253,7 @@ case "$1" in
         case "$1" in
             start)
                 shift
-                START_OPTION="console"
+                START_OPTION="foreground"
                 HEART_OPTION="start"
                 ;;
             start_boot)
@@ -614,9 +614,9 @@ case "$1" in
 
         # Execute as command-line utility
         #
-        # Like the escript command, this does not start the OTP application. 
+        # Like the escript command, this does not start the OTP application.
         # If your command depends on a running OTP application,
-        # use 
+        # use
         #
         #     {:ok, _} = Application.ensure_all_started(:your_app)
 
