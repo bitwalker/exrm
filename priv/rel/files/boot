@@ -630,7 +630,6 @@ case "$1" in
         # Build arguments for erlexec
         set -- "$ERL_OPTS"
         [ "$SYS_CONFIG" ] && set -- "$@" -config "$SYS_CONFIG"
-        [ "$VMARGS_PATH" ] && set -- "$@" -args_file "$VMARGS_PATH"
         set -- "$@" -boot_var ERTS_LIB_DIR "$ERTS_LIB_DIR"
         set -- "$@" -noshell
         set -- "$@" -boot $REL_DIR/start_clean
