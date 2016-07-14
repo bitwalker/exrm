@@ -58,13 +58,13 @@ defmodule ReleaseManager.Appups do
       { v2 |> String.to_char_list,
         [ { v1 |> String.to_char_list,
             (for file <- only_v2, do: generate_instruction(:added, file)) ++
-            (for {file, _} <- different, do: generate_instruction(:changed, file)) ++
+            (for {v1_file, v2_file} <- different, do: generate_instruction(:changed, {v1_file, v2_file})) ++
             (for file <- only_v1, do: generate_instruction(:deleted, file))
           }
         ],
         [ { v1 |> String.to_char_list,
             (for file <- only_v2, do: generate_instruction(:deleted, file)) ++
-            (for {file, _} <- different, do: generate_instruction(:changed, file)) ++
+            (for {v1_file, v2_file} <- different, do: generate_instruction(:changed, {v1_file, v2_file})) ++
             (for file <- only_v1, do: generate_instruction(:added, file))
           }
         ]
@@ -79,33 +79,49 @@ defmodule ReleaseManager.Appups do
     { :ok, appup }
   end
 
-  defp generate_instruction(:added, file) do
-    {:add_module, module_name(file)}
+  defp generate_instruction(:added, file),   do: {:add_module, module_name(file)}
+  defp generate_instruction(:deleted, file), do: {:delete_module, module_name(file)}
+  defp generate_instruction(:changed, {v1_file, v2_file}) do
+    module_name     = module_name(v1_file)
+    attributes      = beam_attributes(v1_file)
+    exports         = beam_exports(v1_file)
+    is_supervisor   = is_supervisor?(attributes)
+    is_special_proc = is_special_process?(exports)
+    generate_instruction_advanced(module_name, is_supervisor, is_special_proc)
   end
 
-  defp generate_instruction(:deleted, file) do
-    {:delete_module, module_name(file)}
+  defp beam_attributes(file) do
+    {:ok, {_, [attributes: attributes]}} = :beam_lib.chunks(file, [:attributes])
+    attributes
   end
 
-  defp generate_instruction(:changed, file) do
-    {:ok, {module_name, list}} = :beam_lib.chunks(file, [:attributes, :exports])
-    behaviour = get_in(list, [:attributes, :behavior]) || get_in(list, [:attributes, :behaviour])
-    is_code_change = get_in(list, [:exports, :code_change]) != nil
-    generate_instruction_advanced(module_name, behaviour, is_code_change)
+  defp beam_imports(file) do
+    {:ok, {_, [imports: imports]}} = :beam_lib.chunks(file, [:imports])
+    imports
   end
 
-  defp generate_instruction_advanced(module_name, [:supervisor], _) do
-    # supervisor
-    {:update, module_name, :supervisor}
+  defp beam_exports(file) do
+    {:ok, {_, [exports: exports]}} = :beam_lib.chunks(file, [:exports])
+    exports
   end
-  defp generate_instruction_advanced(module_name, _behaviour, true) do
-    # exports code_change
-    {:update, module_name, {:advanced, []}}
+
+  defp is_special_process?(exports) do
+    Keyword.get(exports, :system_code_change) == 4 ||
+    Keyword.get(exports, :code_change) == 3
   end
-  defp generate_instruction_advanced(module_name, _behaviour, false) do
-    # code_change not exported
-    {:load_module, module_name}
+
+  defp is_supervisor?(attributes) do
+    behaviours = Keyword.get(attributes, :behavior, []) ++
+                 Keyword.get(attributes, :behaviour, [])
+    (:supervisor in behaviours) || (Supervisor in behaviours)
   end
+
+  # supervisor
+  defp generate_instruction_advanced(m, true, _is_special), do: {:update, m, :supervisor}
+  # special process (i.e. exports code_change/3 or system_code_change/4)
+  defp generate_instruction_advanced(m, _is_sup, true),     do: {:update, m, {:advanced, []}}
+  # non-special process (i.e. neither code_change/3 nor system_code_change/4 are exported)
+  defp generate_instruction_advanced(m, _is_sup, false),    do: {:load_module, m}
 
   defp module_name(file) do
     :beam_lib.info(file) |> Keyword.fetch!(:module)
