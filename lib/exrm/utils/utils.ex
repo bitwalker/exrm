@@ -117,13 +117,13 @@ defmodule ReleaseManager.Utils do
           {:rlx_prv_release, {:invalid_release_info, info}} ->
             {:error, "Target release information is in an invalid format:\n#{inspect info}"}
           {:rlx_prv_release, {:multiple_release_names, a, b}} ->
-            {:error, "Multiple releasees are defined, but no default was specified: #{a}, #{b}"}
+            {:error, "Multiple releases are defined, but no default was specified: #{a}, #{b}"}
           {:rlx_prv_release, :no_releases_in_system} ->
             {:error, "No releases have been defined! See the debug output for more information."}
           {:rlx_prv_release, {:no_releases_for, name}} ->
-            {:error, "No releaases exist for #{name}. See the debug output for more information."}
+            {:error, "No releases exist for #{name}. See the debug output for more information."}
           {:rlx_prv_release, {:release_not_found, {name, vsn}}} ->
-            {:error, "No such releaase: #{name}-#{vsn}. See the debug output for more information."}
+            {:error, "No such release: #{name}-#{vsn}. See the debug output for more information."}
           {:rlx_prv_release, {:failed_solve, {:unreachable_package, missing_app}}} ->
             {:error, "Unable to find application #{missing_app}. See the debug output for more information."}
           {:rlx_prv_relup, {:relup_generation_error, current_name, upfrom_name}}->
