@@ -81,7 +81,7 @@ defmodule ReleaseManager.Appups do
 
   defp generate_instruction(:added, file),   do: {:add_module, module_name(file)}
   defp generate_instruction(:deleted, file), do: {:delete_module, module_name(file)}
-  defp generate_instruction(:changed, {v1_file, v2_file}) do
+  defp generate_instruction(:changed, {v1_file, _v2_file}) do
     module_name     = module_name(v1_file)
     attributes      = beam_attributes(v1_file)
     exports         = beam_exports(v1_file)
@@ -93,11 +93,6 @@ defmodule ReleaseManager.Appups do
   defp beam_attributes(file) do
     {:ok, {_, [attributes: attributes]}} = :beam_lib.chunks(file, [:attributes])
     attributes
-  end
-
-  defp beam_imports(file) do
-    {:ok, {_, [imports: imports]}} = :beam_lib.chunks(file, [:imports])
-    imports
   end
 
   defp beam_exports(file) do
