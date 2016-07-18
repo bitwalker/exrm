@@ -253,7 +253,7 @@ case "$1" in
         case "$1" in
             start)
                 shift
-                START_OPTION="foreground"
+                START_OPTION="console"
                 HEART_OPTION="start"
                 ;;
             start_boot)
