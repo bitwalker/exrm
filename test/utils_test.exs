@@ -1,5 +1,7 @@
 defmodule UtilsTest do
   use ExUnit.Case, async: true
+  use Bitwise, only_operators: true
+
   import ExUnit.CaptureIO
 
   import PathHelpers
@@ -94,6 +96,9 @@ defmodule UtilsTest do
         assert :ok = res
         some_val = Keyword.get(List.first(sysconfig_content), :test) |> Keyword.get(:some_val)
         assert 101 = some_val
+        sys_config_rel_path = Path.join([File.cwd!, "rel", "test", "releases", "0.0.1", "sys.config"])
+         {:ok, info } = File.stat(sys_config_rel_path)
+         assert (info.mode &&& 0o0777) == 0o600
       #end)
     end
   end
