@@ -183,6 +183,8 @@ defmodule Mix.Tasks.Release do
     File.mkdir_p!(dest |> Path.dirname)
     # Write the config to disk
     dest |> Utils.write_term(merged)
+    # tighten permissions on sys.config to owner read/write
+    dest |> File.chmod(0o0600)
     # Continue..
     config
   end
