@@ -10,6 +10,14 @@ The full documentation for Exrm is located [here](http://hexdocs.pm/exrm).
 Thanks to @tylerflint for the original Makefile, rel.config, and runner script
 which inspired this project!
 
+## News
+
+**This project is being replaced by [Distillery](https://github.com/bitwalker/distillery)**.
+
+I would highly recommend using it moving forward, as most of my efforts will be put towards
+that project from now on. I will still accept PRs, and do required maintenance for the near
+future, but at some point in the future I will be flipping the switch.
+
 ## Usage
 
 You can build a release with the `release` task:
