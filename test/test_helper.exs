@@ -6,6 +6,6 @@ defmodule PathHelpers do
   end
 
   def fixture_path(extra) do
-    Path.join(fixture_path, extra)
+    Path.join(fixture_path(), extra)
   end
 end

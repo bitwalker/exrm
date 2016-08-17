@@ -10,8 +10,8 @@ defmodule AppupsTest do
   @v2_app_path Path.join(@v2_path, "ebin/test.app")
 
   setup do
-    @v1_app_path |> write_term(v1_app)
-    @v2_app_path |> write_term(v2_app)
+    @v1_app_path |> write_term(v1_app())
+    @v2_app_path |> write_term(v2_app())
 
     on_exit fn ->
       if @v1_app_path |> File.exists? do
@@ -27,7 +27,7 @@ defmodule AppupsTest do
 
   test "generates valid .appup file" do
     {:ok, appup} = ReleaseManager.Appups.make(:test, "0.0.1", "0.0.2", @v1_path, @v2_path)
-    assert appup == expected_appup
+    assert appup == expected_appup()
   end
 
   defp v1_app do

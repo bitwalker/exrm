@@ -5,10 +5,10 @@ defmodule ReleaseManager.Mixfile do
     [ app: :exrm,
       version: "1.0.8",
       elixir: "~> 1.0",
-      description: description,
-      package: package,
-      deps: deps,
-      docs: docs,
+      description: description(),
+      package: package(),
+      deps: deps(),
+      docs: docs(),
       test_coverage: [tool: Coverex.Task, coveralls: true]]
   end
 
