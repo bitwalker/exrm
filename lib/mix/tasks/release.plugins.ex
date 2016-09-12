@@ -22,7 +22,7 @@ defmodule Mix.Tasks.Release.Plugins do
   end
 
   defp do_run([action: :list]) do
-    case get_plugins do
+    case get_plugins() do
       []      -> IO.puts "No plugins found!"
       plugins ->
         for plugin <- plugins do
@@ -52,7 +52,7 @@ defmodule Mix.Tasks.Release.Plugins do
     case result do
       nil ->
         Logger.notice "No plugin by that name could be found!"
-        abort!
+        abort!()
       _ ->
         result
     end
@@ -91,7 +91,7 @@ defmodule Mix.Tasks.Release.Plugins do
       {_, [plugin], _} -> [action: :details, plugin: plugin]
       {_, _, _} ->
         Logger.error "Invalid arguments for `mix release.plugins`!"
-        abort!
+        abort!()
     end
   end
 

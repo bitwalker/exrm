@@ -263,10 +263,10 @@ defmodule ReleaseManager.Utils do
         terms
       {:error, {line, type, msg}} ->
         Logger.error "Unable to parse #{path}: Line #{line}, #{type}, - #{msg}"
-        abort!
+        abort!()
       {:error, reason} ->
         Logger.error "Unable to access #{path}: #{reason}"
-        abort!
+        abort!()
     end
     result
   end
@@ -338,13 +338,13 @@ defmodule ReleaseManager.Utils do
   @doc "Get the priv path of the exrm dependency"
   def priv_path, do: "#{:code.priv_dir('exrm')}"
   @doc "Get the priv/rel path of the exrm dependency"
-  def rel_source_path,       do: Path.join(priv_path, "rel")
+  def rel_source_path,       do: Path.join(priv_path(), "rel")
   @doc "Get the path to a file located in priv/rel of the exrm dependency"
-  def rel_source_path(file), do: Path.join(rel_source_path, file)
+  def rel_source_path(file), do: Path.join(rel_source_path(), file)
   @doc "Get the priv/rel/files path of the exrm dependency"
-  def rel_file_source_path,       do: Path.join([priv_path, "rel", "files"])
+  def rel_file_source_path,       do: Path.join([priv_path(), "rel", "files"])
   @doc "Get the path to a file located in priv/rel/files of the exrm dependency"
-  def rel_file_source_path(file), do: Path.join(rel_file_source_path, file)
+  def rel_file_source_path(file), do: Path.join(rel_file_source_path(), file)
   @doc """
   Get the path to a file located in the rel directory of the current project.
   You can pass either a file name, or a list of directories to a file, like:
@@ -356,8 +356,8 @@ defmodule ReleaseManager.Utils do
       "path/to/project/rel/<project>/lib/<project>.appup"
 
   """
-  def rel_dest_path(files) when is_list(files), do: Path.join([rel_dest_path] ++ files)
-  def rel_dest_path(file),                      do: Path.join(rel_dest_path, file)
+  def rel_dest_path(files) when is_list(files), do: Path.join([rel_dest_path()] ++ files)
+  def rel_dest_path(file),                      do: Path.join(rel_dest_path(), file)
   @doc "Get the rel path of the current project."
   def rel_dest_path,                            do: Path.join(File.cwd!, "rel")
   @doc """
@@ -371,8 +371,8 @@ defmodule ReleaseManager.Utils do
       "path/to/project/rel/.files/some/path/file.txt"
 
   """
-  def rel_file_dest_path(files) when is_list(files), do: Path.join([rel_file_dest_path] ++ files)
-  def rel_file_dest_path(file),                      do: Path.join(rel_file_dest_path, file)
+  def rel_file_dest_path(files) when is_list(files), do: Path.join([rel_file_dest_path()] ++ files)
+  def rel_file_dest_path(file),                      do: Path.join(rel_file_dest_path(), file)
   @doc "Get the rel/.files path of the current project."
   def rel_file_dest_path,                            do: Path.join([File.cwd!, "rel", ".files"])
 

@@ -74,7 +74,7 @@ defmodule Mix.Tasks.Release.Clean do
   end
   # Clean up the template files for release generation
   def do_cleanup(:relfiles) do
-    rel_files = rel_file_dest_path
+    rel_files = rel_file_dest_path()
     if File.exists?(rel_files), do: File.rm_rf!(rel_files)
   end
   # Clean up everything
@@ -83,7 +83,7 @@ defmodule Mix.Tasks.Release.Clean do
     do_cleanup :build
 
     # Remove release folder
-    rel = rel_dest_path
+    rel = rel_dest_path()
     if File.exists?(rel), do: File.rm_rf!(rel)
   end
 

@@ -102,7 +102,7 @@ defmodule Mix.Tasks.Release do
             IO.puts IO.ANSI.reset
             case answer =~ ~r/^(Y(es)?)?$/i do
               true  -> config
-              false -> abort!
+              false -> abort!()
             end
         end
     end
@@ -126,7 +126,7 @@ defmodule Mix.Tasks.Release do
       "" -> config
       _  -> %{config | :upgrade? => true}
     end
-    elixir_paths = get_elixir_lib_paths |> Enum.map(&String.to_char_list/1)
+    elixir_paths = get_elixir_lib_paths() |> Enum.map(&String.to_char_list/1)
     lib_dirs = [ '#{Path.join(Mix.Project.build_path, "lib")}', '#{Mix.Project.deps_path}' | elixir_paths ]
     # Build release configuration
     relx_config = relx_config
@@ -242,7 +242,7 @@ defmodule Mix.Tasks.Release do
   defp execute_before_hooks(%Config{} = config) do
     # Just in case there are plugins which expect relx.config to already
     # be persisted, we'll persist it before any are run, and again after each plugin runs
-    Utils.write_terms(relx_config_path, config.relx_config)
+    Utils.write_terms(relx_config_path(), config.relx_config)
     plugins = ReleaseManager.Plugin.load_all
     Enum.reduce plugins, config, fn plugin, conf ->
       try do
@@ -251,7 +251,7 @@ defmodule Mix.Tasks.Release do
           %Config{} = result -> result
           _                  -> conf
         end
-        Utils.write_terms(relx_config_path, config.relx_config)
+        Utils.write_terms(relx_config_path(), config.relx_config)
         config
       rescue
         exception ->
@@ -301,7 +301,7 @@ defmodule Mix.Tasks.Release do
   defp do_release(%Config{name: name, version: version, verbosity: verbosity, upgrade?: upgrade?, dev: dev_mode?, env: env} = config) do
     Logger.debug "Generating release..."
     # Persist relx.config one last time in case it was updated by a plugin
-    Utils.write_terms(relx_config_path, config.relx_config)
+    Utils.write_terms(relx_config_path(), config.relx_config)
     # If this is an upgrade release, generate an appup
     if upgrade? do
       # Change mix env for appup generation
@@ -321,7 +321,7 @@ defmodule Mix.Tasks.Release do
                 Logger.info "Using custom .appup located in rel/#{name}.appup"
               {:error, reason} ->
                 Logger.error "Unable to copy custom .appup file: #{reason}"
-                abort!
+                abort!()
             end
           _ ->
             # No custom .appup found, proceed with autogeneration
@@ -330,7 +330,7 @@ defmodule Mix.Tasks.Release do
                 Logger.info "Generated .appup for #{name} #{v1} -> #{version}"
               {:error, reason} ->
                 Logger.error "Appup generation failed with #{reason}"
-                abort!
+                abort!()
             end
         end
       end
@@ -353,13 +353,13 @@ defmodule Mix.Tasks.Release do
         {:error, message} ->
           IO.puts(logs)
           Logger.error "ERROR: #{inspect message}"
-          abort!
+          abort!()
       end
     catch
       err ->
         Logger.error "#{IO.inspect err}"
         Logger.error "Failed to build release package! Try running with `--verbosity=verbose` to see debugging info!"
-        abort!
+        abort!()
     end
   end
 
