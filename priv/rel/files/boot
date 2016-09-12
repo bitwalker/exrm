@@ -28,6 +28,21 @@ fi
 
 RUNNER_LOG_DIR="${RUNNER_LOG_DIR:-$RELEASE_ROOT_DIR/log}"
 
+# Do a textual replacement of ${VAR} occurances in $1 and pipe to $2
+_replace_os_vars() {
+    awk '
+        function escape(s) {
+            gsub(/'\&'/, "\\\\&", s);
+            return s;
+        }
+        {
+            while(match($0,"[$]{[^}]*}")) {
+                var=substr($0,RSTART+2,RLENGTH-3);
+                gsub("[$]{"var"}", escape(ENVIRON[var]))
+            }
+        }1' < "$1" > "$2"
+}
+
 find_erts_dir() {
     __erts_dir="$RELEASE_ROOT_DIR/erts-$ERTS_VSN"
     if [ -d "$__erts_dir" ]; then
@@ -165,7 +180,7 @@ if [ ! -f "$VMARGS_PATH" ]; then
 fi
 
 if [ $RELX_REPLACE_OS_VARS ]; then
-    awk '{while(match($0,"[$]{[^}]*}")) {var=substr($0,RSTART+2,RLENGTH -3);gsub("[$]{"var"}",ENVIRON[var])}}1' < $VMARGS_PATH > $VMARGS_PATH.2.config
+    _replace_os_vars "$VMARGS_PATH" "$VMARGS_PATH.2.config"
     VMARGS_PATH=$VMARGS_PATH.2.config
 fi
 
@@ -179,7 +194,7 @@ if ! [ -w $RUNNER_LOG_DIR ] ; then
 fi
 
 if [ $RELX_REPLACE_OS_VARS ]; then
-    awk '{while(match($0,"[$]{[^}]*}")) {var=substr($0,RSTART+2,RLENGTH -3);gsub("[$]{"var"}",ENVIRON[var])}}1' < $SYS_CONFIG > $SYS_CONFIG.2.config
+    _replace_os_vars "$SYS_CONFIG" "$SYS_CONFIG.2.config"
     SYS_CONFIG=$SYS_CONFIG.2.config
 fi
 
