@@ -32,7 +32,7 @@ RUNNER_LOG_DIR="${RUNNER_LOG_DIR:-$RELEASE_ROOT_DIR/log}"
 _replace_os_vars() {
     awk '
         function escape(s) {
-            gsub(/'\&'/, "\\\\&", s);
+            gsub(/\\/, "\\\\", s);
             return s;
         }
         {
