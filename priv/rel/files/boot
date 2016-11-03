@@ -33,6 +33,7 @@ _replace_os_vars() {
     awk '
         function escape(s) {
             gsub(/\\/, "\\\\", s);
+            gsub(/\&/, "\\\\&", s);
             return s;
         }
         {
