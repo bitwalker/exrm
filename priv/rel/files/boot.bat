@@ -18,7 +18,7 @@
 :: Set variables that describe the release
 @set rel_name={{{PROJECT_NAME}}}
 @set erl_opts={{{ERL_OPTS}}}
-@set conform_opts=""
+@set conform_opts=
 
 :: Discover the release root directory from the directory of this script
 @set script_dir=%~dp0
