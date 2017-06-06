@@ -221,7 +221,7 @@
   set ERRORLEVEL=1
   exit /b %ERRORLEVEL%
 )
-@%escript% "%rootdir%/bin/install_upgrade.escript" "%rel_name%" "%node_type%" "%node_name%" "%cookie%" "%2"
+@%escript% "%rootdir%/bin/install_upgrade.escript" "install" "%rel_name%" "%node_type%" "%node_name%" "%cookie%" "%2"
 @goto :eof
 
 :: Start a console
