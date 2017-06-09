@@ -18,7 +18,7 @@
 :: Set variables that describe the release
 @set rel_name={{{PROJECT_NAME}}}
 @set erl_opts={{{ERL_OPTS}}}
-@set conform_opts=""
+@set conform_opts=
 
 :: Discover the release root directory from the directory of this script
 @set script_dir=%~dp0
@@ -221,7 +221,7 @@
   set ERRORLEVEL=1
   exit /b %ERRORLEVEL%
 )
-@%escript% "%rootdir%/bin/install_upgrade.escript" "%rel_name%" "%node_type%" "%node_name%" "%cookie%" "%2"
+@%escript% "%rootdir%/bin/install_upgrade.escript" "install" "%rel_name%" "%node_type%" "%node_name%" "%cookie%" "%2"
 @goto :eof
 
 :: Start a console
