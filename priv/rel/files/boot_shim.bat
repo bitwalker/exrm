@@ -13,7 +13,7 @@ if %errorLevel% == 0 (set is_admin="true") else (set is_admin="false")
 :: Discover the release root directory from the directory of this script
 @set script_dir=%~dp0
 @for %%A in ("%script_dir%\..") do @(
-  set release_root_dir=%%~fA
+  set release_root_dir=%%~sfA
 )
 @set start_erl=%release_root_dir%\releases\start_erl.data
 @for /f "delims=" %%i in ('type %start_erl%') do @(
@@ -30,4 +30,4 @@ call "%rel_dir%\%rel_name%.bat" %*
 ) else (
   @echo You do not have administrator permissions. Please login as an administrator to proceed.
 )
-  
+
